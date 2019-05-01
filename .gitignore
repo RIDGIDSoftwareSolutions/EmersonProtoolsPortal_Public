@@ -13,6 +13,7 @@ hs_err_pid*
 
 # IntelliJ IDEA and Maven
 .idea/*
+**/*/.idea/*
 *.iml
 build/
 target/
