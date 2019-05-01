@@ -5,7 +5,7 @@
 
     <groupId>com.ridgid</groupId>
     <artifactId>com.ridgid.java.spring.restwebservices.apiversion</artifactId>
-    <version>1.3-SNAPSHOT</version>
+    <version>1.3</version>
     <packaging>jar</packaging>
 
     <!-- Required to publish to Maven Central -->
@@ -49,7 +49,7 @@
         <developerConnection>scm:git:https://github.com/RIDGIDSoftwareSolutions/SpringREST_API_Version.git
         </developerConnection>
         <url>https://github.com/RIDGIDSoftwareSolutions/SpringREST_API_Version</url>
-        <tag>com.ridgid.java.spring.restwebservices.apiversion-1.0</tag>
+        <tag>com.ridgid.java.spring.restwebservices.apiversion-1.3</tag>
     </scm>
 
     <!-- Required for Publishing to Maven Central -->
