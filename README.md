@@ -1,2 +1,3 @@
-# SpringREST_API_Version
-Annotation-based API Versioning for Spring REST/Ajax Services
+# Emerson Professional Tools Public Maven Projects
+Projects created by Emerson Professional Tools/The Ridge Tool Company (RIDGID)
+for public distribution via Maven.

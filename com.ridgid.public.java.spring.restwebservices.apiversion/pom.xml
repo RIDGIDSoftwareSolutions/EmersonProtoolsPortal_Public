@@ -1,32 +1,63 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.ridgid.public</groupId>
-    <artifactId>com.ridgid.public</artifactId>
-    <version>1.0-SNAPSHOT</version>
-    <packaging>pom</packaging>
+    <parent>
+        <groupId>com.ridgid.public</groupId>
+        <artifactId>com.ridgid.public</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
 
-    <properties>
-    </properties>
-
-    <modules>
-        <module>com.ridgid.public.java.spring.restwebservices.apiversion</module>
-    </modules>
+    <artifactId>com.ridgid.public.java.spring.restwebservices.apiversion</artifactId>
+    <version>1.4-SNAPSHOT</version>
+    <packaging>jar</packaging>
 
     <!-- Required to publish to Maven Central -->
-    <name>Emerson Professional Tools (RIDGID) Public Maven Dependencies</name>
-    <description>Publicly distributed via Maven projects created by Emerson Professional Tools Software Solutions
-    </description>
-    <url>https://github.com/RIDGIDSoftwareSolutions/EmersonProtoolsPortal_Public</url>
+    <name>RIDGID (Emerson Professional Tools) Java Spring REST Service API Version</name>
+    <description>Annotation-based API versioning for SpringMVC-based REST Web Services</description>
+    <url>https://github.com/RIDGIDSoftwareSolutions/EmersonProtoolsPortal_Public/SpringREST_API_Version</url>
+
+    <!-- Required to publish to Maven Central -->
+    <licenses>
+        <license>
+            <name>BSD 3-Clause License</name>
+            <url>
+                https://raw.githubusercontent.com/RIDGIDSoftwareSolutions/EmersonProtoolsPortal_Public/SpringREST_API_Version/master/LICENSE
+            </url>
+        </license>
+    </licenses>
+
+    <!-- Required to publish to Maven Central -->
+    <developers>
+        <developer>
+            <name>Thomas Norton</name>
+            <email>thomas.norton@emerson.com</email>
+            <organization>The Ridge Tool Company - Emerson Professional Tools</organization>
+            <organizationUrl>https://www.emerson.com</organizationUrl>
+        </developer>
+        <developer>
+            <name>Mike Koch</name>
+            <email>mike.koch@emerson.com</email>
+            <organization>The Ridge Tool Company - Emerson Professional Tools</organization>
+            <organizationUrl>https://www.emerson.com</organizationUrl>
+        </developer>
+        <developer>
+            <name>Gerald E. Butler</name>
+            <email>gerry.butler@emerson.com</email>
+            <organization>The Ridge Tool Company - Emerson Professional Tools</organization>
+            <organizationUrl>https://www.emerson.com</organizationUrl>
+        </developer>
+    </developers>
 
     <!-- Required for publishing to Maven Central -->
     <scm>
         <connection>scm:git:https://github.com/RIDGIDSoftwareSolutions/EmersonProtoolsPortal_Public.git</connection>
         <developerConnection>scm:git:https://github.com/RIDGIDSoftwareSolutions/EmersonProtoolsPortal_Public.git
         </developerConnection>
-        <url>https://github.com/RIDGIDSoftwareSolutions/EmersonProtoolsPortal_Public</url>
+        <url>https://github.com/RIDGIDSoftwareSolutions/EmersonProtoolsPortal_Public/SpringREST_API_Version</url>
+        <tag>com.ridgid.java.spring.restwebservices.apiversion-1.4</tag>
     </scm>
 
     <!-- Required for Publishing to Maven Central -->
@@ -41,7 +72,17 @@
         </repository>
     </distributionManagement>
 
+    <properties>
+        <spring.version>4.2.5.RELEASE</spring.version>
+    </properties>
+
     <dependencies>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
+            <version>${spring.version}</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>
