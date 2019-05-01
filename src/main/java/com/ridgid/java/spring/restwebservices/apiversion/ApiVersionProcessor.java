@@ -1,4 +1,4 @@
-package com.ridgid.restwebservices.apiversion;
+package com.ridgid.java.spring.restwebservices.apiversion;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Messager;

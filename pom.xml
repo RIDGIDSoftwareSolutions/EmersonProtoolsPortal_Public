@@ -6,8 +6,59 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.ridgid</groupId>
-    <artifactId>com.ridgid.restwebservices.apiversion</artifactId>
+    <artifactId>com.ridgid.java.spring.restwebservices.apiversion</artifactId>
     <version>1.0</version>
+    <packaging>jar</packaging>
+
+    <name>RIDGID (Emerson Professional Tools) Java Spring REST Service API Version</name>
+    <description>Annotation-based API versioning for SpringMVC-based REST Web Services</description>
+    <url>https://github.com/RIDGIDSoftwareSolutions/SpringREST_API_Version</url>
+
+    <licenses>
+        <license>
+            <name>BSD 3-Clause License</name>
+            <url>https://raw.githubusercontent.com/RIDGIDSoftwareSolutions/SpringREST_API_Version/master/LICENSE</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>Thomas Norton</name>
+            <email>thomas.norton@emerson.com</email>
+            <organization>The Ridge Tool Company - Emerson Professional Tools</organization>
+            <organizationUrl>https://www.emerson.com</organizationUrl>
+        </developer>
+        <developer>
+            <name>Mike Koch</name>
+            <email>mike.koch@emerson.com</email>
+            <organization>The Ridge Tool Company - Emerson Professional Tools</organization>
+            <organizationUrl>https://www.emerson.com</organizationUrl>
+        </developer>
+        <developer>
+            <name>Gerald E. Butler</name>
+            <email>gerry.butler@emerson.com</email>
+            <organization>The Ridge Tool Company - Emerson Professional Tools</organization>
+            <organizationUrl>https://www.emerson.com</organizationUrl>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:https://github.com/RIDGIDSoftwareSolutions/SpringREST_API_Version.git</connection>
+        <developerConnection>scm:git:ssh://github.com:RIDGIDSoftwareSolutions/SpringREST_API_Version.git
+        </developerConnection>
+        <url>https://github.com/RIDGIDSoftwareSolutions/SpringREST_API_Version</url>
+    </scm>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        <repository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+    </distributionManagement>
 
     <properties>
         <spring.version>4.2.5.RELEASE</spring.version>
