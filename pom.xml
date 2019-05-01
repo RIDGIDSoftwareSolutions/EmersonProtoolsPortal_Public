@@ -5,7 +5,7 @@
 
     <groupId>com.ridgid</groupId>
     <artifactId>com.ridgid.java.spring.restwebservices.apiversion</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0</version>
     <packaging>jar</packaging>
 
     <name>RIDGID (Emerson Professional Tools) Java Spring REST Service API Version</name>
