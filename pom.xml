@@ -11,13 +11,15 @@
     <!-- Required to publish to Maven Central -->
     <name>RIDGID (Emerson Professional Tools) Java Spring REST Service API Version</name>
     <description>Annotation-based API versioning for SpringMVC-based REST Web Services</description>
-    <url>https://github.com/RIDGIDSoftwareSolutions/SpringREST_API_Version</url>
+    <url>https://github.com/RIDGIDSoftwareSolutions/EmersonProtoolsPortal_Public/SpringREST_API_Version</url>
 
     <!-- Required to publish to Maven Central -->
     <licenses>
         <license>
             <name>BSD 3-Clause License</name>
-            <url>https://raw.githubusercontent.com/RIDGIDSoftwareSolutions/SpringREST_API_Version/master/LICENSE</url>
+            <url>
+                https://raw.githubusercontent.com/RIDGIDSoftwareSolutions/EmersonProtoolsPortal_Public/SpringREST_API_Version/master/LICENSE
+            </url>
         </license>
     </licenses>
 
@@ -45,11 +47,11 @@
 
     <!-- Required for publishing to Maven Central -->
     <scm>
-        <connection>scm:git:https://github.com/RIDGIDSoftwareSolutions/SpringREST_API_Version.git</connection>
-        <developerConnection>scm:git:https://github.com/RIDGIDSoftwareSolutions/SpringREST_API_Version.git
+        <connection>scm:git:https://github.com/RIDGIDSoftwareSolutions/EmersonProtoolsPortal_Public.git</connection>
+        <developerConnection>scm:git:https://github.com/RIDGIDSoftwareSolutions/EmersonProtoolsPortal_Public.git
         </developerConnection>
-        <url>https://github.com/RIDGIDSoftwareSolutions/SpringREST_API_Version</url>
-        <tag>com.ridgid.java.spring.restwebservices.apiversion-1.0</tag>
+        <url>https://github.com/RIDGIDSoftwareSolutions/EmersonProtoolsPortal_Public/SpringREST_API_Version</url>
+        <tag>com.ridgid.java.spring.restwebservices.apiversion-1.4</tag>
     </scm>
 
     <!-- Required for Publishing to Maven Central -->
