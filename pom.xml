@@ -5,7 +5,7 @@
 
     <groupId>com.ridgid</groupId>
     <artifactId>com.ridgid.java.spring.restwebservices.apiversion</artifactId>
-    <version>1.0</version>
+    <version>1.3-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <!-- Required to publish to Maven Central -->
