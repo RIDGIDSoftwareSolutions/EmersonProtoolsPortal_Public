@@ -1,4 +1,4 @@
-package com.ridgid.java.spring.restwebservices.apiversion;
+package com.ridgid.oss.spring.restwebservices.apiversion;
 
 import java.lang.annotation.*;
 
