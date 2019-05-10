@@ -9,7 +9,7 @@
         <version>1.4-SNAPSHOT</version>
     </parent>
 
-    <artifactId>com.ridgid.oss.com.ridgid.oss.orm.jpa</artifactId>
+    <artifactId>com.ridgid.oss.orm.jpa</artifactId>
     <version>1.4-SNAPSHOT</version>
     <packaging>jar</packaging>
 
