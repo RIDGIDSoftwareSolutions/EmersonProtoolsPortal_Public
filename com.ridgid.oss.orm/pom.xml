@@ -6,11 +6,11 @@
     <parent>
         <artifactId>com.ridgid.oss</artifactId>
         <groupId>com.ridgid.oss</groupId>
-        <version>1.5-SNAPSHOT</version>
+        <version>1.5</version>
     </parent>
 
     <artifactId>com.ridgid.oss.orm</artifactId>
-    <version>1.5-SNAPSHOT</version>
+    <version>1.5</version>
     <packaging>jar</packaging>
 
     <!-- Required to publish to Maven Central -->
@@ -38,7 +38,7 @@
         <url>
             https://github.com/RIDGIDSoftwareSolutions/EmersonProtoolsPortal_Public/tree/master/com.ridgid.oss.orm
         </url>
-      <tag>HEAD</tag>
+      <tag>com.ridgid.oss-1.5</tag>
   </scm>
 
     <dependencies>
