@@ -5,7 +5,7 @@
 
     <groupId>com.ridgid.oss</groupId>
     <artifactId>com.ridgid.oss</artifactId>
-    <version>1.6</version>
+    <version>1.7-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -87,7 +87,7 @@
         <developerConnection>scm:git:https://github.com/RIDGIDSoftwareSolutions/EmersonProtoolsPortal_Public.git
         </developerConnection>
         <url>https://github.com/RIDGIDSoftwareSolutions/EmersonProtoolsPortal_Public</url>
-        <tag>com.ridgid.oss-1.6</tag>
+        <tag>com.ridgid.public-1.0</tag>
     </scm>
 
     <!-- Required for Publishing to Maven Central -->

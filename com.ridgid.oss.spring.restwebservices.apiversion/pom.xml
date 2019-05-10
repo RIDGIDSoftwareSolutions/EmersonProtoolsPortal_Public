@@ -6,11 +6,11 @@
     <parent>
         <groupId>com.ridgid.oss</groupId>
         <artifactId>com.ridgid.oss</artifactId>
-        <version>1.6</version>
+        <version>1.7-SNAPSHOT</version>
     </parent>
 
     <artifactId>com.ridgid.oss.spring.restwebservices.apiversion</artifactId>
-    <version>1.6</version>
+    <version>1.7-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <!-- Required to publish to Maven Central -->
@@ -38,7 +38,7 @@
         <url>
             https://github.com/RIDGIDSoftwareSolutions/EmersonProtoolsPortal_Public/tree/master/com.ridgid.oss.spring.restwebservices.apiversion
         </url>
-        <tag>com.ridgid.oss-1.6</tag>
+        <tag>com.ridgid.public-1.0</tag>
     </scm>
 
     <dependencies>
