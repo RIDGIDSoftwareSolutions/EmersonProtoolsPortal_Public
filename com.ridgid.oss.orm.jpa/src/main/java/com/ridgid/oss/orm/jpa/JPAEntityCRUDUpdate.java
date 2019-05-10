@@ -25,8 +25,8 @@ public class JPAEntityCRUDUpdate<T extends PrimaryKeyedEntity<PKT>, PKT> impleme
 
     @Override
     public T update(T entity) {
-        if (em.find(classType, entity.getPK()) == null)
-            throw new javax.persistence.EntityNotFoundException(entity.getPK().toString());
+        if (em.find(classType, entity.getPk()) == null)
+            throw new javax.persistence.EntityNotFoundException(entity.getPk().toString());
         em.merge(entity);
         em.flush();
         em.refresh(entity);
