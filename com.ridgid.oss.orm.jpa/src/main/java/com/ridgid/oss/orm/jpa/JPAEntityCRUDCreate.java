@@ -24,7 +24,7 @@ public class JPAEntityCRUDCreate<T extends PrimaryKeyedEntity<PKT>,PKT> implemen
     }
 
     @Override
-    public T add(T entity) {
+    public T Add(T entity) {
         em.persist(entity);
         em.flush();
         em.refresh(entity);

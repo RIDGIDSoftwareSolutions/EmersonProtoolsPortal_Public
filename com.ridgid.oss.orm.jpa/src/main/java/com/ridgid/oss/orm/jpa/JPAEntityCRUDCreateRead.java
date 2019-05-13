@@ -23,7 +23,7 @@ public class JPAEntityCRUDCreateRead<T extends PrimaryKeyedEntity<PKT>, PKT>
     }
 
     @Override
-    public T add(T entity) {
-        return createBase.add(entity);
+    public T Add(T entity) {
+        return createBase.Add(entity);
     }
 }
