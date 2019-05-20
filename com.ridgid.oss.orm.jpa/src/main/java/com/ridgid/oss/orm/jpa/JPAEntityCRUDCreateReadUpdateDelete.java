@@ -5,21 +5,21 @@ import com.ridgid.oss.orm.PrimaryKeyedEntity;
 
 import javax.persistence.EntityManager;
 
-public class JPAEntityCRUDCreateReadUpdateDelete<T extends PrimaryKeyedEntity<PKT>, PKT>
-        extends JPAEntityCRUDCreateReadUpdate<T, PKT>
-        implements EntityCRUDCreateReadUpdateDelete<T, PKT> {
+public abstract class JPAEntityCRUDCreateReadUpdateDelete<ET extends PrimaryKeyedEntity<PKT>, PKT>
+        extends JPAEntityCRUDCreateReadUpdate<ET, PKT>
+        implements EntityCRUDCreateReadUpdateDelete<ET, PKT> {
 
-    private final JPAEntityCRUDDelete<T,PKT> deleteBase;
+    private final JPAEntityCRUDDelete<ET, PKT> deleteBase;
 
-    public JPAEntityCRUDCreateReadUpdateDelete(Class<T> classType, Class<PKT> pkType) {
+    protected JPAEntityCRUDCreateReadUpdateDelete(Class<ET> classType, Class<PKT> pkType) {
         super(classType, pkType);
         deleteBase = new JPAEntityCRUDDelete<>(classType,pkType);
     }
 
     @Override
-    public void setEm(EntityManager em) {
-        super.setEm(em);
-        deleteBase.setEm(em);
+    public void setEntityManager(EntityManager entityManager) {
+        super.setEntityManager(entityManager);
+        deleteBase.setEntityManager(entityManager);
     }
 
     @Override

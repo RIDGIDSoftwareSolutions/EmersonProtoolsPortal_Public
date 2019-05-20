@@ -2,8 +2,9 @@ package com.ridgid.oss.orm;
 
 import java.util.List;
 
-public interface EntityCRUDRead<T extends PrimaryKeyedEntity<PKT>, PKT> extends EntityCRUD<T,PKT> {
-    T find(PKT pk);
+public interface EntityCRUDRead<ET extends PrimaryKeyedEntity<PKT>, PKT>
+        extends EntityCRUD<ET, PKT> {
+    ET find(PKT pk);
 
-    List<T> findAll(int offset, int limit);
+    List<ET> findAll(int offset, int limit);
 }

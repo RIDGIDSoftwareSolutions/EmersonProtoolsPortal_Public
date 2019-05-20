@@ -5,26 +5,26 @@ import com.ridgid.oss.orm.PrimaryKeyedEntity;
 
 import javax.persistence.EntityManager;
 
-public class JPAEntityCRUDCreateReadUpdate<T extends PrimaryKeyedEntity<PKT>,PKT>
-        extends JPAEntityCRUDCreateRead<T,PKT>
-        implements EntityCRUDCreateReadUpdate<T, PKT> {
+public abstract class JPAEntityCRUDCreateReadUpdate<ET extends PrimaryKeyedEntity<PKT>, PKT>
+        extends JPAEntityCRUDCreateRead<ET, PKT>
+        implements EntityCRUDCreateReadUpdate<ET, PKT> {
 
-    private final JPAEntityCRUDUpdate<T,PKT> updateBase;
+    private final JPAEntityCRUDUpdate<ET, PKT> updateBase;
 
-    public JPAEntityCRUDCreateReadUpdate(Class<T> classType,
+    protected JPAEntityCRUDCreateReadUpdate(Class<ET> classType,
                                          Class<PKT> pkType) {
         super(classType, pkType);
         updateBase = new JPAEntityCRUDUpdate<>(classType);
     }
 
     @Override
-    public void setEm(EntityManager em) {
-        super.setEm(em);
-        updateBase.setEm(em);
+    public void setEntityManager(EntityManager em) {
+        super.setEntityManager(em);
+        updateBase.setEntityManager(em);
     }
 
     @Override
-    public T update(T entity) {
+    public ET update(ET entity) {
         return updateBase.update(entity);
     }
 }

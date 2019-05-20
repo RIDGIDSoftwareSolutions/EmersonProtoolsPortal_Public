@@ -3,33 +3,23 @@ package com.ridgid.oss.orm.jpa;
 import com.ridgid.oss.orm.EntityCRUDUpdate;
 import com.ridgid.oss.orm.PrimaryKeyedEntity;
 
-import javax.persistence.EntityManager;
+public class JPAEntityCRUDUpdate<ET extends PrimaryKeyedEntity<PKT>, PKT>
+        extends JPAEntityCRUD<ET, PKT>
+        implements EntityCRUDUpdate<ET, PKT> {
 
-public class JPAEntityCRUDUpdate<T extends PrimaryKeyedEntity<PKT>, PKT> implements EntityCRUDUpdate<T,PKT> {
+    private final Class<ET> classType;
 
-    private final Class<T> classType;
-
-    private EntityManager em;
-
-    public JPAEntityCRUDUpdate(Class<T> classType) {
+    protected JPAEntityCRUDUpdate(Class<ET> classType) {
         this.classType = classType;
     }
 
-    public void setEm(EntityManager em) {
-        this.em = em;
-    }
-
-    protected final EntityManager getEm() {
-        return em;
-    }
-
     @Override
-    public T update(T entity) {
-        if (em.find(classType, entity.getPk()) == null)
+    public ET update(ET entity) {
+        if (getEntityManager().find(classType, entity.getPk()) == null)
             throw new javax.persistence.EntityNotFoundException(entity.getPk().toString());
-        em.merge(entity);
-        em.flush();
-        em.refresh(entity);
+        getEntityManager().merge(entity);
+        getEntityManager().flush();
+        getEntityManager().refresh(entity);
         return entity;
     }
 }
