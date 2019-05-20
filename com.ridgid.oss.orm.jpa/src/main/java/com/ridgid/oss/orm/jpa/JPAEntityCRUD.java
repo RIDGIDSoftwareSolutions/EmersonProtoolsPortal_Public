@@ -10,11 +10,11 @@ public abstract class JPAEntityCRUD<ET extends PrimaryKeyedEntity<PKT>, PKT>
 
     private EntityManager entityManager;
 
-    protected void setEntityManager(EntityManager entityManager) {
+    public void setEntityManager(EntityManager entityManager) {
         this.entityManager = entityManager;
     }
 
-    protected final EntityManager getEntityManager() {
+    public final EntityManager getEntityManager() {
         return entityManager;
     }
 }
