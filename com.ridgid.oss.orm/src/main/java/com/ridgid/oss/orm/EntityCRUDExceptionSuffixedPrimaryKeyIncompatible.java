@@ -9,15 +9,15 @@ package com.ridgid.oss.orm;
  * as its Primary Key and the Order Line that is being attempted to add to the collection has a different
  * Customer Number and/or Order Number from the Parent, this exception could/should be thrown.
  */
-public class SuffixedPrimaryKeyIncompatibleException extends RuntimeException {
-    public SuffixedPrimaryKeyIncompatibleException() {
+public class EntityCRUDExceptionSuffixedPrimaryKeyIncompatible extends EntityCRUDException {
+    public EntityCRUDExceptionSuffixedPrimaryKeyIncompatible() {
     }
 
-    public SuffixedPrimaryKeyIncompatibleException(String message) {
+    public EntityCRUDExceptionSuffixedPrimaryKeyIncompatible(String message) {
         super(message);
     }
 
-    public SuffixedPrimaryKeyIncompatibleException(String message, Throwable cause) {
+    public EntityCRUDExceptionSuffixedPrimaryKeyIncompatible(String message, Throwable cause) {
         super(message, cause);
     }
 }
