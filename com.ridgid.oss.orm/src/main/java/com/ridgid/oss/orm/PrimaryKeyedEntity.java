@@ -22,7 +22,7 @@ public interface PrimaryKeyedEntity<PKT> extends Serializable {
     /**
      * Gets the primary key
      *
-     * @return primarky key of type PKT of the entity
+     * @return primary key of type PKT of the entity
      */
     PKT getPk();
 }
