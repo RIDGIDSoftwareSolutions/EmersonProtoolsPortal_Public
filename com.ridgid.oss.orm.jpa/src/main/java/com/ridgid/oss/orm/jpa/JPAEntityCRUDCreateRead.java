@@ -8,7 +8,7 @@ import com.ridgid.oss.orm.PrimaryKeyedEntity;
 import javax.persistence.EntityManager;
 
 /**
- * Base class for a JPA DAO that provides CREATE & READ CRUD operations only
+ * Base class for a JPA DAO that provides CREATE and READ CRUD operations only
  *
  * @param <ET>  entity type of the entity that the DAO provides persistence methods for
  * @param <PKT> primary key type of the entity type that the DAO provides persistence methods for

@@ -8,7 +8,7 @@ import javax.persistence.EntityManager;
 import java.util.Optional;
 
 /**
- * Base class for a JPA DAO that provides CREATE, READ, & UPDATE CRUD operations only
+ * Base class for a JPA DAO that provides CREATE, READ, and UPDATE CRUD operations only
  *
  * @param <ET>  entity type of the entity that the DAO provides persistence methods for
  * @param <PKT> primary key type of the entity type that the DAO provides persistence methods for
