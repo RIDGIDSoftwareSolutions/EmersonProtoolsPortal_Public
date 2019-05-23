@@ -11,7 +11,7 @@ import com.ridgid.oss.orm.PrimaryKeyedEntity;
  * @param <ET>  entity type of the entity that the DAO provides persistence methods for
  * @param <PKT> primary key type of the entity type that the DAO provides persistence methods for
  */
-public class JPAEntityCRUDCreate<ET extends PrimaryKeyedEntity<PKT>, PKT>
+public class JPAEntityCRUDCreate<ET extends PrimaryKeyedEntity<PKT>, PKT extends Comparable<PKT>>
         extends JPAEntityCRUD<ET, PKT>
         implements EntityCRUDCreate<ET, PKT> {
 

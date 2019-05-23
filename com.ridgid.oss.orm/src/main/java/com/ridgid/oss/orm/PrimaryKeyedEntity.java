@@ -17,7 +17,7 @@ import java.io.Serializable;
  *
  * @param <PKT> type of the Primary Key of the entity
  */
-public interface PrimaryKeyedEntity<PKT> extends Serializable {
+public interface PrimaryKeyedEntity<PKT extends Comparable<PKT>> extends Serializable {
 
     /**
      * Gets the primary key

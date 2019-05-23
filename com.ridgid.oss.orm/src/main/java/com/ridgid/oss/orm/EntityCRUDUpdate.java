@@ -8,7 +8,7 @@ import java.util.Optional;
  * @param <ET>  Entity Type of the Entity that the DAO provides an UPDATE (update) CRUD method for
  * @param <PKT> Type of the Primary Key of the Entity Type ET
  */
-public interface EntityCRUDUpdate<ET extends PrimaryKeyedEntity<PKT>, PKT>
+public interface EntityCRUDUpdate<ET extends PrimaryKeyedEntity<PKT>, PKT extends Comparable<PKT>>
         extends EntityCRUD<ET, PKT> {
 
     /**

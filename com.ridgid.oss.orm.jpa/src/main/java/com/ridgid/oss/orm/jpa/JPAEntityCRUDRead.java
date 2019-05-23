@@ -16,7 +16,7 @@ import java.util.Optional;
  * @param <ET>  Entity Type of the Entity that the DAO provides READ (find) CRUD methods for
  * @param <PKT> Type of the Primary Key of the Entity Type ET
  */
-public class JPAEntityCRUDRead<ET extends PrimaryKeyedEntity<PKT>, PKT>
+public class JPAEntityCRUDRead<ET extends PrimaryKeyedEntity<PKT>, PKT extends Comparable<PKT>>
         extends JPAEntityCRUD<ET, PKT>
         implements EntityCRUDRead<ET, PKT> {
 
