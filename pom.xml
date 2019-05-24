@@ -29,6 +29,7 @@
         <net.sf.jt400.version>9.8</net.sf.jt400.version>
         <org.apache.commons.commons-lang3.version>3.4</org.apache.commons.commons-lang3.version>
         <spring.version>5.1.6.RELEASE</spring.version>
+        <spring-boot.version>2.1.4.RELEASE</spring-boot.version>
 
         <!-- Plugin Dependency Versions -->
         <maven-javadoc-plugin.version>3.0.1</maven-javadoc-plugin.version>
@@ -41,6 +42,7 @@
         <module>com.ridgid.oss.restwebservices.doclet</module>
         <module>com.ridgid.oss.orm</module>
         <module>com.ridgid.oss.orm.jpa</module>
+        <module>com.ridgid.oss.orm.jpa.test</module>
     </modules>
 
     <!-- Required to publish to Maven Central -->
