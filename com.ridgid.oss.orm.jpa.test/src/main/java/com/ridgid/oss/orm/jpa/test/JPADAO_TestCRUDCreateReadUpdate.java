@@ -9,9 +9,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
 
-import static java.util.Comparator.comparing;
-import static java.util.stream.Collectors.toList;
-
 @ExtendWith(SpringExtension.class)
 @DataJpaTest
 public abstract class JPADAO_TestCRUDCreateReadUpdate<DAO extends JPAEntityCRUDCreateReadUpdate<ET, PKT>, ET extends PrimaryKeyedEntity<PKT>, PKT extends Comparable<PKT>>
@@ -45,8 +42,6 @@ public abstract class JPADAO_TestCRUDCreateReadUpdate<DAO extends JPAEntityCRUDC
         }
         getEntityManager().flush();
         getEntityManager().getEntityManagerFactory().getCache().evictAll();
-        List<ET> actual = getDao().findAll(0, Integer.MAX_VALUE).stream().sorted(comparing(ET::getPk)).collect(toList());
-        List<ET> expected = getAllEntitiesFromTestSet(getEntityClass()).stream().sorted(comparing(ET::getPk)).collect(toList());
-        validateExpectedAndActualEntitiesAreAllEqual(expected, actual);
+        findAndCompareAllWithoutSetup();
     }
 }
