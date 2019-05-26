@@ -6,6 +6,7 @@ import javax.persistence.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
@@ -19,6 +20,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  *
@@ -40,7 +43,7 @@ public final class DAOTestHelpers {
         return IntStream
                 .range(0, numRecsToGenerate)
                 .mapToObj(generatorFunction::apply)
-                .collect(Collectors.toList());
+                .collect(toList());
     }
 
     /**
@@ -250,7 +253,8 @@ public final class DAOTestHelpers {
         if (!field.isAccessible()) field.setAccessible(true);
         if (field.isAnnotationPresent(Transient.class)
                 || field.isAnnotationPresent(EmbeddedId.class)
-                || field.isAnnotationPresent(Id.class)) return false;
+                || Modifier.isFinal(field.getModifiers())
+                || Modifier.isStatic((field.getModifiers()))) return false;
         Class<?> ft = field.getType();
         if (ft.isEnum())
             populateEnumField(rec, field, ft, idx, fieldIdx);
