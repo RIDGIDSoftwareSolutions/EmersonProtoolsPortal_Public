@@ -172,14 +172,39 @@ public final class DAOTestHelpers {
     public static void setInsertQueryColumnValues(Query q, Object obj, int offset, List<String> fieldNames) {
         for (int i = 0; i < fieldNames.size(); i++) {
             Field f = getFieldOrThrowRuntimeException(obj.getClass(), fieldNames.get(i));
-            Class<?> ft = f.getType();
-            if (ft == Calendar.class)
-                setCalendarParameterValue(q, obj, i + offset + 1, f);
-            else if (ft == Date.class)
-                setDateParameterValue(q, obj, i + offset + 1, f);
+            if (f.isAnnotationPresent(Convert.class))
+                setConvertedParameterValue(q, obj, offset, i, f);
             else
-                q.setParameter(i + offset + 1, getFieldValueOrThrowRuntimeException(obj, f));
+                setBasicParameterValue(q, obj, offset, i, f);
         }
+    }
+
+    private static void setConvertedParameterValue(Query q, Object obj, int offset, int i, Field f) {
+        try {
+            AttributeConverter converter
+                    = (AttributeConverter) f
+                    .getAnnotation(Convert.class)
+                    .converter()
+                    .getConstructor()
+                    .newInstance();
+            q.setParameter
+                    (
+                            i + offset + 1,
+                            converter.convertToDatabaseColumn(getFieldValueOrThrowRuntimeException(obj, f))
+                    );
+        } catch (InstantiationException | InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static void setBasicParameterValue(Query q, Object obj, int offset, int i, Field f) {
+        Class<?> ft = f.getType();
+        if (ft == Calendar.class)
+            setCalendarParameterValue(q, obj, i + offset + 1, f);
+        else if (ft == Date.class)
+            setDateParameterValue(q, obj, i + offset + 1, f);
+        else
+            q.setParameter(i + offset + 1, getFieldValueOrThrowRuntimeException(obj, f));
     }
 
     /**
