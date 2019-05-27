@@ -119,11 +119,11 @@ public abstract class JPADAO_TestBase<DAO extends JPAEntityCRUD<ET, PKT>, ET ext
         setupEntitiesFromPrimaryKeys(numberOfTestRecords, this::primaryKeyGenerator);
     }
 
-    private void setupTestEntities(BiConsumer<Integer, ET> fieldsModifier) {
+    private void setupTestEntities(BiConsumer<Integer, ET> fieldsModifierCallback) {
         List<ET> entities = generateTestEntities();
         for (int i = 0; i < entities.size(); i++) {
             ET entity = entities.get(i);
-            fieldsModifier.accept(i, entity);
+            fieldsModifierCallback.accept(i, entity);
             persistFlushAndDetachEntity(entity);
         }
         evictAllFromPersistenceCache();
