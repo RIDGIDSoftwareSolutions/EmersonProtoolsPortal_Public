@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 import static java.util.stream.Collectors.joining;
@@ -116,6 +117,16 @@ public abstract class JPADAO_TestBase<DAO extends JPAEntityCRUD<ET, PKT>, ET ext
      */
     protected final void setupTestEntities() {
         setupEntitiesFromPrimaryKeys(numberOfTestRecords, this::primaryKeyGenerator);
+    }
+
+    private void setupTestEntities(BiConsumer<Integer, ET> fieldsModifier) {
+        List<ET> entities = generateTestEntities();
+        for (int i = 0; i < entities.size(); i++) {
+            ET entity = entities.get(i);
+            fieldsModifier.accept(i, entity);
+            persistFlushAndDetachEntity(entity);
+        }
+        evictAllFromPersistenceCache();
     }
 
     /**
@@ -263,11 +274,20 @@ public abstract class JPADAO_TestBase<DAO extends JPAEntityCRUD<ET, PKT>, ET ext
                        Function<Integer, T2> generatorFunction) {
         for (int i = 0; i < numRecsToGenerate; i++) {
             T2 rec = generatorFunction.apply(i);
-            entityManager.persist(rec);
-            entityManager.flush();
-            entityManager.detach(rec);
+            persistFlushAndDetachEntity(rec);
             storeSetupRecord(rec);
         }
+        evictAllFromPersistenceCache();
+    }
+
+    public final <T2 extends PrimaryKeyedEntity<PKT2>, PKT2 extends Comparable<PKT2>>
+    void persistFlushAndDetachEntity(T2 rec) {
+        entityManager.persist(rec);
+        entityManager.flush();
+        entityManager.detach(rec);
+    }
+
+    public final void evictAllFromPersistenceCache() {
         entityManager.getEntityManagerFactory().getCache().evictAll();
     }
 
