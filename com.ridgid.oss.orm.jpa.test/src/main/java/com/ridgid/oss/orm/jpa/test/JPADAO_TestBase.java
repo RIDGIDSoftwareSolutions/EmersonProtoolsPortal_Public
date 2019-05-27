@@ -125,6 +125,7 @@ public abstract class JPADAO_TestBase<DAO extends JPAEntityCRUD<ET, PKT>, ET ext
             ET entity = entities.get(i);
             fieldsModifierCallback.accept(i, entity);
             persistFlushAndDetachEntity(entity);
+            storeSetupRecord(entity);
         }
         evictAllFromPersistenceCache();
     }
@@ -273,18 +274,18 @@ public abstract class JPADAO_TestBase<DAO extends JPAEntityCRUD<ET, PKT>, ET ext
     void setupEntities(int numRecsToGenerate,
                        Function<Integer, T2> generatorFunction) {
         for (int i = 0; i < numRecsToGenerate; i++) {
-            T2 rec = generatorFunction.apply(i);
-            persistFlushAndDetachEntity(rec);
-            storeSetupRecord(rec);
+            T2 entity = generatorFunction.apply(i);
+            persistFlushAndDetachEntity(entity);
+            storeSetupRecord(entity);
         }
         evictAllFromPersistenceCache();
     }
 
     public final <T2 extends PrimaryKeyedEntity<PKT2>, PKT2 extends Comparable<PKT2>>
-    void persistFlushAndDetachEntity(T2 rec) {
-        entityManager.persist(rec);
+    void persistFlushAndDetachEntity(T2 entity) {
+        entityManager.persist(entity);
         entityManager.flush();
-        entityManager.detach(rec);
+        entityManager.detach(entity);
     }
 
     public final void evictAllFromPersistenceCache() {
@@ -356,14 +357,14 @@ public abstract class JPADAO_TestBase<DAO extends JPAEntityCRUD<ET, PKT>, ET ext
     }
 
     /**
-     * @param rec
+     * @param entity
      * @param <T2>
      * @param <PKT2>
      */
     protected final <T2 extends PrimaryKeyedEntity<PKT2>, PKT2 extends Comparable<PKT2>>
-    void storeSetupRecord(T2 rec) {
-        List<PrimaryKeyedEntity<?>> testDataList = TEST_DATA_MAP.computeIfAbsent(rec.getClass(), k -> new ArrayList<>());
-        testDataList.add(rec);
+    void storeSetupRecord(T2 entity) {
+        List<PrimaryKeyedEntity<?>> testDataList = TEST_DATA_MAP.computeIfAbsent(entity.getClass(), k -> new ArrayList<>());
+        testDataList.add(entity);
     }
 
     /**
