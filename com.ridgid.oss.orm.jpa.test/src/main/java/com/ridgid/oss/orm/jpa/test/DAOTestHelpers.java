@@ -724,7 +724,7 @@ public final class DAOTestHelpers {
                             (idx + fieldIdx) % 24,
                             (idx + fieldIdx) % 60,
                             (idx + fieldIdx) % 60,
-                            (int) ((long) Math.pow(idx, fieldIdx) % 1_000_000_000)
+                            0
                     );
             field.set(rec, val);
         } catch (IllegalAccessException e) {
@@ -765,7 +765,7 @@ public final class DAOTestHelpers {
                             (idx + fieldIdx) % 24,
                             (idx + fieldIdx) % 60,
                             (idx + fieldIdx) % 60,
-                            (int) ((long) Math.pow(idx, fieldIdx) % 1_000_000_000)
+                            0
                     );
             field.set(rec, val);
         } catch (IllegalAccessException e) {
@@ -789,7 +789,7 @@ public final class DAOTestHelpers {
                             (idx + fieldIdx) % 24,
                             (idx + fieldIdx) % 60,
                             (idx + fieldIdx) % 60,
-                            (int) ((long) Math.pow(idx, fieldIdx) % 1_000_000_000)
+                            0
                     );
             field.set(rec, val);
         } catch (IllegalAccessException e) {
@@ -805,16 +805,10 @@ public final class DAOTestHelpers {
      */
     public static void populateInstantField(Object rec, Field field, int idx, int fieldIdx) {
         try {
-            Instant val = LocalDateTime.of
+            Instant val = Instant.ofEpochMilli
                     (
-                            2000 + (idx * 100 + fieldIdx) % 50,
-                            (idx + fieldIdx) % 12 + 1,
-                            (idx + fieldIdx) % 28 + 1,
-                            (idx + fieldIdx) % 24,
-                            (idx + fieldIdx) % 60,
-                            (idx + fieldIdx) % 60,
-                            (int) ((long) Math.pow(idx, fieldIdx) % 1_000_000_000)
-                    ).toInstant(ZoneOffset.UTC);
+                            (int) (((long) Math.pow(idx, fieldIdx) + idx * fieldIdx + idx + fieldIdx) % 1_000_000_000)
+                    );
             field.set(rec, val);
         } catch (IllegalAccessException e) {
             throwAsRuntimeExceptionUnableToSetField(rec, field, idx, fieldIdx, e);
@@ -856,7 +850,7 @@ public final class DAOTestHelpers {
                             (idx + fieldIdx) % 24,
                             (idx + fieldIdx) % 60,
                             (idx + fieldIdx) % 60,
-                            (int) ((long) Math.pow(idx, fieldIdx) % 1_000_000_000),
+                            0,
                             ZoneOffset.UTC
                     );
             field.set(rec, val);
@@ -878,7 +872,7 @@ public final class DAOTestHelpers {
                             (idx + fieldIdx) % 24,
                             (idx + fieldIdx) % 60,
                             (idx + fieldIdx) % 60,
-                            (int) ((long) Math.pow(idx, fieldIdx) % 1_000_000_000),
+                            0,
                             ZoneOffset.UTC
                     );
             field.set(rec, val);
@@ -903,7 +897,7 @@ public final class DAOTestHelpers {
                             (idx + fieldIdx) % 24,
                             (idx + fieldIdx) % 60,
                             (idx + fieldIdx) % 60,
-                            (int) ((long) Math.pow(idx, fieldIdx) % 1_000_000_000),
+                            0,
                             ZoneOffset.UTC
                     );
             field.set(rec, val);
