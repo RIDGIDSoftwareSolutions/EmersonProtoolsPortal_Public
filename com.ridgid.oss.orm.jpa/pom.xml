@@ -1,22 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
+    <modelVersion>4.0.0</modelVersion>
+
     <parent>
         <artifactId>com.ridgid.oss</artifactId>
         <groupId>com.ridgid.oss</groupId>
         <version>2.11-SNAPSHOT</version>
     </parent>
-    <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>com.ridgid.oss.restwebservices.doclet</artifactId>
+    <artifactId>com.ridgid.oss.orm.jpa</artifactId>
     <version>2.11-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <!-- Required to publish to Maven Central -->
-    <name>RIDGID (Emerson Professional Tools) Java REST Service Doclet</name>
-    <description>JavaDoc Doclet for REST Services</description>
+    <name>RIDGID (Emerson Professional Tools) JPA ORM Helper Interfaces and Classes</name>
+    <description>Unified Interfaces for JPA ORM tools</description>
     <url>
-        https://github.com/RIDGIDSoftwareSolutions/EmersonProtoolsPortal_Public/tree/master/com.ridgid.oss.restwebservices.apiversion
+        https://github.com/RIDGIDSoftwareSolutions/EmersonProtoolsPortal_Public/tree/master/com.ridgid.oss.orm.jpa
     </url>
 
     <!-- Required to publish to Maven Central -->
@@ -24,7 +25,7 @@
         <license>
             <name>BSD 3-Clause License</name>
             <url>
-                https://github.com/RIDGIDSoftwareSolutions/EmersonProtoolsPortal_Public/tree/master/com.ridgid.oss.restwebservices.doclet/LICENSE
+                https://github.com/RIDGIDSoftwareSolutions/EmersonProtoolsPortal_Public/tree/master/com.ridgid.oss.orm.jpa/LICENSE
             </url>
         </license>
     </licenses>
@@ -35,34 +36,38 @@
         <developerConnection>scm:git:https://github.com/RIDGIDSoftwareSolutions/EmersonProtoolsPortal_Public.git
         </developerConnection>
         <url>
-            https://github.com/RIDGIDSoftwareSolutions/EmersonProtoolsPortal_Public/tree/master/com.ridgid.oss.spring.restwebservices.doclet
+            https://github.com/RIDGIDSoftwareSolutions/EmersonProtoolsPortal_Public/tree/master/com.ridgid.oss.orm.jpa
         </url>
-        <tag>com.ridgid.public-1.0</tag>
-    </scm>
+      <tag>HEAD</tag>
+  </scm>
 
     <dependencies>
+
+        <!-- RIDGID OSS Dependencies -->
         <dependency>
             <groupId>com.ridgid.oss</groupId>
-            <artifactId>com.ridgid.oss.spring.restwebservices.apiversion</artifactId>
+            <artifactId>com.ridgid.oss.orm</artifactId>
             <version>2.11-SNAPSHOT</version>
         </dependency>
+
+        <!-- External Dependencies -->
         <dependency>
-            <groupId>com.sun</groupId>
-            <artifactId>tools</artifactId>
-            <version>1.8</version>
-            <scope>system</scope>
-            <systemPath>${java.home}/../lib/tools.jar</systemPath>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-jdbc</artifactId>
+            <version>${spring.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-collections4</artifactId>
-            <version>4.1</version>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-orm</artifactId>
+            <version>${spring.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>3.9</version>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-entitymanager</artifactId>
+            <version>${hibernate-entitymanager.version}</version>
         </dependency>
+
     </dependencies>
+
 
 </project>
