@@ -178,7 +178,7 @@ public final class DAOTestHelpers {
                 .collect(Collectors.joining(","));
         return String.format
                 (
-                        "insert into $s\"%s\" ( %s ) values ( %s )",
+                        "insert into %s\"%s\" ( %s ) values ( %s )",
                         schemaPart,
                         tableName,
                         fieldsPart,
