@@ -32,6 +32,24 @@ public abstract class JPADAO_TestCRUDCreateReadUpdateDelete<DAO extends JPAEntit
                 numberOfTestRecords);
     }
 
+    public JPADAO_TestCRUDCreateReadUpdateDelete(Class<ET> entityClass,
+                                                 Class<PKT> entityPrimaryKeyClass,
+                                                 DAO dao,
+                                                 String schemaName,
+                                                 String tableName,
+                                                 List<String> primaryKeyColumnAndFieldNames,
+                                                 List<String> entityColumnAndFieldNames,
+                                                 int numberOfTestRecords) {
+        super(entityClass,
+                entityPrimaryKeyClass,
+                dao,
+                schemaName,
+                tableName,
+                primaryKeyColumnAndFieldNames,
+                entityColumnAndFieldNames,
+                numberOfTestRecords);
+    }
+
     @Test
     void when_remove_is_called_on_all_records_and_then_all_are_retrieved_the_count_is_zero() {
         setupTestEntities();

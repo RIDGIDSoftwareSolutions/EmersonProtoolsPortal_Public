@@ -34,9 +34,32 @@ public abstract class JPADAO_TestCRUDCreateRead<DAO extends JPAEntityCRUDCreateR
                 numberOfTestRecords);
     }
 
+    public JPADAO_TestCRUDCreateRead(Class<ET> entityClass,
+                                     Class<PKT> entityPrimaryKeyClass,
+                                     DAO dao,
+                                     String schemaName,
+                                     String tableName,
+                                     List<String> primaryKeyColumnAndFieldNames,
+                                     List<String> entityColumnAndFieldNames,
+                                     int numberOfTestRecords) {
+        super(entityClass,
+                entityPrimaryKeyClass,
+                dao,
+                schemaName,
+                tableName,
+                primaryKeyColumnAndFieldNames,
+                entityColumnAndFieldNames,
+                numberOfTestRecords);
+    }
+
     @Test
     void when_add_is_called_it_retrieves_all_added_records_from_the_db() {
-        Query query = createNativeDeleteQueryFrom(getTableName());
+        Query query
+                = createNativeDeleteQueryFrom
+                (
+                        getSchemaName(),
+                        getTableName()
+                );
         assertEquals(0, getDao().findAll(0, 10).size(), "Should be 0 records found");
         for (ET rec : generateTestEntities()) {
             storeSetupRecord(rec);

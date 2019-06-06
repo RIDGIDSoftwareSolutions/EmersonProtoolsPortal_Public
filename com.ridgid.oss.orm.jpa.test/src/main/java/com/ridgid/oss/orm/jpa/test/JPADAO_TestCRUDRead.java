@@ -36,6 +36,24 @@ public abstract class JPADAO_TestCRUDRead<DAO extends JPAEntityCRUDRead<ET, PKT>
                 numberOfTestRecords);
     }
 
+    public JPADAO_TestCRUDRead(Class<ET> entityClass,
+                               Class<PKT> entityPrimaryKeyClass,
+                               DAO dao,
+                               String schemaName,
+                               String tableName,
+                               List<String> primaryKeyColumnAndFieldNames,
+                               List<String> entityColumnAndFieldNames,
+                               int numberOfTestRecords) {
+        super(entityClass,
+                entityPrimaryKeyClass,
+                dao,
+                schemaName,
+                tableName,
+                primaryKeyColumnAndFieldNames,
+                entityColumnAndFieldNames,
+                numberOfTestRecords);
+    }
+
     @Test
     void when_find_is_called_it_retrieves_the_previously_stored_record_for_the_given_primary_key() {
         setupTestEntities();
@@ -80,6 +98,7 @@ public abstract class JPADAO_TestCRUDRead<DAO extends JPAEntityCRUDRead<ET, PKT>
                 .collect(toList());
         for (ET entity : expected) {
             Query query = createNativeInsertQueryFrom(
+                    getSchemaName(),
                     getTableName(),
                     getPrimaryKeyColumnAndFieldNames(),
                     getEntityColumnAndFieldNames(),

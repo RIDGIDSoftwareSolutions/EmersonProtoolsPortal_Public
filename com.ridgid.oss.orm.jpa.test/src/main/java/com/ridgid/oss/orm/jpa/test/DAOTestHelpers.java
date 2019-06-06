@@ -145,21 +145,44 @@ public final class DAOTestHelpers {
                                                            List<String> primaryKeyFieldNames,
                                                            List<String> entityColumnNames,
                                                            List<String> entityFieldNames) {
+        return createNativeInsertQueryStringFrom
+                (
+                        null,
+                        tableName,
+                        primaryKeyColumnNames,
+                        primaryKeyFieldNames,
+                        entityColumnNames,
+                        entityFieldNames
+                );
+    }
+
+    public static String createNativeInsertQueryStringFrom(String schemaName,
+                                                           String tableName,
+                                                           List<String> primaryKeyColumnNames,
+                                                           List<String> primaryKeyFieldNames,
+                                                           List<String> entityColumnNames,
+                                                           List<String> entityFieldNames) {
         Objects.requireNonNull("tableName must be non-null");
         if (primaryKeyColumnNames.size() != primaryKeyFieldNames.size())
             throw new RuntimeException("primary key column names and primary key field names must match in number");
         if (entityColumnNames.size() != entityFieldNames.size())
             throw new RuntimeException("entity column names and entity field names must match in number");
+        String schemaPart = schemaName == null ? "" : "\"" + schemaName + "\".";
+        String fieldsPart
+                = Stream.concat(primaryKeyColumnNames.stream(), entityColumnNames.stream())
+                .map(cn -> "\"" + cn + "\"")
+                .collect(Collectors.joining(","));
+        String valuesPart
+                = Stream.concat(primaryKeyColumnNames.stream(), entityColumnNames.stream())
+                .map(fn -> "?")
+                .collect(Collectors.joining(","));
         return String.format
                 (
-                        "insert into \"%s\" ( %s ) values ( %s )",
+                        "insert into $s\"%s\" ( %s ) values ( %s )",
+                        schemaPart,
                         tableName,
-                        Stream.concat(primaryKeyColumnNames.stream(), entityColumnNames.stream())
-                                .map(cn -> "\"" + cn + "\"")
-                                .collect(Collectors.joining(",")),
-                        Stream.concat(primaryKeyColumnNames.stream(), entityColumnNames.stream())
-                                .map(fn -> "?")
-                                .collect(Collectors.joining(","))
+                        fieldsPart,
+                        valuesPart
                 );
     }
 
@@ -1049,6 +1072,15 @@ public final class DAOTestHelpers {
     }
 
     /**
+     * @param schemaName
+     * @param tableName
+     * @return
+     */
+    public static String createNativeDeleteQueryStringFrom(String schemaName, String tableName) {
+        return "delete from \"" + schemaName + "\".\"" + tableName + "\"";
+    }
+
+    /**
      * @param obj
      * @param fieldNames
      */
@@ -1510,6 +1542,5 @@ public final class DAOTestHelpers {
         if (item.compareTo(rangeStart) < 0) return false;
         return item.compareTo(rangeEnd) < 0;
     }
-
 
 }

@@ -39,6 +39,7 @@ public abstract class JPADAO_TestBase<DAO extends JPAEntityCRUD<ET, PKT>, ET ext
     private final int numberOfTestRecords;
     private final Class<ET> entityClass;
     private final Class<PKT> entityPrimaryKeyClass;
+    private final String schemaName;
     private final String tableName;
     private final List<String> primaryKeyColumnAndFieldNames;
     private final List<String> entityColumnAndFieldNames;
@@ -62,14 +63,46 @@ public abstract class JPADAO_TestBase<DAO extends JPAEntityCRUD<ET, PKT>, ET ext
                               List<String> primaryKeyColumnAndFieldNames,
                               List<String> entityColumnAndFieldNames,
                               int numberOfTestRecords) {
-        if (tableName == null || tableName.length() < 1) throw new RuntimeException("tableName required");
+        this(
+                entityClass,
+                entityPrimaryKeyClass,
+                dao,
+                null,
+                tableName,
+                primaryKeyColumnAndFieldNames,
+                entityColumnAndFieldNames,
+                numberOfTestRecords);
+    }
+
+    /**
+     * @param entityClass
+     * @param entityPrimaryKeyClass
+     * @param dao
+     * @param schemaName
+     * @param tableName
+     * @param primaryKeyColumnAndFieldNames
+     * @param entityColumnAndFieldNames
+     * @param numberOfTestRecords
+     */
+    protected JPADAO_TestBase(Class<ET> entityClass,
+                              Class<PKT> entityPrimaryKeyClass,
+                              DAO dao,
+                              String schemaName,
+                              String tableName,
+                              List<String> primaryKeyColumnAndFieldNames,
+                              List<String> entityColumnAndFieldNames,
+                              int numberOfTestRecords) {
+        if (schemaName != null && schemaName.isEmpty())
+            throw new IllegalArgumentException("schemaName must be null or non-blank");
+        if (tableName == null || tableName.length() < 1) throw new IllegalArgumentException("tableName required");
         if (primaryKeyColumnAndFieldNames.size() % 2 != 0)
-            throw new RuntimeException("primaryKeyColumnAndFieldNames must be an even number - 1 column name per 1 field name, alternating column name followed by field name");
+            throw new IllegalArgumentException("primaryKeyColumnAndFieldNames must be an even number - 1 column name per 1 field name, alternating column name followed by field name");
         if (primaryKeyColumnAndFieldNames.size() % 2 != 0)
-            throw new RuntimeException("entityColumnAndFieldNames must be an even number - 1 column name per 1 field name, alternating column name followed by field name");
+            throw new IllegalArgumentException("entityColumnAndFieldNames must be an even number - 1 column name per 1 field name, alternating column name followed by field name");
         this.entityClass = entityClass;
         this.entityPrimaryKeyClass = entityPrimaryKeyClass;
         this.dao = dao;
+        this.schemaName = schemaName;
         this.tableName = tableName;
         this.primaryKeyColumnAndFieldNames = primaryKeyColumnAndFieldNames;
         this.entityColumnAndFieldNames = entityColumnAndFieldNames;
@@ -182,6 +215,13 @@ public abstract class JPADAO_TestBase<DAO extends JPAEntityCRUD<ET, PKT>, ET ext
      */
     public final String getTableName() {
         return tableName;
+    }
+
+    /**
+     * @return
+     */
+    public String getSchemaName() {
+        return schemaName;
     }
 
     /**
@@ -381,7 +421,30 @@ public abstract class JPADAO_TestBase<DAO extends JPAEntityCRUD<ET, PKT>, ET ext
                                       List<String> primaryKeyColumnAndFieldNames,
                                       List<String> entityColumnAndFieldNames,
                                       T2 entity) {
+        return createNativeInsertQueryFrom(
+                null,
+                tableName,
+                primaryKeyColumnAndFieldNames,
+                entityColumnAndFieldNames,
+                entity);
+    }
 
+    /**
+     * @param schemaName
+     * @param tableName
+     * @param primaryKeyColumnAndFieldNames
+     * @param entityColumnAndFieldNames
+     * @param entity
+     * @param <T2>
+     * @param <PKT2>
+     * @return
+     */
+    public final <T2 extends PrimaryKeyedEntity<PKT2>, PKT2 extends Comparable<PKT2>>
+    Query createNativeInsertQueryFrom(String schemaName,
+                                      String tableName,
+                                      List<String> primaryKeyColumnAndFieldNames,
+                                      List<String> entityColumnAndFieldNames,
+                                      T2 entity) {
         List<String> primaryKeyColumnNames = new ArrayList<>();
         List<String> primaryKeyFieldNames = new ArrayList<>();
         DAOTestHelpers.separateColumnAndFieldNames(primaryKeyColumnAndFieldNames, primaryKeyColumnNames, primaryKeyFieldNames);
@@ -390,13 +453,27 @@ public abstract class JPADAO_TestBase<DAO extends JPAEntityCRUD<ET, PKT>, ET ext
         List<String> entityFieldNames = new ArrayList<>();
         DAOTestHelpers.separateColumnAndFieldNames(entityColumnAndFieldNames, entityColumnNames, entityFieldNames);
 
-        Query query = entityManager.createNativeQuery(
-                DAOTestHelpers.createNativeInsertQueryStringFrom(
-                        tableName,
-                        primaryKeyColumnNames,
-                        primaryKeyFieldNames,
-                        entityColumnNames,
-                        entityFieldNames));
+        Query query
+                = schemaName == null
+                ? entityManager.createNativeQuery
+                (
+                        DAOTestHelpers.createNativeInsertQueryStringFrom(
+                                tableName,
+                                primaryKeyColumnNames,
+                                primaryKeyFieldNames,
+                                entityColumnNames,
+                                entityFieldNames)
+                )
+                : entityManager.createNativeQuery
+                (
+                        DAOTestHelpers.createNativeInsertQueryStringFrom(
+                                schemaName,
+                                tableName,
+                                primaryKeyColumnNames,
+                                primaryKeyFieldNames,
+                                entityColumnNames,
+                                entityFieldNames)
+                );
 
         DAOTestHelpers.setInsertQueryColumnValues(
                 query,
@@ -414,8 +491,19 @@ public abstract class JPADAO_TestBase<DAO extends JPAEntityCRUD<ET, PKT>, ET ext
 
     public final <T2 extends PrimaryKeyedEntity<PKT2>, PKT2 extends Comparable<PKT2>>
     Query createNativeDeleteQueryFrom(String tableName) {
+        return createNativeDeleteQueryFrom(tableName);
+    }
+
+    /**
+     * @param schemaName
+     * @param tableName
+     * @return
+     */
+    public final Query createNativeDeleteQueryFrom(String schemaName, String tableName) {
         Query query = entityManager.createNativeQuery(
-                DAOTestHelpers.createNativeDeleteQueryStringFrom(tableName)
+                schemaName == null
+                        ? DAOTestHelpers.createNativeDeleteQueryStringFrom(tableName)
+                        : DAOTestHelpers.createNativeDeleteQueryStringFrom(schemaName, tableName)
         );
         return query;
     }

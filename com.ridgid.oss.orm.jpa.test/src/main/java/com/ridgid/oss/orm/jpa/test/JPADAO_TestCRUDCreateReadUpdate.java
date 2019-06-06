@@ -30,6 +30,24 @@ public abstract class JPADAO_TestCRUDCreateReadUpdate<DAO extends JPAEntityCRUDC
                 numberOfTestRecords);
     }
 
+    public JPADAO_TestCRUDCreateReadUpdate(Class<ET> entityClass,
+                                           Class<PKT> entityPrimaryKeyClass,
+                                           DAO dao,
+                                           String schemaName,
+                                           String tableName,
+                                           List<String> primaryKeyColumnAndFieldNames,
+                                           List<String> entityColumnAndFieldNames,
+                                           int numberOfTestRecords) {
+        super(entityClass,
+                entityPrimaryKeyClass,
+                dao,
+                schemaName,
+                tableName,
+                primaryKeyColumnAndFieldNames,
+                entityColumnAndFieldNames,
+                numberOfTestRecords);
+    }
+
     @Test
     void when_update_is_called_on_all_existing_records_to_update_some_fields_the_records_read_back_reflect_the_changes() {
         setupTestEntities();
