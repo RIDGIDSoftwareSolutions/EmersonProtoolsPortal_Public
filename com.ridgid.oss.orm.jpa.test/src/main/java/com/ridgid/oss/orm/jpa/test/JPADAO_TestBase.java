@@ -156,6 +156,7 @@ public abstract class JPADAO_TestBase<DAO extends JPAEntityCRUD<ET, PKT>, ET ext
         List<ET> entities = generateTestEntities();
         for (int i = 0; i < entities.size(); i++) {
             ET entity = entities.get(i);
+            foreignKeysUpdater(i, entity);
             fieldsModifierCallback.accept(i, entity);
             persistFlushAndDetachEntity(entity);
             storeSetupRecord(entity);
@@ -168,6 +169,20 @@ public abstract class JPADAO_TestBase<DAO extends JPAEntityCRUD<ET, PKT>, ET ext
      */
     protected final List<ET> generateTestEntities() {
         return generateEntitiesFromPrimaryKeys(numberOfTestRecords, this::primaryKeyGenerator);
+    }
+
+    /**
+     * @param recordNumber
+     * @return
+     */
+    protected abstract PKT primaryKeyGenerator(int recordNumber);
+
+    /**
+     * @param recordNumber
+     * @return
+     */
+    protected void foreignKeysUpdater(int recordNumber, ET entity) {
+        // nothing to do by default
     }
 
     /**
@@ -351,12 +366,6 @@ public abstract class JPADAO_TestBase<DAO extends JPAEntityCRUD<ET, PKT>, ET ext
     }
 
     /**
-     * @param recordNumber
-     * @return
-     */
-    protected abstract PKT primaryKeyGenerator(int recordNumber);
-
-    /**
      * @param numberOfRecords
      * @param primaryKeyGenerator
      */
@@ -365,7 +374,8 @@ public abstract class JPADAO_TestBase<DAO extends JPAEntityCRUD<ET, PKT>, ET ext
         setupEntitiesFromPrimaryKeys(
                 numberOfRecords,
                 DAOTestHelpers.getConstructorForEntityOrThrowRuntimeException(entityClass, entityPrimaryKeyClass),
-                primaryKeyGenerator);
+                primaryKeyGenerator,
+                this::foreignKeysUpdater);
     }
 
     /**
@@ -385,10 +395,19 @@ public abstract class JPADAO_TestBase<DAO extends JPAEntityCRUD<ET, PKT>, ET ext
     void setupEntitiesFromPrimaryKeys(int numberOfTestRecords,
                                       Constructor<T2> entityConstructor,
                                       Function<Integer, PKT2> primaryKeyGenerator) {
+        setupEntitiesFromPrimaryKeys(numberOfTestRecords, entityConstructor, primaryKeyGenerator, null);
+    }
+
+    private <T2 extends PrimaryKeyedEntity<PKT2>, PKT2 extends Comparable<PKT2>>
+    void setupEntitiesFromPrimaryKeys(int numberOfTestRecords,
+                                      Constructor<T2> entityConstructor,
+                                      Function<Integer, PKT2> primaryKeyGenerator,
+                                      BiConsumer<Integer, T2> foreignKeysUpdater) {
         setupEntities(numberOfTestRecords, (idx) -> {
             try {
                 T2 rv = entityConstructor.newInstance(primaryKeyGenerator.apply(idx));
                 DAOTestHelpers.populateBaseFields(idx, rv);
+                if (foreignKeysUpdater != null) foreignKeysUpdater.accept(idx, rv);
                 return rv;
             } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
                 throw new RuntimeException(e);
