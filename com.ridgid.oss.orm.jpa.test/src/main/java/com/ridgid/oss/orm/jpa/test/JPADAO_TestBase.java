@@ -179,7 +179,6 @@ public abstract class JPADAO_TestBase<DAO extends JPAEntityCRUD<ET, PKT>, ET ext
 
     /**
      * @param recordNumber
-     * @return
      */
     protected void foreignKeysUpdater(int recordNumber, ET entity) {
         // nothing to do by default
