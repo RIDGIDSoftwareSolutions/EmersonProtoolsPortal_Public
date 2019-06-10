@@ -1084,8 +1084,16 @@ public final class DAOTestHelpers {
      * @param obj
      * @param fieldNames
      */
-    public static void modifyFields(Object obj, List<String> fieldNames) {
+    public static void modifyFields(Object obj,
+                                    List<String> fieldNames) {
+        modifyFieldsExceptForeignKeyFields(obj, fieldNames, Collections.emptySet());
+    }
+
+    public static void modifyFieldsExceptForeignKeyFields(Object obj,
+                                                          List<String> fieldNames,
+                                                          Set<String> foreignKeyFieldNames) {
         for (String fieldName : fieldNames) {
+            if (foreignKeyFieldNames.contains(fieldName)) continue;
             Field f = getFieldOrThrowRuntimeException(obj.getClass(), fieldName);
             modifyField(obj, f);
         }

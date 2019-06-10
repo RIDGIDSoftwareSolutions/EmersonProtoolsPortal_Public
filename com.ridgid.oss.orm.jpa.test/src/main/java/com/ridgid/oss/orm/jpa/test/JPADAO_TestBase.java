@@ -14,9 +14,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
@@ -43,6 +41,7 @@ public abstract class JPADAO_TestBase<DAO extends JPAEntityCRUD<ET, PKT>, ET ext
     private final String tableName;
     private final List<String> primaryKeyColumnAndFieldNames;
     private final List<String> entityColumnAndFieldNames;
+    private final Set<String> foreignKeyFieldNames;
 
     @Autowired
     private EntityManager entityManager;
@@ -67,11 +66,43 @@ public abstract class JPADAO_TestBase<DAO extends JPAEntityCRUD<ET, PKT>, ET ext
                 entityClass,
                 entityPrimaryKeyClass,
                 dao,
-                null,
+                (String) null,
                 tableName,
                 primaryKeyColumnAndFieldNames,
                 entityColumnAndFieldNames,
                 numberOfTestRecords);
+    }
+
+    /**
+     * @param entityClass
+     * @param entityPrimaryKeyClass
+     * @param dao
+     * @param tableName
+     * @param primaryKeyColumnAndFieldNames
+     * @param entityColumnAndFieldNames
+     * @param foreignKeyFieldNames
+     * @param numberOfTestRecords
+     */
+    protected JPADAO_TestBase(Class<ET> entityClass,
+                              Class<PKT> entityPrimaryKeyClass,
+                              DAO dao,
+                              String tableName,
+                              List<String> primaryKeyColumnAndFieldNames,
+                              List<String> entityColumnAndFieldNames,
+                              Set<String> foreignKeyFieldNames,
+                              int numberOfTestRecords) {
+        this(
+                entityClass,
+                entityPrimaryKeyClass,
+                dao,
+                (String) null,
+                tableName,
+                primaryKeyColumnAndFieldNames,
+                entityColumnAndFieldNames,
+                foreignKeyFieldNames,
+                numberOfTestRecords);
+        if (foreignKeyFieldNames == null || foreignKeyFieldNames.size() == 0)
+            throw new IllegalArgumentException("Foreign Key Field Names must not be null or empty");
     }
 
     /**
@@ -92,6 +123,39 @@ public abstract class JPADAO_TestBase<DAO extends JPAEntityCRUD<ET, PKT>, ET ext
                               List<String> primaryKeyColumnAndFieldNames,
                               List<String> entityColumnAndFieldNames,
                               int numberOfTestRecords) {
+        this(entityClass,
+                entityPrimaryKeyClass,
+                dao,
+                schemaName,
+                tableName,
+                primaryKeyColumnAndFieldNames,
+                entityColumnAndFieldNames,
+                Collections.EMPTY_SET,
+                numberOfTestRecords);
+    }
+
+    /**
+     * @param entityClass
+     * @param entityPrimaryKeyClass
+     * @param dao
+     * @param schemaName
+     * @param tableName
+     * @param primaryKeyColumnAndFieldNames
+     * @param entityColumnAndFieldNames
+     * @param foreignKeyFieldNames
+     * @param numberOfTestRecords
+     */
+    public JPADAO_TestBase(Class<ET> entityClass,
+                           Class<PKT> entityPrimaryKeyClass,
+                           DAO dao,
+                           String schemaName,
+                           String tableName,
+                           List<String> primaryKeyColumnAndFieldNames,
+                           List<String> entityColumnAndFieldNames,
+                           Set<String> foreignKeyFieldNames,
+                           int numberOfTestRecords) {
+        if (foreignKeyFieldNames == null)
+            throw new IllegalArgumentException("Foreign Key Field Names must not be null");
         if (schemaName != null && schemaName.isEmpty())
             throw new IllegalArgumentException("schemaName must be null or non-blank");
         if (tableName == null || tableName.length() < 1) throw new IllegalArgumentException("tableName required");
@@ -106,6 +170,7 @@ public abstract class JPADAO_TestBase<DAO extends JPAEntityCRUD<ET, PKT>, ET ext
         this.tableName = tableName;
         this.primaryKeyColumnAndFieldNames = primaryKeyColumnAndFieldNames;
         this.entityColumnAndFieldNames = entityColumnAndFieldNames;
+        this.foreignKeyFieldNames = foreignKeyFieldNames;
         this.numberOfTestRecords = numberOfTestRecords;
     }
 
@@ -242,7 +307,7 @@ public abstract class JPADAO_TestBase<DAO extends JPAEntityCRUD<ET, PKT>, ET ext
      * @return
      */
     public final List<String> getPrimaryKeyColumnAndFieldNames() {
-        return primaryKeyColumnAndFieldNames;
+        return Collections.unmodifiableList(primaryKeyColumnAndFieldNames);
     }
 
     /**
@@ -252,7 +317,7 @@ public abstract class JPADAO_TestBase<DAO extends JPAEntityCRUD<ET, PKT>, ET ext
         List<String> primaryKeyColumnNames = new ArrayList<>();
         List<String> primaryKeyFieldNames = new ArrayList<>();
         DAOTestHelpers.separateColumnAndFieldNames(primaryKeyColumnAndFieldNames, primaryKeyColumnNames, primaryKeyFieldNames);
-        return primaryKeyColumnNames;
+        return Collections.unmodifiableList(primaryKeyColumnNames);
     }
 
     /**
@@ -262,14 +327,14 @@ public abstract class JPADAO_TestBase<DAO extends JPAEntityCRUD<ET, PKT>, ET ext
         List<String> primaryKeyColumnNames = new ArrayList<>();
         List<String> primaryKeyFieldNames = new ArrayList<>();
         DAOTestHelpers.separateColumnAndFieldNames(primaryKeyColumnAndFieldNames, primaryKeyColumnNames, primaryKeyFieldNames);
-        return primaryKeyFieldNames;
+        return Collections.unmodifiableList(primaryKeyFieldNames);
     }
 
     /**
      * @return
      */
     public final List<String> getEntityColumnAndFieldNames() {
-        return entityColumnAndFieldNames;
+        return Collections.unmodifiableList(entityColumnAndFieldNames);
     }
 
     /**
@@ -279,7 +344,7 @@ public abstract class JPADAO_TestBase<DAO extends JPAEntityCRUD<ET, PKT>, ET ext
         List<String> entityColumnNames = new ArrayList<>();
         List<String> entityFieldNames = new ArrayList<>();
         DAOTestHelpers.separateColumnAndFieldNames(entityColumnAndFieldNames, entityColumnNames, entityFieldNames);
-        return entityColumnNames;
+        return Collections.unmodifiableList(entityColumnNames);
     }
 
     /**
@@ -289,7 +354,11 @@ public abstract class JPADAO_TestBase<DAO extends JPAEntityCRUD<ET, PKT>, ET ext
         List<String> entityColumnNames = new ArrayList<>();
         List<String> entityFieldNames = new ArrayList<>();
         DAOTestHelpers.separateColumnAndFieldNames(entityColumnAndFieldNames, entityColumnNames, entityFieldNames);
-        return entityFieldNames;
+        return Collections.unmodifiableList(entityFieldNames);
+    }
+
+    public Set<String> getForeignKeyFieldNames() {
+        return Collections.unmodifiableSet(foreignKeyFieldNames);
     }
 
     /**

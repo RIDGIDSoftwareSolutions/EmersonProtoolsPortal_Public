@@ -10,6 +10,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import javax.persistence.Query;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
@@ -20,6 +21,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public abstract class JPADAO_TestCRUDRead<DAO extends JPAEntityCRUDRead<ET, PKT>, ET extends PrimaryKeyedEntity<PKT>, PKT extends Comparable<PKT>>
         extends JPADAO_TestBase<DAO, ET, PKT> {
 
+    /**
+     * @param entityClass
+     * @param entityPrimaryKeyClass
+     * @param dao
+     * @param tableName
+     * @param primaryKeyColumnAndFieldNames
+     * @param entityColumnAndFieldNames
+     * @param numberOfTestRecords
+     */
     public JPADAO_TestCRUDRead(Class<ET> entityClass,
                                Class<PKT> entityPrimaryKeyClass,
                                DAO dao,
@@ -36,6 +46,45 @@ public abstract class JPADAO_TestCRUDRead<DAO extends JPAEntityCRUDRead<ET, PKT>
                 numberOfTestRecords);
     }
 
+    /**
+     *
+     * @param entityClass
+     * @param entityPrimaryKeyClass
+     * @param dao
+     * @param tableName
+     * @param primaryKeyColumnAndFieldNames
+     * @param entityColumnAndFieldNames
+     * @param foreignKeyFieldNames
+     * @param numberOfTestRecords
+     */
+    public JPADAO_TestCRUDRead(Class<ET> entityClass,
+                               Class<PKT> entityPrimaryKeyClass,
+                               DAO dao,
+                               String tableName,
+                               List<String> primaryKeyColumnAndFieldNames,
+                               List<String> entityColumnAndFieldNames,
+                               Set<String> foreignKeyFieldNames,
+                               int numberOfTestRecords) {
+        super(entityClass,
+                entityPrimaryKeyClass,
+                dao,
+                tableName,
+                primaryKeyColumnAndFieldNames,
+                entityColumnAndFieldNames,
+                foreignKeyFieldNames,
+                numberOfTestRecords);
+    }
+
+    /**
+     * @param entityClass
+     * @param entityPrimaryKeyClass
+     * @param dao
+     * @param schemaName
+     * @param tableName
+     * @param primaryKeyColumnAndFieldNames
+     * @param entityColumnAndFieldNames
+     * @param numberOfTestRecords
+     */
     public JPADAO_TestCRUDRead(Class<ET> entityClass,
                                Class<PKT> entityPrimaryKeyClass,
                                DAO dao,
@@ -51,6 +100,38 @@ public abstract class JPADAO_TestCRUDRead<DAO extends JPAEntityCRUDRead<ET, PKT>
                 tableName,
                 primaryKeyColumnAndFieldNames,
                 entityColumnAndFieldNames,
+                numberOfTestRecords);
+    }
+
+    /**
+     *
+     * @param entityClass
+     * @param entityPrimaryKeyClass
+     * @param dao
+     * @param schemaName
+     * @param tableName
+     * @param primaryKeyColumnAndFieldNames
+     * @param entityColumnAndFieldNames
+     * @param foreignKeyFieldNames
+     * @param numberOfTestRecords
+     */
+    public JPADAO_TestCRUDRead(Class<ET> entityClass,
+                               Class<PKT> entityPrimaryKeyClass,
+                               DAO dao,
+                               String schemaName,
+                               String tableName,
+                               List<String> primaryKeyColumnAndFieldNames,
+                               List<String> entityColumnAndFieldNames,
+                               Set<String> foreignKeyFieldNames,
+                               int numberOfTestRecords) {
+        super(entityClass,
+                entityPrimaryKeyClass,
+                dao,
+                schemaName,
+                tableName,
+                primaryKeyColumnAndFieldNames,
+                entityColumnAndFieldNames,
+                foreignKeyFieldNames,
                 numberOfTestRecords);
     }
 

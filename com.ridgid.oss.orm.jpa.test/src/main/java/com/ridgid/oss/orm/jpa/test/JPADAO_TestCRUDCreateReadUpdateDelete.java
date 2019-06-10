@@ -8,6 +8,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -35,6 +36,24 @@ public abstract class JPADAO_TestCRUDCreateReadUpdateDelete<DAO extends JPAEntit
     public JPADAO_TestCRUDCreateReadUpdateDelete(Class<ET> entityClass,
                                                  Class<PKT> entityPrimaryKeyClass,
                                                  DAO dao,
+                                                 String tableName,
+                                                 List<String> primaryKeyColumnAndFieldNames,
+                                                 List<String> entityColumnAndFieldNames,
+                                                 Set<String> foreignKeyFieldNames,
+                                                 int numberOfTestRecords) {
+        super(entityClass,
+                entityPrimaryKeyClass,
+                dao,
+                tableName,
+                primaryKeyColumnAndFieldNames,
+                entityColumnAndFieldNames,
+                foreignKeyFieldNames,
+                numberOfTestRecords);
+    }
+
+    public JPADAO_TestCRUDCreateReadUpdateDelete(Class<ET> entityClass,
+                                                 Class<PKT> entityPrimaryKeyClass,
+                                                 DAO dao,
                                                  String schemaName,
                                                  String tableName,
                                                  List<String> primaryKeyColumnAndFieldNames,
@@ -47,6 +66,26 @@ public abstract class JPADAO_TestCRUDCreateReadUpdateDelete<DAO extends JPAEntit
                 tableName,
                 primaryKeyColumnAndFieldNames,
                 entityColumnAndFieldNames,
+                numberOfTestRecords);
+    }
+
+    public JPADAO_TestCRUDCreateReadUpdateDelete(Class<ET> entityClass,
+                                                 Class<PKT> entityPrimaryKeyClass,
+                                                 DAO dao,
+                                                 String schemaName,
+                                                 String tableName,
+                                                 List<String> primaryKeyColumnAndFieldNames,
+                                                 List<String> entityColumnAndFieldNames,
+                                                 Set<String> foreignKeyFieldNames,
+                                                 int numberOfTestRecords) {
+        super(entityClass,
+                entityPrimaryKeyClass,
+                dao,
+                schemaName,
+                tableName,
+                primaryKeyColumnAndFieldNames,
+                entityColumnAndFieldNames,
+                foreignKeyFieldNames,
                 numberOfTestRecords);
     }
 

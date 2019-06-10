@@ -9,6 +9,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import javax.persistence.Query;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -18,6 +19,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public abstract class JPADAO_TestCRUDCreateRead<DAO extends JPAEntityCRUDCreateRead<ET, PKT>, ET extends PrimaryKeyedEntity<PKT>, PKT extends Comparable<PKT>>
         extends JPADAO_TestCRUDRead<DAO, ET, PKT> {
 
+    /**
+     * @param entityClass
+     * @param entityPrimaryKeyClass
+     * @param dao
+     * @param tableName
+     * @param primaryKeyColumnAndFieldNames
+     * @param entityColumnAndFieldNames
+     * @param numberOfTestRecords
+     */
     public JPADAO_TestCRUDCreateRead(Class<ET> entityClass,
                                      Class<PKT> entityPrimaryKeyClass,
                                      DAO dao,
@@ -34,6 +44,44 @@ public abstract class JPADAO_TestCRUDCreateRead<DAO extends JPAEntityCRUDCreateR
                 numberOfTestRecords);
     }
 
+    /**
+     * @param entityClass
+     * @param entityPrimaryKeyClass
+     * @param dao
+     * @param tableName
+     * @param primaryKeyColumnAndFieldNames
+     * @param entityColumnAndFieldNames
+     * @param foreignKeyFieldNames
+     * @param numberOfTestRecords
+     */
+    public JPADAO_TestCRUDCreateRead(Class<ET> entityClass,
+                                     Class<PKT> entityPrimaryKeyClass,
+                                     DAO dao,
+                                     String tableName,
+                                     List<String> primaryKeyColumnAndFieldNames,
+                                     List<String> entityColumnAndFieldNames,
+                                     Set<String> foreignKeyFieldNames,
+                                     int numberOfTestRecords) {
+        super(entityClass,
+                entityPrimaryKeyClass,
+                dao,
+                tableName,
+                primaryKeyColumnAndFieldNames,
+                entityColumnAndFieldNames,
+                foreignKeyFieldNames,
+                numberOfTestRecords);
+    }
+
+    /**
+     * @param entityClass
+     * @param entityPrimaryKeyClass
+     * @param dao
+     * @param schemaName
+     * @param tableName
+     * @param primaryKeyColumnAndFieldNames
+     * @param entityColumnAndFieldNames
+     * @param numberOfTestRecords
+     */
     public JPADAO_TestCRUDCreateRead(Class<ET> entityClass,
                                      Class<PKT> entityPrimaryKeyClass,
                                      DAO dao,
@@ -49,6 +97,38 @@ public abstract class JPADAO_TestCRUDCreateRead<DAO extends JPAEntityCRUDCreateR
                 tableName,
                 primaryKeyColumnAndFieldNames,
                 entityColumnAndFieldNames,
+                numberOfTestRecords);
+    }
+
+    /**
+     *
+     * @param entityClass
+     * @param entityPrimaryKeyClass
+     * @param dao
+     * @param schemaName
+     * @param tableName
+     * @param primaryKeyColumnAndFieldNames
+     * @param entityColumnAndFieldNames
+     * @param foreignKeyFieldNames
+     * @param numberOfTestRecords
+     */
+    public JPADAO_TestCRUDCreateRead(Class<ET> entityClass,
+                                     Class<PKT> entityPrimaryKeyClass,
+                                     DAO dao,
+                                     String schemaName,
+                                     String tableName,
+                                     List<String> primaryKeyColumnAndFieldNames,
+                                     List<String> entityColumnAndFieldNames,
+                                     Set<String> foreignKeyFieldNames,
+                                     int numberOfTestRecords) {
+        super(entityClass,
+                entityPrimaryKeyClass,
+                dao,
+                schemaName,
+                tableName,
+                primaryKeyColumnAndFieldNames,
+                entityColumnAndFieldNames,
+                foreignKeyFieldNames,
                 numberOfTestRecords);
     }
 
