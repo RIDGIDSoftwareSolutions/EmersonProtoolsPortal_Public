@@ -17,6 +17,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import static java.util.stream.Collectors.joining;
@@ -42,6 +43,15 @@ public abstract class JPADAO_TestBase<DAO extends JPAEntityCRUD<ET, PKT>, ET ext
     private final List<String> primaryKeyColumnAndFieldNames;
     private final List<String> entityColumnAndFieldNames;
     private final Set<String> foreignKeyFieldNames;
+
+    private final List<String> childCollectionFieldNames = new ArrayList<>();
+    private final List<Class<? extends Collection<? extends PrimaryKeyedEntity<? extends Comparable<?>>>>> childCollectionTypeClasses = new ArrayList<>();
+    private final List<Class<? extends PrimaryKeyedEntity<? extends Comparable<?>>>> childEntityTypeClasses = new ArrayList<>();
+    private final List<BiFunction<Integer, ET, ? extends Collection<? extends PrimaryKeyedEntity<? extends Comparable<?>>>>> childCollectionProviders = new ArrayList<>();
+    private final List<String> readonlyChildCollectionFieldNames = Collections.unmodifiableList(childCollectionFieldNames);
+    private final List<Class<? extends Collection<? extends PrimaryKeyedEntity<? extends Comparable<?>>>>> readOnlyChildCollectionTypeClasses = Collections.unmodifiableList(childCollectionTypeClasses);
+    private final List<Class<? extends PrimaryKeyedEntity<? extends Comparable<?>>>> readOnlyChildEntityTypeClasses = Collections.unmodifiableList(childEntityTypeClasses);
+    private final List<BiFunction<Integer, ET, ? extends Collection<? extends PrimaryKeyedEntity<? extends Comparable<?>>>>> readOnlyChildCollectionProviders = Collections.unmodifiableList(childCollectionProviders);
 
     @Autowired
     private EntityManager entityManager;
@@ -174,6 +184,25 @@ public abstract class JPADAO_TestBase<DAO extends JPAEntityCRUD<ET, PKT>, ET ext
         this.numberOfTestRecords = numberOfTestRecords;
     }
 
+    /**
+     * @param collectionFieldName
+     * @param childCollectionTypeClass
+     * @param childEntityTypeClass
+     * @param <CCTC>
+     * @param <CETC>
+     * @param <CETCPK>
+     */
+    protected <CCTC extends Collection<CETC>, CETC extends PrimaryKeyedEntity<CETCPK>, CETCPK extends Comparable<CETCPK>>
+    void addChildCollectionMetaData(String collectionFieldName,
+                                    Class<CCTC> childCollectionTypeClass,
+                                    Class<CETC> childEntityTypeClass,
+                                    BiFunction<Integer, ET, CCTC> childCollectionProvider) {
+        childCollectionFieldNames.add(collectionFieldName);
+        childCollectionTypeClasses.add(childCollectionTypeClass);
+        childEntityTypeClasses.add(childEntityTypeClass);
+        childCollectionProviders.add(childCollectionProvider);
+    }
+
     @BeforeEach
     void setUp() {
         initialSetup();
@@ -287,6 +316,39 @@ public abstract class JPADAO_TestBase<DAO extends JPAEntityCRUD<ET, PKT>, ET ext
      */
     public final Class<PKT> getEntityPrimaryKeyClass() {
         return this.entityPrimaryKeyClass;
+    }
+
+
+    /**
+     *
+     * @return
+     */
+    public List<String> getChildCollectionFieldNames() {
+        return readonlyChildCollectionFieldNames;
+    }
+
+    /**
+     * @return
+     */
+    public List<Class<? extends Collection<? extends PrimaryKeyedEntity<? extends Comparable<?>>>>>
+    getChildCollectionTypeClasses() {
+        return readOnlyChildCollectionTypeClasses;
+    }
+
+    /**
+     * @return
+     */
+    public List<Class<? extends PrimaryKeyedEntity<? extends Comparable<?>>>>
+    getChildEntityTypeClasses() {
+        return readOnlyChildEntityTypeClasses;
+    }
+
+    /**
+     * @return
+     */
+    public List<BiFunction<Integer, ET, ? extends Collection<? extends PrimaryKeyedEntity<? extends Comparable<?>>>>>
+    getChildCollectionProviders() {
+        return readOnlyChildCollectionProviders;
     }
 
     /**
