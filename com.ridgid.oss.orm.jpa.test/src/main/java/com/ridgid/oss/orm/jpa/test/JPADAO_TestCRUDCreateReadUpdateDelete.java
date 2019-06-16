@@ -1,5 +1,6 @@
 package com.ridgid.oss.orm.jpa.test;
 
+import com.ridgid.oss.common.helper.CollectionHelpers;
 import com.ridgid.oss.orm.PrimaryKeyedEntity;
 import com.ridgid.oss.orm.jpa.JPAEntityCRUDCreateReadUpdateDelete;
 import org.junit.jupiter.api.Test;
@@ -7,10 +8,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.function.BiConsumer;
 
+import static java.util.Comparator.comparing;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SuppressWarnings("unused")
 @ExtendWith(SpringExtension.class)
@@ -102,4 +107,37 @@ public abstract class JPADAO_TestCRUDCreateReadUpdateDelete<DAO extends JPAEntit
         int expected = 0;
         assertEquals(expected, actual, "After all records removed there should be zero records");
     }
+
+    @Test
+    void when_remove_is_called_on_a_record_that_has_any_child_collections_populated_an_exception_is_thrown_and_the_record_is_not_deleted() {
+
+        if (getChildCollectionFieldNames().size() == 0) return;
+
+        setupTestEntities();
+
+        @SuppressWarnings("OptionalGetWithoutIsPresent")
+        ET unmodifiedEntity = getAllEntitiesFromTestSet(getEntityClass())
+                .stream()
+                .min(comparing(ET::getPk))
+                .get();
+        PKT pk = unmodifiedEntity.getPk();
+        ET entity = getDao().find(pk);
+
+        for (int i = 0; i < getChildCollectionPopulators().size(); i++) {
+            CollectionHelpers.clearCollection(entity, getChildCollectionFieldNames().get(i));
+            getDao().update(entity);
+            BiConsumer<Integer, ET> populator = getChildCollectionPopulators().get(i);
+            populator.accept(0, entity);
+            ET entityWithCollectionPopulated = getDao().update(entity);
+            assertThrows(RuntimeException.class, () -> getDao().delete(pk));
+            entity = getDao().find(pk);
+            validateExpectedAndActualEntitiesAreAllEqual
+                    (
+                            Collections.singletonList(entityWithCollectionPopulated),
+                            Collections.singletonList(entity),
+                            true
+                    );
+        }
+    }
+
 }
