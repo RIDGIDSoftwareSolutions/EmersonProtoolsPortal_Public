@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <artifactId>com.ridgid.oss</artifactId>
+        <groupId>com.ridgid.oss</groupId>
+        <version>2.17-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>com.ridgid.oss.common</artifactId>
+    <packaging>jar</packaging>
+    <version>2.17-SNAPSHOT</version>
+
+    <!-- Required to publish to Maven Central -->
+    <name>RIDGID (Emerson Professional Tools) Java Common</name>
+    <description>Common Java Helpers</description>
+    <url>
+        https://github.com/RIDGIDSoftwareSolutions/EmersonProtoolsPortal_Public/tree/master/com.ridgid.oss.common
+    </url>
+
+    <!-- Required to publish to Maven Central -->
+    <licenses>
+        <license>
+            <name>BSD 3-Clause License</name>
+            <url>
+                https://github.com/RIDGIDSoftwareSolutions/EmersonProtoolsPortal_Public/tree/master/com.ridgid.oss.common/LICENSE
+            </url>
+        </license>
+    </licenses>
+
+    <!-- Required for publishing to Maven Central -->
+    <scm>
+        <connection>scm:git:https://github.com/RIDGIDSoftwareSolutions/EmersonProtoolsPortal_Public.git</connection>
+        <developerConnection>scm:git:https://github.com/RIDGIDSoftwareSolutions/EmersonProtoolsPortal_Public.git
+        </developerConnection>
+        <url>
+            https://github.com/RIDGIDSoftwareSolutions/EmersonProtoolsPortal_Public/tree/master/com.ridgid.oss.spring.common
+        </url>
+    </scm>
+
+    <dependencies>
+    </dependencies>
+
+</project>

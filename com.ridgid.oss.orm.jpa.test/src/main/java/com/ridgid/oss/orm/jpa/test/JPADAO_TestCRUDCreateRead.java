@@ -7,7 +7,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import javax.persistence.Query;
 import java.util.List;
 import java.util.Set;
 
@@ -133,43 +132,36 @@ public abstract class JPADAO_TestCRUDCreateRead<DAO extends JPAEntityCRUDCreateR
 
     @Test
     void when_findAll_is_called_after_add_it_retrieves_all_added_records_from_the_db() {
-        Query query
-                = createNativeDeleteQueryFrom
-                (
-                        getSchemaName(),
-                        getTableName()
-                );
-        assertEquals(0, getDao().findAll(0, 10).size(), "Should be 0 records found");
-        for (ET rec : generateTestEntities()) {
-            storeSetupRecord(rec);
-            assertDoesNotThrow(() -> getDao().add(rec));
-        }
-        findAndCompareAllWithoutSetup();
+        addRecordsOneAtATimeThroughAddMethodAndThenReadBackAndVerify(false);
     }
-
 
     @Test
     void when_add_is_called_with_items_containing_collections_Of_child_entities_it_persists_the_children_also() {
         if (getChildCollectionFieldNames().size() == 0)
             return; // Test auto-succeeds if there are no designated child collections to test
-        Query query
-                = createNativeDeleteQueryFrom
+        addRecordsOneAtATimeThroughAddMethodAndThenReadBackAndVerify(true);
+    }
+
+    private void addRecordsOneAtATimeThroughAddMethodAndThenReadBackAndVerify(boolean setupChildCollections) {
+        createNativeDeleteQueryFrom
                 (
                         getSchemaName(),
                         getTableName()
-                );
+                )
+                .executeUpdate();
         assertEquals(0, getDao().findAll(0, 10).size(), "Should be 0 records found");
         for (ET rec : generateTestEntities()) {
-            setupChildCollections(rec);
+            if (setupChildCollections) setupChildCollections(rec);
             storeSetupRecord(rec);
             assertDoesNotThrow(() -> getDao().add(rec));
         }
-        findAndCompareAllWithoutSetup();
+        findAndCompareAllWithoutSetup(setupChildCollections);
     }
+
 
     private void setupChildCollections(ET rec) {
         for (int i = 0; i < getChildCollectionFieldNames().size(); i++) {
-//            DAOTestHelpers.setField( getChildCollectionFieldNames().get(i), )
+//            JPAEntityHelpers.setField( getChildCollectionFieldNames().get(i), )
 //            Collection<? extends PrimaryKeyedEntity<? extends Comparable<?>>> items = getChildCollectionProviders().get(i).apply(i, rec);
         }
     }

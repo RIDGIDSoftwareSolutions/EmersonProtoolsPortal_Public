@@ -43,6 +43,7 @@
         <module>com.ridgid.oss.orm</module>
         <module>com.ridgid.oss.orm.jpa</module>
         <module>com.ridgid.oss.orm.jpa.test</module>
+        <module>com.ridgid.oss.common</module>
     </modules>
 
     <!-- Required to publish to Maven Central -->

@@ -8,7 +8,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import javax.persistence.Query;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
@@ -47,7 +46,6 @@ public abstract class JPADAO_TestCRUDRead<DAO extends JPAEntityCRUDRead<ET, PKT>
     }
 
     /**
-     *
      * @param entityClass
      * @param entityPrimaryKeyClass
      * @param dao
@@ -104,7 +102,6 @@ public abstract class JPADAO_TestCRUDRead<DAO extends JPAEntityCRUDRead<ET, PKT>
     }
 
     /**
-     *
      * @param entityClass
      * @param entityPrimaryKeyClass
      * @param dao
@@ -165,7 +162,7 @@ public abstract class JPADAO_TestCRUDRead<DAO extends JPAEntityCRUDRead<ET, PKT>
     @Test
     void when_findAll_is_called_it_returns_all_existing_records_in_the_desired_range() {
         setupTestEntities();
-        findAndCompareAllWithoutSetup();
+        findAndCompareAllWithoutSetup(false);
     }
 
     @Test
@@ -175,7 +172,7 @@ public abstract class JPADAO_TestCRUDRead<DAO extends JPAEntityCRUDRead<ET, PKT>
         List<ET> expected
                 = generateTestEntities()
                 .stream()
-                .sorted(Comparator.comparing(ET::getPk))
+                .sorted(comparing(ET::getPk))
                 .collect(toList());
         for (ET entity : expected) {
             Query query = createNativeInsertQueryFrom(
@@ -190,22 +187,30 @@ public abstract class JPADAO_TestCRUDRead<DAO extends JPAEntityCRUDRead<ET, PKT>
 
         // Act & Get Actual Values
         List<ET> actual
-                = getDao().findAll(0, Integer.MAX_VALUE)
+                = getDao()
+                .findAll(0, Integer.MAX_VALUE)
                 .stream()
-                .sorted(Comparator.comparing(ET::getPk))
+                .sorted(comparing(ET::getPk))
                 .collect(toList());
 
         // Assert that everything is equal
-        validateExpectedAndActualEntitiesAreAllEqual(actual, expected);
+        validateExpectedAndActualEntitiesAreAllEqual(actual, expected, false);
     }
 
     /**
      *
      */
     protected final void findAndCompareAllWithoutSetup() {
+        findAndCompareAllWithoutSetup(false);
+    }
+
+    /**
+     * @param validateChildCollections
+     */
+    protected final void findAndCompareAllWithoutSetup(boolean validateChildCollections) {
         List<ET> actual = getDao().findAll(0, Integer.MAX_VALUE).stream().sorted(comparing(ET::getPk)).collect(toList());
         List<ET> expected = getAllEntitiesFromTestSet(getEntityClass()).stream().sorted(comparing(ET::getPk)).collect(toList());
-        validateExpectedAndActualEntitiesAreAllEqual(actual, expected);
+        validateExpectedAndActualEntitiesAreAllEqual(actual, expected, validateChildCollections);
     }
 
 }

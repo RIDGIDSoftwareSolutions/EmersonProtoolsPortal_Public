@@ -2,6 +2,7 @@ package com.ridgid.oss.orm.jpa.test;
 
 import com.ridgid.oss.orm.PrimaryKeyedEntity;
 import com.ridgid.oss.orm.jpa.JPAEntityCRUDCreateReadUpdate;
+import com.ridgid.oss.orm.jpa.helper.JPAFieldModificationHelpers;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -131,14 +132,14 @@ public abstract class JPADAO_TestCRUDCreateReadUpdate<DAO extends JPAEntityCRUDC
     void when_update_is_called_on_all_existing_records_to_update_some_fields_the_records_read_back_reflect_the_changes() {
         setupTestEntities();
         for (ET rec : getAllEntitiesFromTestSet(getEntityClass()))
-            DAOTestHelpers.modifyFieldsExceptForeignKeyFields
+            JPAFieldModificationHelpers.modifyFields
                     (
                             rec,
                             getEntityFieldNames(),
                             getForeignKeyFieldNames()
                     );
         for (ET rec : getDao().findAll(0, Integer.MAX_VALUE)) {
-            DAOTestHelpers.modifyFieldsExceptForeignKeyFields
+            JPAFieldModificationHelpers.modifyFields
                     (
                             rec,
                             getEntityFieldNames(),
@@ -148,6 +149,6 @@ public abstract class JPADAO_TestCRUDCreateReadUpdate<DAO extends JPAEntityCRUDC
         }
         getEntityManager().flush();
         getEntityManager().getEntityManagerFactory().getCache().evictAll();
-        findAndCompareAllWithoutSetup();
+        findAndCompareAllWithoutSetup(false);
     }
 }

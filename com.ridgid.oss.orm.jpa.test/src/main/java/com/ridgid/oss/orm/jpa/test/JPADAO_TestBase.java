@@ -1,7 +1,11 @@
 package com.ridgid.oss.orm.jpa.test;
 
+import com.ridgid.oss.common.helper.EqualityHelpers;
 import com.ridgid.oss.orm.PrimaryKeyedEntity;
 import com.ridgid.oss.orm.jpa.JPAEntityCRUD;
+import com.ridgid.oss.orm.jpa.helper.JPAEntityHelpers;
+import com.ridgid.oss.orm.jpa.helper.JPAFieldPopulationHelpers;
+import com.ridgid.oss.orm.jpa.helper.JPANativeQueryHelpers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,6 +34,7 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 @ExtendWith(SpringExtension.class)
 @DataJpaTest
+@SuppressWarnings("unused")
 public abstract class JPADAO_TestBase<DAO extends JPAEntityCRUD<ET, PKT>, ET extends PrimaryKeyedEntity<PKT>, PKT extends Comparable<PKT>> {
 
     private final Map<Class<?>, List<PrimaryKeyedEntity<?>>> TEST_DATA_MAP = new ConcurrentHashMap<>();
@@ -48,9 +53,9 @@ public abstract class JPADAO_TestBase<DAO extends JPAEntityCRUD<ET, PKT>, ET ext
     private final List<Class<? extends Collection<? extends PrimaryKeyedEntity<? extends Comparable<?>>>>> childCollectionTypeClasses = new ArrayList<>();
     private final List<Class<? extends PrimaryKeyedEntity<? extends Comparable<?>>>> childEntityTypeClasses = new ArrayList<>();
     private final List<BiFunction<Integer, ET, ? extends Collection<? extends PrimaryKeyedEntity<? extends Comparable<?>>>>> childCollectionProviders = new ArrayList<>();
-    private final List<String> readonlyChildCollectionFieldNames = Collections.unmodifiableList(childCollectionFieldNames);
-    private final List<Class<? extends Collection<? extends PrimaryKeyedEntity<? extends Comparable<?>>>>> readOnlyChildCollectionTypeClasses = Collections.unmodifiableList(childCollectionTypeClasses);
-    private final List<Class<? extends PrimaryKeyedEntity<? extends Comparable<?>>>> readOnlyChildEntityTypeClasses = Collections.unmodifiableList(childEntityTypeClasses);
+    private final List<String> readOnlyChildCollectionFieldNames = Collections.unmodifiableList(childCollectionFieldNames);
+    private final List<Class<? extends Collection<?>>> readOnlyChildCollectionTypeClasses = Collections.unmodifiableList(childCollectionTypeClasses);
+    private final List<Class<?>> readOnlyChildEntityTypeClasses = Collections.unmodifiableList(childEntityTypeClasses);
     private final List<BiFunction<Integer, ET, ? extends Collection<? extends PrimaryKeyedEntity<? extends Comparable<?>>>>> readOnlyChildCollectionProviders = Collections.unmodifiableList(childCollectionProviders);
 
     @Autowired
@@ -324,13 +329,13 @@ public abstract class JPADAO_TestBase<DAO extends JPAEntityCRUD<ET, PKT>, ET ext
      * @return
      */
     public List<String> getChildCollectionFieldNames() {
-        return readonlyChildCollectionFieldNames;
+        return readOnlyChildCollectionFieldNames;
     }
 
     /**
      * @return
      */
-    public List<Class<? extends Collection<? extends PrimaryKeyedEntity<? extends Comparable<?>>>>>
+    public List<Class<? extends Collection<?>>>
     getChildCollectionTypeClasses() {
         return readOnlyChildCollectionTypeClasses;
     }
@@ -338,7 +343,7 @@ public abstract class JPADAO_TestBase<DAO extends JPAEntityCRUD<ET, PKT>, ET ext
     /**
      * @return
      */
-    public List<Class<? extends PrimaryKeyedEntity<? extends Comparable<?>>>>
+    public List<Class<?>>
     getChildEntityTypeClasses() {
         return readOnlyChildEntityTypeClasses;
     }
@@ -378,7 +383,7 @@ public abstract class JPADAO_TestBase<DAO extends JPAEntityCRUD<ET, PKT>, ET ext
     public final List<String> getPrimaryKeyColumnNames() {
         List<String> primaryKeyColumnNames = new ArrayList<>();
         List<String> primaryKeyFieldNames = new ArrayList<>();
-        DAOTestHelpers.separateColumnAndFieldNames(primaryKeyColumnAndFieldNames, primaryKeyColumnNames, primaryKeyFieldNames);
+        JPAEntityHelpers.separateColumnAndFieldNames(primaryKeyColumnAndFieldNames, primaryKeyColumnNames, primaryKeyFieldNames);
         return Collections.unmodifiableList(primaryKeyColumnNames);
     }
 
@@ -388,7 +393,7 @@ public abstract class JPADAO_TestBase<DAO extends JPAEntityCRUD<ET, PKT>, ET ext
     public final List<String> getPrimaryKeyFieldNames() {
         List<String> primaryKeyColumnNames = new ArrayList<>();
         List<String> primaryKeyFieldNames = new ArrayList<>();
-        DAOTestHelpers.separateColumnAndFieldNames(primaryKeyColumnAndFieldNames, primaryKeyColumnNames, primaryKeyFieldNames);
+        JPAEntityHelpers.separateColumnAndFieldNames(primaryKeyColumnAndFieldNames, primaryKeyColumnNames, primaryKeyFieldNames);
         return Collections.unmodifiableList(primaryKeyFieldNames);
     }
 
@@ -405,7 +410,7 @@ public abstract class JPADAO_TestBase<DAO extends JPAEntityCRUD<ET, PKT>, ET ext
     public final List<String> getEntityColumnNames() {
         List<String> entityColumnNames = new ArrayList<>();
         List<String> entityFieldNames = new ArrayList<>();
-        DAOTestHelpers.separateColumnAndFieldNames(entityColumnAndFieldNames, entityColumnNames, entityFieldNames);
+        JPAEntityHelpers.separateColumnAndFieldNames(entityColumnAndFieldNames, entityColumnNames, entityFieldNames);
         return Collections.unmodifiableList(entityColumnNames);
     }
 
@@ -415,7 +420,7 @@ public abstract class JPADAO_TestBase<DAO extends JPAEntityCRUD<ET, PKT>, ET ext
     public final List<String> getEntityFieldNames() {
         List<String> entityColumnNames = new ArrayList<>();
         List<String> entityFieldNames = new ArrayList<>();
-        DAOTestHelpers.separateColumnAndFieldNames(entityColumnAndFieldNames, entityColumnNames, entityFieldNames);
+        JPAEntityHelpers.separateColumnAndFieldNames(entityColumnAndFieldNames, entityColumnNames, entityFieldNames);
         return Collections.unmodifiableList(entityFieldNames);
     }
 
@@ -491,7 +496,7 @@ public abstract class JPADAO_TestBase<DAO extends JPAEntityCRUD<ET, PKT>, ET ext
                                       Function<Integer, PKT2> primaryKeyGenerator) {
         setupEntitiesFromPrimaryKeys(
                 numberOfRecords,
-                DAOTestHelpers.getConstructorForEntityOrThrowRuntimeException(entityClass, primaryKeyClass),
+                JPAEntityHelpers.getConstructorForEntityOrThrowRuntimeException(entityClass, primaryKeyClass),
                 primaryKeyGenerator);
     }
 
@@ -503,7 +508,7 @@ public abstract class JPADAO_TestBase<DAO extends JPAEntityCRUD<ET, PKT>, ET ext
                                                    Function<Integer, PKT> primaryKeyGenerator) {
         setupEntitiesFromPrimaryKeys(
                 numberOfRecords,
-                DAOTestHelpers.getConstructorForEntityOrThrowRuntimeException(entityClass, entityPrimaryKeyClass),
+                JPAEntityHelpers.getConstructorForEntityOrThrowRuntimeException(entityClass, entityPrimaryKeyClass),
                 primaryKeyGenerator,
                 this::foreignKeysUpdater);
     }
@@ -515,9 +520,9 @@ public abstract class JPADAO_TestBase<DAO extends JPAEntityCRUD<ET, PKT>, ET ext
      */
     public final List<ET> generateEntitiesFromPrimaryKeys(int numberOfRecords,
                                                           Function<Integer, PKT> primaryKeyGenerator) {
-        return DAOTestHelpers.generateEntitiesFromPrimaryKeys(
+        return JPAEntityHelpers.generateEntitiesFromPrimaryKeys(
                 numberOfRecords,
-                DAOTestHelpers.getConstructorForEntityOrThrowRuntimeException(entityClass, entityPrimaryKeyClass),
+                JPAEntityHelpers.getConstructorForEntityOrThrowRuntimeException(entityClass, entityPrimaryKeyClass),
                 primaryKeyGenerator);
     }
 
@@ -536,7 +541,7 @@ public abstract class JPADAO_TestBase<DAO extends JPAEntityCRUD<ET, PKT>, ET ext
         setupEntities(numberOfTestRecords, (idx) -> {
             try {
                 T2 rv = entityConstructor.newInstance(primaryKeyGenerator.apply(idx));
-                DAOTestHelpers.populateBaseFields(idx, rv);
+                JPAFieldPopulationHelpers.populateBaseFields(idx, rv);
                 if (foreignKeysUpdater != null) foreignKeysUpdater.accept(idx, rv);
                 return rv;
             } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
@@ -596,17 +601,17 @@ public abstract class JPADAO_TestBase<DAO extends JPAEntityCRUD<ET, PKT>, ET ext
                                       T2 entity) {
         List<String> primaryKeyColumnNames = new ArrayList<>();
         List<String> primaryKeyFieldNames = new ArrayList<>();
-        DAOTestHelpers.separateColumnAndFieldNames(primaryKeyColumnAndFieldNames, primaryKeyColumnNames, primaryKeyFieldNames);
+        JPAEntityHelpers.separateColumnAndFieldNames(primaryKeyColumnAndFieldNames, primaryKeyColumnNames, primaryKeyFieldNames);
 
         List<String> entityColumnNames = new ArrayList<>();
         List<String> entityFieldNames = new ArrayList<>();
-        DAOTestHelpers.separateColumnAndFieldNames(entityColumnAndFieldNames, entityColumnNames, entityFieldNames);
+        JPAEntityHelpers.separateColumnAndFieldNames(entityColumnAndFieldNames, entityColumnNames, entityFieldNames);
 
         Query query
                 = schemaName == null
                 ? entityManager.createNativeQuery
                 (
-                        DAOTestHelpers.createNativeInsertQueryStringFrom(
+                        JPANativeQueryHelpers.createNativeInsertQueryStringFrom(
                                 tableName,
                                 primaryKeyColumnNames,
                                 primaryKeyFieldNames,
@@ -615,7 +620,7 @@ public abstract class JPADAO_TestBase<DAO extends JPAEntityCRUD<ET, PKT>, ET ext
                 )
                 : entityManager.createNativeQuery
                 (
-                        DAOTestHelpers.createNativeInsertQueryStringFrom(
+                        JPANativeQueryHelpers.createNativeInsertQueryStringFrom(
                                 schemaName,
                                 tableName,
                                 primaryKeyColumnNames,
@@ -624,12 +629,12 @@ public abstract class JPADAO_TestBase<DAO extends JPAEntityCRUD<ET, PKT>, ET ext
                                 entityFieldNames)
                 );
 
-        DAOTestHelpers.setInsertQueryColumnValues(
+        JPANativeQueryHelpers.setInsertQueryColumnValues(
                 query,
                 entity.getPk(),
                 0,
                 primaryKeyFieldNames);
-        DAOTestHelpers.setInsertQueryColumnValues(
+        JPANativeQueryHelpers.setInsertQueryColumnValues(
                 query,
                 entity,
                 primaryKeyColumnNames.size(),
@@ -651,8 +656,8 @@ public abstract class JPADAO_TestBase<DAO extends JPAEntityCRUD<ET, PKT>, ET ext
     public final Query createNativeDeleteQueryFrom(String schemaName, String tableName) {
         Query query = entityManager.createNativeQuery(
                 schemaName == null
-                        ? DAOTestHelpers.createNativeDeleteQueryStringFrom(tableName)
-                        : DAOTestHelpers.createNativeDeleteQueryStringFrom(schemaName, tableName)
+                        ? JPANativeQueryHelpers.createNativeDeleteQueryStringFrom(tableName)
+                        : JPANativeQueryHelpers.createNativeDeleteQueryStringFrom(schemaName, tableName)
         );
         return query;
     }
@@ -660,8 +665,11 @@ public abstract class JPADAO_TestBase<DAO extends JPAEntityCRUD<ET, PKT>, ET ext
     /**
      * @param actual
      * @param expected
+     * @param validateChildCollections
      */
-    public final void validateExpectedAndActualEntitiesAreAllEqual(List<ET> actual, List<ET> expected) {
+    public final void validateExpectedAndActualEntitiesAreAllEqual(List<ET> actual,
+                                                                   List<ET> expected,
+                                                                   boolean validateChildCollections) {
         List<String> errors = new ArrayList<>();
         for (int i = 0; i < expected.size(); i++) {
             assertEquals(
@@ -670,7 +678,16 @@ public abstract class JPADAO_TestBase<DAO extends JPAEntityCRUD<ET, PKT>, ET ext
                     "Primary keys are NOT equal"
             );
             assertTrue(
-                    DAOTestHelpers.fieldsAreEqual(
+                    validateChildCollections
+                            ? EqualityHelpers.fieldsAreEqual(
+                            getEntityFieldNames(),
+                            readOnlyChildCollectionFieldNames,
+                            readOnlyChildCollectionTypeClasses,
+                            readOnlyChildEntityTypeClasses,
+                            expected.get(i),
+                            actual.get(i),
+                            errors)
+                            : EqualityHelpers.fieldsAreEqual(
                             getEntityFieldNames(),
                             expected.get(i),
                             actual.get(i),
