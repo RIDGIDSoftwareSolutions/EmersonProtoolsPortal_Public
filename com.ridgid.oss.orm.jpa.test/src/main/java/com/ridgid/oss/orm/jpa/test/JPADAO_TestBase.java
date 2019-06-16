@@ -21,7 +21,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import static java.util.stream.Collectors.joining;
@@ -34,7 +33,7 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 @ExtendWith(SpringExtension.class)
 @DataJpaTest
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "JavaDoc", "SpellCheckingInspection"})
 public abstract class JPADAO_TestBase<DAO extends JPAEntityCRUD<ET, PKT>, ET extends PrimaryKeyedEntity<PKT>, PKT extends Comparable<PKT>> {
 
     private final Map<Class<?>, List<PrimaryKeyedEntity<?>>> TEST_DATA_MAP = new ConcurrentHashMap<>();
@@ -52,11 +51,14 @@ public abstract class JPADAO_TestBase<DAO extends JPAEntityCRUD<ET, PKT>, ET ext
     private final List<String> childCollectionFieldNames = new ArrayList<>();
     private final List<Class<? extends Collection<? extends PrimaryKeyedEntity<? extends Comparable<?>>>>> childCollectionTypeClasses = new ArrayList<>();
     private final List<Class<? extends PrimaryKeyedEntity<? extends Comparable<?>>>> childEntityTypeClasses = new ArrayList<>();
-    private final List<BiFunction<Integer, ET, ? extends Collection<? extends PrimaryKeyedEntity<? extends Comparable<?>>>>> childCollectionProviders = new ArrayList<>();
+    private final List<BiConsumer<Integer, ET>> childCollectionPopulators = new ArrayList<>();
+    private final List<BiConsumer<Integer, ET>> childCollectionMutators = new ArrayList<>();
+
     private final List<String> readOnlyChildCollectionFieldNames = Collections.unmodifiableList(childCollectionFieldNames);
     private final List<Class<? extends Collection<?>>> readOnlyChildCollectionTypeClasses = Collections.unmodifiableList(childCollectionTypeClasses);
     private final List<Class<?>> readOnlyChildEntityTypeClasses = Collections.unmodifiableList(childEntityTypeClasses);
-    private final List<BiFunction<Integer, ET, ? extends Collection<? extends PrimaryKeyedEntity<? extends Comparable<?>>>>> readOnlyChildCollectionProviders = Collections.unmodifiableList(childCollectionProviders);
+    private final List<BiConsumer<Integer, ET>> readOnlyChildCollectionPopulators = Collections.unmodifiableList(childCollectionPopulators);
+    private final List<BiConsumer<Integer, ET>> readOnlyChildCollectionMutators = Collections.unmodifiableList(childCollectionMutators);
 
     @Autowired
     private EntityManager entityManager;
@@ -81,7 +83,7 @@ public abstract class JPADAO_TestBase<DAO extends JPAEntityCRUD<ET, PKT>, ET ext
                 entityClass,
                 entityPrimaryKeyClass,
                 dao,
-                (String) null,
+                null,
                 tableName,
                 primaryKeyColumnAndFieldNames,
                 entityColumnAndFieldNames,
@@ -110,12 +112,13 @@ public abstract class JPADAO_TestBase<DAO extends JPAEntityCRUD<ET, PKT>, ET ext
                 entityClass,
                 entityPrimaryKeyClass,
                 dao,
-                (String) null,
+                null,
                 tableName,
                 primaryKeyColumnAndFieldNames,
                 entityColumnAndFieldNames,
                 foreignKeyFieldNames,
                 numberOfTestRecords);
+        //noinspection ConstantConditions
         if (foreignKeyFieldNames == null || foreignKeyFieldNames.size() == 0)
             throw new IllegalArgumentException("Foreign Key Field Names must not be null or empty");
     }
@@ -138,6 +141,7 @@ public abstract class JPADAO_TestBase<DAO extends JPAEntityCRUD<ET, PKT>, ET ext
                               List<String> primaryKeyColumnAndFieldNames,
                               List<String> entityColumnAndFieldNames,
                               int numberOfTestRecords) {
+        //noinspection unchecked
         this(entityClass,
                 entityPrimaryKeyClass,
                 dao,
@@ -176,7 +180,7 @@ public abstract class JPADAO_TestBase<DAO extends JPAEntityCRUD<ET, PKT>, ET ext
         if (tableName == null || tableName.length() < 1) throw new IllegalArgumentException("tableName required");
         if (primaryKeyColumnAndFieldNames.size() % 2 != 0)
             throw new IllegalArgumentException("primaryKeyColumnAndFieldNames must be an even number - 1 column name per 1 field name, alternating column name followed by field name");
-        if (primaryKeyColumnAndFieldNames.size() % 2 != 0)
+        if (entityColumnAndFieldNames.size() % 2 != 0)
             throw new IllegalArgumentException("entityColumnAndFieldNames must be an even number - 1 column name per 1 field name, alternating column name followed by field name");
         this.entityClass = entityClass;
         this.entityPrimaryKeyClass = entityPrimaryKeyClass;
@@ -197,15 +201,18 @@ public abstract class JPADAO_TestBase<DAO extends JPAEntityCRUD<ET, PKT>, ET ext
      * @param <CETC>
      * @param <CETCPK>
      */
-    protected <CCTC extends Collection<CETC>, CETC extends PrimaryKeyedEntity<CETCPK>, CETCPK extends Comparable<CETCPK>>
+    @SuppressWarnings("SpellCheckingInspection")
+    protected final <CCTC extends Collection<CETC>, CETC extends PrimaryKeyedEntity<CETCPK>, CETCPK extends Comparable<CETCPK>>
     void addChildCollectionMetaData(String collectionFieldName,
                                     Class<CCTC> childCollectionTypeClass,
                                     Class<CETC> childEntityTypeClass,
-                                    BiFunction<Integer, ET, CCTC> childCollectionProvider) {
+                                    BiConsumer<Integer, ET> childCollectionPopulator,
+                                    BiConsumer<Integer, ET> childCollectionMutator) {
         childCollectionFieldNames.add(collectionFieldName);
         childCollectionTypeClasses.add(childCollectionTypeClass);
         childEntityTypeClasses.add(childEntityTypeClass);
-        childCollectionProviders.add(childCollectionProvider);
+        childCollectionPopulators.add(childCollectionPopulator);
+        childCollectionMutators.add(childCollectionPopulator);
     }
 
     @BeforeEach
@@ -325,7 +332,6 @@ public abstract class JPADAO_TestBase<DAO extends JPAEntityCRUD<ET, PKT>, ET ext
 
 
     /**
-     *
      * @return
      */
     public List<String> getChildCollectionFieldNames() {
@@ -351,9 +357,17 @@ public abstract class JPADAO_TestBase<DAO extends JPAEntityCRUD<ET, PKT>, ET ext
     /**
      * @return
      */
-    public List<BiFunction<Integer, ET, ? extends Collection<? extends PrimaryKeyedEntity<? extends Comparable<?>>>>>
-    getChildCollectionProviders() {
-        return readOnlyChildCollectionProviders;
+    public List<BiConsumer<Integer, ET>>
+    getChildCollectionPopulators() {
+        return readOnlyChildCollectionPopulators;
+    }
+
+    /**
+     * @return
+     */
+    public List<BiConsumer<Integer, ET>>
+    getChildCollectionMutators() {
+        return readOnlyChildCollectionMutators;
     }
 
     /**
@@ -645,7 +659,7 @@ public abstract class JPADAO_TestBase<DAO extends JPAEntityCRUD<ET, PKT>, ET ext
 
     public final <T2 extends PrimaryKeyedEntity<PKT2>, PKT2 extends Comparable<PKT2>>
     Query createNativeDeleteQueryFrom(String tableName) {
-        return createNativeDeleteQueryFrom(tableName);
+        return createNativeDeleteQueryFrom(null, tableName);
     }
 
     /**
@@ -654,12 +668,12 @@ public abstract class JPADAO_TestBase<DAO extends JPAEntityCRUD<ET, PKT>, ET ext
      * @return
      */
     public final Query createNativeDeleteQueryFrom(String schemaName, String tableName) {
-        Query query = entityManager.createNativeQuery(
-                schemaName == null
-                        ? JPANativeQueryHelpers.createNativeDeleteQueryStringFrom(tableName)
-                        : JPANativeQueryHelpers.createNativeDeleteQueryStringFrom(schemaName, tableName)
-        );
-        return query;
+        return entityManager.createNativeQuery
+                (
+                        schemaName == null
+                                ? JPANativeQueryHelpers.createNativeDeleteQueryStringFrom(tableName)
+                                : JPANativeQueryHelpers.createNativeDeleteQueryStringFrom(schemaName, tableName)
+                );
     }
 
     /**
@@ -679,19 +693,23 @@ public abstract class JPADAO_TestBase<DAO extends JPAEntityCRUD<ET, PKT>, ET ext
             );
             assertTrue(
                     validateChildCollections
-                            ? EqualityHelpers.fieldsAreEqual(
-                            getEntityFieldNames(),
-                            readOnlyChildCollectionFieldNames,
-                            readOnlyChildCollectionTypeClasses,
-                            readOnlyChildEntityTypeClasses,
-                            expected.get(i),
-                            actual.get(i),
-                            errors)
-                            : EqualityHelpers.fieldsAreEqual(
-                            getEntityFieldNames(),
-                            expected.get(i),
-                            actual.get(i),
-                            errors),
+                            ? EqualityHelpers.fieldsAreEqual
+                            (
+                                    getEntityFieldNames(),
+                                    readOnlyChildCollectionFieldNames,
+                                    readOnlyChildCollectionTypeClasses,
+                                    readOnlyChildEntityTypeClasses,
+                                    expected.get(i),
+                                    actual.get(i),
+                                    errors
+                            )
+                            : EqualityHelpers.fieldsAreEqual
+                            (
+                                    getEntityFieldNames(),
+                                    expected.get(i),
+                                    actual.get(i),
+                                    errors
+                            ),
                     () -> "All fields are not equal:\n" + errors.stream().collect(joining(",\n\t", "\t", "")));
         }
     }

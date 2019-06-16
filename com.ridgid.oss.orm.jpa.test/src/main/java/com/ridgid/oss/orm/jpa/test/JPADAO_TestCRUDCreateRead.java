@@ -13,6 +13,7 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@SuppressWarnings("JavaDoc")
 @ExtendWith(SpringExtension.class)
 @DataJpaTest
 public abstract class JPADAO_TestCRUDCreateRead<DAO extends JPAEntityCRUDCreateRead<ET, PKT>, ET extends PrimaryKeyedEntity<PKT>, PKT extends Comparable<PKT>>
@@ -142,7 +143,7 @@ public abstract class JPADAO_TestCRUDCreateRead<DAO extends JPAEntityCRUDCreateR
         addRecordsOneAtATimeThroughAddMethodAndThenReadBackAndVerify(true);
     }
 
-    private void addRecordsOneAtATimeThroughAddMethodAndThenReadBackAndVerify(boolean setupChildCollections) {
+    private void addRecordsOneAtATimeThroughAddMethodAndThenReadBackAndVerify(boolean validateChildCollections) {
         createNativeDeleteQueryFrom
                 (
                         getSchemaName(),
@@ -150,20 +151,20 @@ public abstract class JPADAO_TestCRUDCreateRead<DAO extends JPAEntityCRUDCreateR
                 )
                 .executeUpdate();
         assertEquals(0, getDao().findAll(0, 10).size(), "Should be 0 records found");
+        int i = 0;
         for (ET rec : generateTestEntities()) {
-            if (setupChildCollections) setupChildCollections(rec);
+            if (validateChildCollections) {
+                deterministicallyPopulateChildCollections(i, rec);
+                i++;
+            }
             storeSetupRecord(rec);
             assertDoesNotThrow(() -> getDao().add(rec));
         }
-        findAndCompareAllWithoutSetup(setupChildCollections);
+        findAndCompareAllWithoutSetup(validateChildCollections);
     }
 
-
-    private void setupChildCollections(ET rec) {
-        for (int i = 0; i < getChildCollectionFieldNames().size(); i++) {
-//            JPAEntityHelpers.setField( getChildCollectionFieldNames().get(i), )
-//            Collection<? extends PrimaryKeyedEntity<? extends Comparable<?>>> items = getChildCollectionProviders().get(i).apply(i, rec);
-        }
+    private void deterministicallyPopulateChildCollections(int idx, ET rec) {
+        getChildCollectionPopulators().forEach(p -> p.accept(idx, rec));
     }
 
 }

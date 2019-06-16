@@ -58,7 +58,8 @@ public final class JPAFieldModificationHelpers {
                         obj,
                         field,
                         JPAFieldReflectionHelpers::shouldExcludeBecauseIsSpecializedEntityField,
-                        JPAFieldReflectionHelpers::getTemporalTypeForAmbiguousTemporalField);
+                        JPAFieldReflectionHelpers::getTemporalTypeForAmbiguousTemporalField
+                );
     }
 
 

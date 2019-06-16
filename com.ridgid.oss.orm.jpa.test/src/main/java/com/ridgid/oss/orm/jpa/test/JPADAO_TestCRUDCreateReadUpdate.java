@@ -11,6 +11,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.util.List;
 import java.util.Set;
 
+@SuppressWarnings("JavaDoc")
 @ExtendWith(SpringExtension.class)
 @DataJpaTest
 public abstract class JPADAO_TestCRUDCreateReadUpdate<DAO extends JPAEntityCRUDCreateReadUpdate<ET, PKT>, ET extends PrimaryKeyedEntity<PKT>, PKT extends Comparable<PKT>>
@@ -150,5 +151,28 @@ public abstract class JPADAO_TestCRUDCreateReadUpdate<DAO extends JPAEntityCRUDC
         getEntityManager().flush();
         getEntityManager().getEntityManagerFactory().getCache().evictAll();
         findAndCompareAllWithoutSetup(false);
+    }
+
+    @Test
+    void when_update_is_called_on_all_existing_records_to_modify_collections_and_then_read_back_the_collections_reflect_the_changes() {
+        setupTestEntities();
+        int i = 0;
+        for (ET rec : getAllEntitiesFromTestSet(getEntityClass())) {
+            deterministicallyMutateChildCollections(i, rec);
+            i++;
+        }
+        i = 0;
+        for (ET rec : getDao().findAll(0, Integer.MAX_VALUE)) {
+            deterministicallyMutateChildCollections(i, rec);
+            i++;
+            getDao().update(rec);
+        }
+        getEntityManager().flush();
+        getEntityManager().getEntityManagerFactory().getCache().evictAll();
+        findAndCompareAllWithoutSetup(true);
+    }
+
+    private void deterministicallyMutateChildCollections(int idx, ET rec) {
+        getChildCollectionMutators().forEach(m -> m.accept(idx, rec));
     }
 }

@@ -15,6 +15,7 @@ import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@SuppressWarnings("JavaDoc")
 @ExtendWith(SpringExtension.class)
 @DataJpaTest
 public abstract class JPADAO_TestCRUDRead<DAO extends JPAEntityCRUDRead<ET, PKT>, ET extends PrimaryKeyedEntity<PKT>, PKT extends Comparable<PKT>>
@@ -200,6 +201,7 @@ public abstract class JPADAO_TestCRUDRead<DAO extends JPAEntityCRUDRead<ET, PKT>
     /**
      *
      */
+    @SuppressWarnings("unused")
     protected final void findAndCompareAllWithoutSetup() {
         findAndCompareAllWithoutSetup(false);
     }
