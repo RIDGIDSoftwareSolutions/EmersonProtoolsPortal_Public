@@ -1,6 +1,7 @@
 package com.ridgid.oss.orm.jpa.helper;
 
 import com.ridgid.oss.common.helper.TemporalType;
+import com.ridgid.oss.orm.CreateModifyTracking;
 
 import javax.persistence.*;
 import java.lang.reflect.Field;
@@ -77,8 +78,14 @@ public final class JPAFieldReflectionHelpers {
      * @return
      */
     public static boolean shouldPopulateCompositeField(Field field, Class<?> fieldType) {
-        return field.isAnnotationPresent(Embedded.class)
-                || fieldType.isAnnotationPresent(Embeddable.class);
+        return
+                (
+                        field.isAnnotationPresent(Embedded.class)
+                                ||
+                                fieldType.isAnnotationPresent(Embeddable.class)
+                )
+                        &&
+                        !CreateModifyTracking.class.isAssignableFrom(fieldType);
     }
 
 }
