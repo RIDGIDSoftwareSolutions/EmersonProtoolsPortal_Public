@@ -3,6 +3,7 @@ package com.ridgid.oss.common.helper;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
@@ -164,7 +165,9 @@ public final class FieldPopulationHelpers {
                                                              Function<Field, TemporalType> ambiguousTemporalTypeMapper,
                                                              Function<Field, Integer> lengthOrScaleMapper) {
         if (!field.isAccessible()) field.setAccessible(true);
-        if (fieldExclusionPredicate.test(field)) return false;
+        if (Modifier.isFinal(field.getModifiers())
+                || Modifier.isStatic(field.getModifiers())
+                || fieldExclusionPredicate.test(field)) return false;
         Class<?> ft = field.getType();
         if (ft.isEnum())
             deterministicallyPopulateEnumField(obj, field, ft, idx, fieldIdx);

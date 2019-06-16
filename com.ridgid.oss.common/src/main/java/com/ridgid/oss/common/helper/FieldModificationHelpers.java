@@ -1,6 +1,7 @@
 package com.ridgid.oss.common.helper;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.MalformedURLException;
@@ -166,7 +167,9 @@ public final class FieldModificationHelpers {
                                                     Function<Field, TemporalType> ambiguousTemporalTypeMappper) {
         Class<?> ft = field.getType();
         if (!field.isAccessible()) field.setAccessible(true);
-        if (fieldExclusionPredicate.test(field)) return;
+        if (Modifier.isFinal(field.getModifiers())
+                || Modifier.isStatic(field.getModifiers())
+                || fieldExclusionPredicate.test(field)) return;
         if (ft.isEnum())
             deterministicallyModifyEnumField(obj, field, (Class<? extends Enum>) ft);
             // Integral Numeric Primitive & Primitive Wrapper Types
