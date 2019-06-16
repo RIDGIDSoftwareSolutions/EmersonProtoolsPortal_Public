@@ -11,11 +11,13 @@ import com.ridgid.oss.orm.PrimaryKeyedEntity;
  * @param <ET>  Entity Type of the Entity that the DAO provides a CREATE (add) CRUD method for
  * @param <PKT> Type of the Primary Key of the Entity Type ET
  */
+@SuppressWarnings("WeakerAccess")
 public class JPAEntityCRUDDelete<ET extends PrimaryKeyedEntity<PKT>, PKT extends Comparable<PKT>>
         extends JPAEntityCRUD<ET, PKT>
         implements EntityCRUDDelete<ET, PKT> {
 
     private final Class<ET> classType;
+    @SuppressWarnings({"FieldCanBeLocal", "unused"})
     private final Class<PKT> pkType;
 
     protected JPAEntityCRUDDelete(Class<ET> classType, Class<PKT> pkType) {

@@ -13,6 +13,7 @@ import javax.persistence.EntityManager;
  * @param <ET>  entity type of the entity that the DAO provides persistence methods for
  * @param <PKT> primary key type of the entity type that the DAO provides persistence methods for
  */
+@SuppressWarnings("WeakerAccess")
 public abstract class JPAEntityCRUDCreateRead<ET extends PrimaryKeyedEntity<PKT>, PKT extends Comparable<PKT>>
         extends JPAEntityCRUDRead<ET, PKT>
         implements EntityCRUDCreateRead<ET, PKT> {

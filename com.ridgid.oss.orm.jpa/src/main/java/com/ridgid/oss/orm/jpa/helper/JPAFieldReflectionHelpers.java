@@ -7,6 +7,7 @@ import java.lang.reflect.Field;
 
 import static com.ridgid.oss.common.helper.TemporalType.*;
 
+@SuppressWarnings({"WeakerAccess", "unused", "JavaDoc"})
 public final class JPAFieldReflectionHelpers {
 
     private JPAFieldReflectionHelpers() {

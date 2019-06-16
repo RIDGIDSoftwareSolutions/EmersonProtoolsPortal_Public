@@ -13,6 +13,7 @@ import static java.util.stream.Collectors.toList;
 /**
  *
  */
+@SuppressWarnings({"WeakerAccess", "unused", "JavaDoc"})
 public final class JPAEntityHelpers {
 
     private JPAEntityHelpers() {

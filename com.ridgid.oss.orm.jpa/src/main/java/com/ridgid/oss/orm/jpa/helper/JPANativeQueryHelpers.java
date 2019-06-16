@@ -20,7 +20,7 @@ import static com.ridgid.oss.common.helper.FieldReflectionHelpers.getFieldValueO
 /**
  *
  */
-@SuppressWarnings({"WeakerAccess", "unused"})
+@SuppressWarnings({"WeakerAccess", "unused", "JavaDoc"})
 public final class JPANativeQueryHelpers {
 
     private JPANativeQueryHelpers() {

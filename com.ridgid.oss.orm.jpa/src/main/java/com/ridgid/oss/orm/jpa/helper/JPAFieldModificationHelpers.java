@@ -7,7 +7,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-
+@SuppressWarnings({"WeakerAccess", "unused", "JavaDoc"})
 public final class JPAFieldModificationHelpers {
 
     private JPAFieldModificationHelpers() {

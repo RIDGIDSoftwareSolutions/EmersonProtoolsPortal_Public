@@ -4,6 +4,7 @@ import com.ridgid.oss.common.helper.FieldPopulationHelpers;
 
 import java.lang.reflect.Field;
 
+@SuppressWarnings({"WeakerAccess", "unused", "JavaDoc"})
 public final class JPAFieldPopulationHelpers {
 
     private JPAFieldPopulationHelpers() {
