@@ -12,6 +12,7 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@SuppressWarnings("unused")
 @ExtendWith(SpringExtension.class)
 @DataJpaTest
 public abstract class JPADAO_TestCRUDCreateReadUpdateDelete<DAO extends JPAEntityCRUDCreateReadUpdateDelete<ET, PKT>, ET extends PrimaryKeyedEntity<PKT>, PKT extends Comparable<PKT>>
