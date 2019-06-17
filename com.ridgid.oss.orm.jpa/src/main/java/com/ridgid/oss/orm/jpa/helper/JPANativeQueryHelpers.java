@@ -9,6 +9,7 @@ import javax.persistence.Query;
 import javax.persistence.TemporalType;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -292,10 +293,10 @@ public final class JPANativeQueryHelpers {
                     (
                             Arrays.asList
                                     (
-                                            o -> ((CreateModifyTracking) o).getCreated(),
-                                            o -> ((CreateModifyTracking) o).getCreatedBy(),
-                                            o -> ((CreateModifyTracking) o).getModified(),
-                                            o -> ((CreateModifyTracking) o).getModifiedBy()
+                                            o -> LocalDate.now(),
+                                            o -> "*TEST*",
+                                            o -> LocalDate.now(),
+                                            o -> "*TEST*"
                                     )
                     );
         }
