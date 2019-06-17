@@ -621,6 +621,10 @@ public abstract class JPADAO_TestBase<DAO extends JPAEntityCRUD<ET, PKT>, ET ext
         List<String> entityFieldNames = new ArrayList<>();
         JPAEntityHelpers.separateColumnAndFieldNames(entityColumnAndFieldNames, entityColumnNames, entityFieldNames);
 
+        List<String> additionalColumnNames = new ArrayList<>();
+        List<Function<Object, Object>> additonalColumnGetters = new ArrayList<>();
+        JPANativeQueryHelpers.determineEmbeddedAdditionalRequiredFields(entity.getClass(), additionalColumnNames, additonalColumnGetters);
+
         Query query
                 = schemaName == null
                 ? entityManager.createNativeQuery
@@ -630,7 +634,8 @@ public abstract class JPADAO_TestBase<DAO extends JPAEntityCRUD<ET, PKT>, ET ext
                                 primaryKeyColumnNames,
                                 primaryKeyFieldNames,
                                 entityColumnNames,
-                                entityFieldNames)
+                                entityFieldNames,
+                                additionalColumnNames)
                 )
                 : entityManager.createNativeQuery
                 (
@@ -640,7 +645,8 @@ public abstract class JPADAO_TestBase<DAO extends JPAEntityCRUD<ET, PKT>, ET ext
                                 primaryKeyColumnNames,
                                 primaryKeyFieldNames,
                                 entityColumnNames,
-                                entityFieldNames)
+                                entityFieldNames,
+                                additionalColumnNames)
                 );
 
         JPANativeQueryHelpers.setInsertQueryColumnValues(
@@ -653,6 +659,12 @@ public abstract class JPADAO_TestBase<DAO extends JPAEntityCRUD<ET, PKT>, ET ext
                 entity,
                 primaryKeyColumnNames.size(),
                 entityFieldNames);
+        JPANativeQueryHelpers.setInsertQueryColumnValues(
+                query,
+                entity,
+                primaryKeyColumnAndFieldNames.size() + entityFieldNames.size(),
+                additionalColumnNames,
+                additonalColumnGetters);
 
         return query;
     }

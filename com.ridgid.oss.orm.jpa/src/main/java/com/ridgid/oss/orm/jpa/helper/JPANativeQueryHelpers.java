@@ -1,6 +1,7 @@
 package com.ridgid.oss.orm.jpa.helper;
 
 import com.ridgid.oss.common.helper.FieldReflectionHelpers;
+import com.ridgid.oss.orm.CreateModifyTracking;
 
 import javax.persistence.AttributeConverter;
 import javax.persistence.Convert;
@@ -8,10 +9,8 @@ import javax.persistence.Query;
 import javax.persistence.TemporalType;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -50,12 +49,50 @@ public final class JPANativeQueryHelpers {
                 );
     }
 
+    public static String createNativeInsertQueryStringFrom(String tableName,
+                                                           List<String> primaryKeyColumnNames,
+                                                           List<String> primaryKeyFieldNames,
+                                                           List<String> entityColumnNames,
+                                                           List<String> entityFieldNames,
+                                                           List<String> additionalColumnNames) {
+        return createNativeInsertQueryStringFrom
+                (
+                        null,
+                        tableName,
+                        primaryKeyColumnNames,
+                        primaryKeyFieldNames,
+                        entityColumnNames,
+                        entityFieldNames,
+                        additionalColumnNames
+                );
+    }
+
     public static String createNativeInsertQueryStringFrom(String schemaName,
                                                            String tableName,
                                                            List<String> primaryKeyColumnNames,
                                                            List<String> primaryKeyFieldNames,
                                                            List<String> entityColumnNames,
                                                            List<String> entityFieldNames) {
+        //noinspection unchecked
+        return createNativeInsertQueryStringFrom
+                (
+                        null,
+                        tableName,
+                        primaryKeyColumnNames,
+                        primaryKeyFieldNames,
+                        entityColumnNames,
+                        entityFieldNames,
+                        Collections.EMPTY_LIST
+                );
+    }
+
+    public static String createNativeInsertQueryStringFrom(String schemaName,
+                                                           String tableName,
+                                                           List<String> primaryKeyColumnNames,
+                                                           List<String> primaryKeyFieldNames,
+                                                           List<String> entityColumnNames,
+                                                           List<String> entityFieldNames,
+                                                           List<String> additionalColumnNames) {
         Objects.requireNonNull(tableName, "tableName must be non-null");
         if (primaryKeyColumnNames.size() != primaryKeyFieldNames.size())
             throw new RuntimeException("primary key column names and primary key field names must match in number");
@@ -63,11 +100,27 @@ public final class JPANativeQueryHelpers {
             throw new RuntimeException("entity column names and entity field names must match in number");
         String schemaPart = schemaName == null ? "" : "\"" + schemaName + "\".";
         String fieldsPart
-                = Stream.concat(primaryKeyColumnNames.stream(), entityColumnNames.stream())
+                = Stream.concat
+                (
+                        Stream.concat
+                                (
+                                        primaryKeyColumnNames.stream(),
+                                        entityColumnNames.stream()
+                                ),
+                        additionalColumnNames.stream()
+                )
                 .map(cn -> "\"" + cn + "\"")
                 .collect(Collectors.joining(","));
         String valuesPart
-                = Stream.concat(primaryKeyColumnNames.stream(), entityColumnNames.stream())
+                = Stream.concat
+                (
+                        Stream.concat
+                                (
+                                        primaryKeyColumnNames.stream(),
+                                        entityColumnNames.stream()
+                                ),
+                        additionalColumnNames.stream()
+                )
                 .map(fn -> "?")
                 .collect(Collectors.joining(","));
         return String.format
@@ -97,6 +150,15 @@ public final class JPANativeQueryHelpers {
             else
                 setBasicParameterValue(q, obj, offset, i, f);
         }
+    }
+
+    public static void setInsertQueryColumnValues(Query q,
+                                                  Object obj,
+                                                  int offset,
+                                                  List<String> additionalColumnNames,
+                                                  List<Function<Object, Object>> additionalColumnGetters) {
+        for (int i = 0; i < additionalColumnNames.size(); i++)
+            setBasicParameterValue(q, obj, offset, i, additionalColumnGetters.get(i));
     }
 
     private static void setConvertedParameterValue(Query q,
@@ -135,6 +197,25 @@ public final class JPANativeQueryHelpers {
             setDateParameterValue(q, obj, i + offset + 1, f);
         else
             q.setParameter(i + offset + 1, getFieldValueOrThrowRuntimeException(obj, f));
+    }
+
+    /**
+     * @param q
+     * @param obj
+     * @param offset
+     * @param i
+     * @param getter
+     */
+    private static void setBasicParameterValue(Query q,
+                                               Object obj,
+                                               int offset,
+                                               int i,
+                                               Function<Object, Object> getter) {
+        Object val = getter.apply(obj);
+        if (val instanceof Calendar || val instanceof Date)
+            throw new IllegalArgumentException("Embedded required fields of type Date or Calendar not supported. Used java.time package Date/Time types instead");
+        else
+            q.setParameter(i + offset + 1, val);
     }
 
     /**
@@ -187,4 +268,37 @@ public final class JPANativeQueryHelpers {
             return createNativeDeleteQueryStringFrom(tableName);
         return "delete from \"" + schemaName + "\".\"" + tableName + "\"";
     }
+
+    /**
+     * @param entityClass
+     * @param additionalColumnNames
+     * @param additionalColumnGetters
+     */
+    public static void determineEmbeddedAdditionalRequiredFields(Class<?> entityClass,
+                                                                 List<String> additionalColumnNames,
+                                                                 List<Function<Object, Object>> additionalColumnGetters) {
+        if (CreateModifyTracking.class.isAssignableFrom(entityClass)) {
+            additionalColumnNames.addAll
+                    (
+                            Arrays.asList
+                                    (
+                                            "Created",
+                                            "CreatedBy",
+                                            "Modified",
+                                            "ModifiedBy"
+                                    )
+                    );
+            additionalColumnGetters.addAll
+                    (
+                            Arrays.asList
+                                    (
+                                            o -> ((CreateModifyTracking) o).getCreated(),
+                                            o -> ((CreateModifyTracking) o).getCreatedBy(),
+                                            o -> ((CreateModifyTracking) o).getModified(),
+                                            o -> ((CreateModifyTracking) o).getModifiedBy()
+                                    )
+                    );
+        }
+    }
+
 }

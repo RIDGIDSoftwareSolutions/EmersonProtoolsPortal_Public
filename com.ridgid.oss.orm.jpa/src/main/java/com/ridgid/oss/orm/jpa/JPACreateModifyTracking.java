@@ -17,13 +17,13 @@ public class JPACreateModifyTracking
     @Column(name = "Created", updatable = false, nullable = false)
     private LocalDateTime created;
 
-    @Column(name = "CreatedBy", updatable = false, nullable = false)
+    @Column(name = "CreatedBy", length = 64, updatable = false, nullable = false)
     private String createdBy;
 
     @Column(name = "Modified", nullable = false)
     private LocalDateTime modified;
 
-    @Column(name = "ModifiedBy", nullable = false)
+    @Column(name = "ModifiedBy", length = 64, nullable = false)
     private String modifiedBy;
 
     @Override
