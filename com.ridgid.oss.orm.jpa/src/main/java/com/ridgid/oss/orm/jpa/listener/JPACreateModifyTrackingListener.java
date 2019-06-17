@@ -16,18 +16,25 @@ public class JPACreateModifyTrackingListener
     public void onCreate(Object entity) {
         if (entity instanceof CreateModifyTracking) {
             CreateModifyTracking e = (CreateModifyTracking) entity;
-            e.setCreated(LocalDateTime.now());
-            e.setCreatedBy("*AUTO*");
+            setCreatedTrackingFields(e);
+            setModifiedTrackingFields((CreateModifyTracking) entity);
         }
     }
 
     @PreUpdate
     @Override
     public void onUpdate(Object entity) {
-        if (entity instanceof CreateModifyTracking) {
-            CreateModifyTracking e = (CreateModifyTracking) entity;
-            e.setModified(LocalDateTime.now());
-            e.setModifiedBy("*AUTO*");
-        }
+        if (entity instanceof CreateModifyTracking)
+            setModifiedTrackingFields((CreateModifyTracking) entity);
+    }
+
+    private void setCreatedTrackingFields(CreateModifyTracking e) {
+        e.setCreated(LocalDateTime.now());
+        e.setCreatedBy("*AUTO*");
+    }
+
+    private void setModifiedTrackingFields(CreateModifyTracking e) {
+        e.setModified(LocalDateTime.now());
+        e.setModifiedBy("*AUTO*");
     }
 }
