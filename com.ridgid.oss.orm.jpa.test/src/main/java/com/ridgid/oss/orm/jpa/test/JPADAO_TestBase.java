@@ -662,7 +662,7 @@ public abstract class JPADAO_TestBase<DAO extends JPAEntityCRUD<ET, PKT>, ET ext
         JPANativeQueryHelpers.setInsertQueryColumnValues(
                 query,
                 entity,
-                primaryKeyColumnAndFieldNames.size() + entityFieldNames.size(),
+                primaryKeyColumnNames.size() + entityFieldNames.size(),
                 additionalColumnNames,
                 additonalColumnGetters);
 
