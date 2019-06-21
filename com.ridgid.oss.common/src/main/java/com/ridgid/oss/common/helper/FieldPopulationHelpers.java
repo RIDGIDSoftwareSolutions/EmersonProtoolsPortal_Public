@@ -23,7 +23,7 @@ import static com.ridgid.oss.common.helper.TemporalType.*;
 /**
  *
  */
-@SuppressWarnings({"unused", "WeakerAccess"})
+@SuppressWarnings({"unused", "WeakerAccess", "JavaDoc"})
 public final class FieldPopulationHelpers {
 
     private FieldPopulationHelpers() {
@@ -392,7 +392,7 @@ public final class FieldPopulationHelpers {
      */
     public static void deterministicallyPopulateBooleanField(Object obj, Field field, int idx, int fieldIdx) {
         try {
-            field.set(obj, idx + fieldIdx % 2 == 0 ? false : true);
+            field.set(obj, idx + fieldIdx % 2 != 0);
         } catch (IllegalAccessException e) {
             throwAsRuntimeExceptionUnableToSetField(obj, field, idx, fieldIdx, e);
         }
@@ -426,10 +426,10 @@ public final class FieldPopulationHelpers {
                                                             Function<Field, Integer> lengthOrScaleMapper) {
         try {
             int length = lengthOrScaleMapper.apply(field);
-            String val = "";
+            StringBuilder val = new StringBuilder();
             for (int i = 0; i < length; i++)
-                val += (char) (Character.SPACE_SEPARATOR + (idx + fieldIdx) % 95);
-            field.set(obj, val);
+                val.append((char) (Character.SPACE_SEPARATOR + (idx + fieldIdx) % 95));
+            field.set(obj, val.toString());
         } catch (IllegalAccessException e) {
             throwAsRuntimeExceptionUnableToSetField(obj, field, idx, fieldIdx, e);
         }
@@ -496,6 +496,7 @@ public final class FieldPopulationHelpers {
                                                           Function<Field, TemporalType> ambiguousTemporalTypeMapper) {
         try {
             TemporalType tt = ambiguousTemporalTypeMapper.apply(field);
+            @SuppressWarnings({"UnclearExpression", "MagicConstant"})
             Date val = tt.equals(DATE)
                     ? new Date
                     (
@@ -544,6 +545,7 @@ public final class FieldPopulationHelpers {
             TemporalType tt = ambiguousTemporalTypeMapper.apply(field);
             Calendar val = Calendar.getInstance();
             if (tt.equals(DATE))
+                //noinspection MagicConstant
                 val.set
                         (
                                 2000 + (idx * 100 + fieldIdx) % 50,
@@ -551,6 +553,7 @@ public final class FieldPopulationHelpers {
                                 (idx + fieldIdx) % 28 + 1
                         );
             else if (tt.equals(TIME))
+                //noinspection MagicConstant
                 val.set
                         (
                                 0,
@@ -561,6 +564,7 @@ public final class FieldPopulationHelpers {
                                 (idx + fieldIdx) % 60
                         );
             else
+                //noinspection MagicConstant
                 val.set
                         (
                                 2000 + (idx * 100 + fieldIdx) % 50,
@@ -911,6 +915,7 @@ public final class FieldPopulationHelpers {
     public static void deterministicallyPopulateCompositeField(Object obj, Field field, int idx, int fieldIdx) {
         try {
             Constructor<?> constructor = field.getType().getConstructor(field.getType());
+            @SuppressWarnings("JavaReflectionInvocation")
             Object embeddable = constructor.newInstance();
             deterministicallyPopulateBaseFields(idx * 100_000 + fieldIdx, embeddable);
             field.set(obj, embeddable);

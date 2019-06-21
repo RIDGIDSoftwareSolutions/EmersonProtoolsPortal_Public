@@ -2,6 +2,7 @@ package com.ridgid.oss.orm;
 
 import java.time.LocalDateTime;
 
+@SuppressWarnings("unused")
 public interface CreateModifyTracking {
     LocalDateTime getCreated();
 

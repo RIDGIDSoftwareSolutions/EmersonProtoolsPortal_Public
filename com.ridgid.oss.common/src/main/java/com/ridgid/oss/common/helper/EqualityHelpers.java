@@ -3,11 +3,15 @@ package com.ridgid.oss.common.helper;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Stream;
 
-@SuppressWarnings("WeakerAccess")
+import static java.util.stream.Collectors.toList;
+
+@SuppressWarnings({"WeakerAccess", "JavaDoc"})
 public final class EqualityHelpers {
 
     private EqualityHelpers() {
@@ -49,7 +53,7 @@ public final class EqualityHelpers {
                                           Object obj2,
                                           List<String> outErrors) {
         boolean areEqual = true;
-        for (Field field : getAllFieldsFor(obj1.getClass())) {
+        for (Field field : getAllNonStaticFieldsFor(obj1.getClass())) {
             FieldReflectionHelpers.enableFieldAccess(field);
             areEqual = areEqual
                     &&
@@ -128,8 +132,23 @@ public final class EqualityHelpers {
                 (Comparable.class.isAssignableFrom(objType) && fieldsAreEqual(obj1, obj2, outErrors));
     }
 
-    public static Iterable<? extends Field> getAllFieldsFor(Class<?> classType) {
-        return null;
+    public static Iterable<? extends Field> getAllNonStaticFieldsFor(Class<?> classType) {
+        Stream<Field> fields = Arrays.stream(classType.getDeclaredFields());
+        for (Class<?> clazz = classType.getSuperclass(); clazz != null && clazz != Object.class; clazz = clazz.getSuperclass())
+            fields = Stream.concat(fields, Arrays.stream(clazz.getDeclaredFields()));
+        return fields
+                .peek(f -> {
+                    if (!f.isAccessible()) f.setAccessible(true);
+                })
+                .filter
+                        (
+                                f -> !(Modifier.isStatic(f.getModifiers())
+                                        || Modifier.isFinal(f.getModifiers())
+                                        || Modifier.isTransient(f.getModifiers())
+                                        || Modifier.isVolatile(f.getModifiers())
+                                        || Modifier.isNative(f.getModifiers()))
+                        )
+                .collect(toList());
     }
 
     /**

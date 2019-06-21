@@ -3,6 +3,7 @@ package com.ridgid.oss.common.helper;
 /**
  *
  */
+@SuppressWarnings({"JavaDoc", "WeakerAccess"})
 public final class ArrayHelpers {
 
     private ArrayHelpers() {

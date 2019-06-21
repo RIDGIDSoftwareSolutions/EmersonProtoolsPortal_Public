@@ -13,9 +13,9 @@ public class Y1900JulianDateConverter
 
     @Override
     public LocalDate convertToEntityAttribute(Integer julianDate) {
+        if (julianDate == null || julianDate == 0) return null;
         if (julianDate < 0)
             throw new IllegalArgumentException("Julian date integer must be positive and of the form yyyddd where yyy = year - 1900 and ddd = day of year. Invalid Value: " + julianDate);
-        if (julianDate == null || julianDate == 0) return null;
         int year = 1900 + julianDate / 1000;
         int doy = julianDate % 1000;
         return LocalDate.ofYearDay(year, doy);

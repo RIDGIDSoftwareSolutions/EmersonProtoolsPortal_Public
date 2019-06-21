@@ -9,6 +9,7 @@ package com.ridgid.oss.orm;
  * as its Primary Key and the Order Line that is being attempted to add to the collection has a different
  * Customer Number and/or Order Number from the Parent, this exception could/should be thrown.
  */
+@SuppressWarnings("unused")
 public class EntityCRUDExceptionSuffixedPrimaryKeyIncompatible extends EntityCRUDException {
     public EntityCRUDExceptionSuffixedPrimaryKeyIncompatible() {
     }

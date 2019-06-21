@@ -6,5 +6,6 @@ package com.ridgid.oss.orm;
  * @param <ET>  Entity Type of Entity that the DAO is providing CRUD methods for
  * @param <PKT> Type of the Primary Key of the Entity Type
  */
+@SuppressWarnings("unused")
 public interface EntityCRUD<ET extends PrimaryKeyedEntity<PKT>, PKT extends Comparable<PKT>> {
 }

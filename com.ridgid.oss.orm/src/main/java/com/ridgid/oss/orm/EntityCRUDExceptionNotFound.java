@@ -1,5 +1,6 @@
 package com.ridgid.oss.orm;
 
+@SuppressWarnings("unused")
 public class EntityCRUDExceptionNotFound extends EntityCRUDException {
     public EntityCRUDExceptionNotFound() {
     }

@@ -3,7 +3,7 @@ package com.ridgid.oss.common.helper;
 /**
  *
  */
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "JavaDoc"})
 public final class ComparisonHelpers {
 
     private ComparisonHelpers() {

@@ -4,8 +4,9 @@ package com.ridgid.oss.orm.convert;
  * @param <TField>
  * @param <TDatabaseColumn>
  */
+@SuppressWarnings("unused")
 public interface AttributeConverter<TField, TDatabaseColumn> {
-    TDatabaseColumn convertToDatabaseColumn(TField date);
+    TDatabaseColumn convertToDatabaseColumn(TField entityValue);
 
-    TField convertToEntityAttribute(TDatabaseColumn julianDate);
+    TField convertToEntityAttribute(TDatabaseColumn dbValue);
 }

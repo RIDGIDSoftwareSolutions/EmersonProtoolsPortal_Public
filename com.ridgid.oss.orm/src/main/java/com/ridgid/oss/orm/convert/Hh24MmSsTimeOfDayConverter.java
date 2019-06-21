@@ -25,7 +25,7 @@ public class Hh24MmSsTimeOfDayConverter
             throw new IllegalArgumentException("hhmmssTimeInt hour must be between 00 and 23. Invalid Value: " + hhmmssTimeInt);
         if (minute > 59)
             throw new IllegalArgumentException("hhmmssTimeInt minute must be between 00 and 59. Invalid Value: " + hhmmssTimeInt);
-        if (hour > 60)
+        if (second > 60)
             throw new IllegalArgumentException("hhmmssTimeInt hour must be between 00 and 59 (or 60 if there is a leap second). Invalid Value: " + hhmmssTimeInt);
         return LocalTime.of(hour, minute, second);
     }

@@ -5,6 +5,7 @@ import java.lang.reflect.Field;
 /**
  *
  */
+@SuppressWarnings({"JavaDoc", "WeakerAccess"})
 public final class ExceptionHelpers {
 
     private ExceptionHelpers() {

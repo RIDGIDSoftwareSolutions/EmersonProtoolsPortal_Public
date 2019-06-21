@@ -1,5 +1,6 @@
 package com.ridgid.oss.orm;
 
+@SuppressWarnings("WeakerAccess")
 public class EntityCRUDException extends RuntimeException {
     public EntityCRUDException() {
     }

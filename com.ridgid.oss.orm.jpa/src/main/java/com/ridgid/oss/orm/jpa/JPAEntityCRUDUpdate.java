@@ -34,9 +34,11 @@ public class JPAEntityCRUDUpdate<ET extends PrimaryKeyedEntity<PKT>, PKT extends
     @Override
     public Optional<ET> optionalUpdate(ET entity) throws EntityCRUDExceptionError {
         try {
-            if (getEntityManager().find(classType, entity.getPk()) == null)
-                return Optional.empty();
-            getEntityManager().merge(entity);
+            if (!getEntityManager().contains(entity)) {
+                if (getEntityManager().find(classType, entity.getPk()) == null)
+                    return Optional.empty();
+                getEntityManager().merge(entity);
+            }
             getEntityManager().flush();
             getEntityManager().refresh(entity);
             return Optional.of(entity);
