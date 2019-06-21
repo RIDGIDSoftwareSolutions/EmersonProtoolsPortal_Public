@@ -34,7 +34,7 @@ public class IntIdPK implements Serializable, Comparable<IntIdPK> {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Integer.hashCode(id);
     }
 
     @Override

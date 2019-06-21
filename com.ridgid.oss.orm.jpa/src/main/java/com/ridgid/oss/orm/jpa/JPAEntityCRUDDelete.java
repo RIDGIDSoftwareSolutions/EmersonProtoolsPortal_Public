@@ -38,6 +38,7 @@ public class JPAEntityCRUDDelete<ET extends PrimaryKeyedEntity<PKT>, PKT extends
             ET entity = getEntityManager().find(classType, pk);
             if (entity == null) throw new EntityCRUDExceptionNotFound();
             getEntityManager().remove(entity);
+            getEntityManager().flush();
         } catch (EntityCRUDExceptionNotFound ex) {
             throw ex;
         } catch (Exception ex) {
