@@ -344,7 +344,7 @@ public final class FieldPopulationHelpers {
      */
     public static void deterministicallyPopulateFloatField(Object obj, Field field, int idx, int fieldIdx) {
         try {
-            field.set(obj, idx + (float) Integer.MAX_VALUE / fieldIdx);
+            field.set(obj, idx + (float) Integer.MAX_VALUE / (fieldIdx + 1));
         } catch (IllegalAccessException e) {
             throwAsRuntimeExceptionUnableToSetField(obj, field, idx, fieldIdx, e);
         }
@@ -358,7 +358,7 @@ public final class FieldPopulationHelpers {
      */
     public static void deterministicallyPopulateDoubleField(Object obj, Field field, int idx, int fieldIdx) {
         try {
-            field.set(obj, idx + (double) Integer.MAX_VALUE / fieldIdx);
+            field.set(obj, idx + (double) Integer.MAX_VALUE / (fieldIdx + 1));
         } catch (IllegalAccessException e) {
             throwAsRuntimeExceptionUnableToSetField(obj, field, idx, fieldIdx, e);
         }
@@ -378,7 +378,7 @@ public final class FieldPopulationHelpers {
                                                                 Function<Field, Integer> lengthOrScaleMapper) {
         try {
             int scale = lengthOrScaleMapper.apply(field);
-            field.set(obj, BigDecimal.valueOf(idx + (double) Integer.MAX_VALUE / fieldIdx).setScale(scale, RoundingMode.HALF_EVEN));
+            field.set(obj, BigDecimal.valueOf(idx + (double) Integer.MAX_VALUE / (fieldIdx + 1)).setScale(scale, RoundingMode.HALF_EVEN));
         } catch (IllegalAccessException e) {
             throwAsRuntimeExceptionUnableToSetField(obj, field, idx, fieldIdx, e);
         }
