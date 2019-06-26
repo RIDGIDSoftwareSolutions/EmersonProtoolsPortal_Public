@@ -6,46 +6,50 @@ import java.io.Serializable;
 
 @Embeddable
 @SuppressWarnings("unused")
-public class IntIdPK implements Serializable, Comparable<IntIdPK> {
-
+public class LongIdPK implements Serializable, Comparable<LongIdPK> {
     private static final long serialVersionUID = 894985165165165698L;
 
-    @Column(name = "Id", precision = 8)
-    private int id = 0;
+    @Column(name = "Id", precision = 16)
+    private long id = 0;
 
-    public IntIdPK() {
+    public LongIdPK() {
     }
 
-    public IntIdPK(int id) {
+    public LongIdPK(long id) {
         this.id = id;
     }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof IntIdPK)) return false;
-        IntIdPK that = (IntIdPK) o;
+        if (!(o instanceof LongIdPK)) return false;
+        LongIdPK that = (LongIdPK) o;
         return id == that.id;
     }
 
     @Override
     public int hashCode() {
-        return Integer.hashCode(id);
+        return Long.hashCode(id);
     }
 
     @Override
     public String toString() {
-        return "IntIdPKImpl{" +
+        return "LongIdPKImpl{" +
                 "id=" + id +
                 '}';
     }
 
     @Override
-    public int compareTo(IntIdPK o) {
-        return id - o.id;
+    public int compareTo(LongIdPK o) {
+        long cmp = id - o.id;
+        return cmp < 0
+                ? -1
+                : cmp > 0
+                ? 1
+                : 0;
     }
 }
