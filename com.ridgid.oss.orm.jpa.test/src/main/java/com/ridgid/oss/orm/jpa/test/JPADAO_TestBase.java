@@ -18,6 +18,10 @@ import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.math.BigInteger;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
@@ -651,8 +655,24 @@ public abstract class JPADAO_TestBase<DAO extends JPAEntityCRUD<ET, PKT>, ET ext
 
         JPANativeQueryHelpers.setInsertQueryColumnValues(
                 query,
-                entity.getPk(),
-                0,
+                (
+                        primaryKeyFieldNames.size() == 1
+                                &&
+                                (
+                                        Byte.class.isAssignableFrom(getEntityPrimaryKeyClass())
+                                                || Short.class.isAssignableFrom(getEntityPrimaryKeyClass())
+                                                || Integer.class.isAssignableFrom(getEntityPrimaryKeyClass())
+                                                || Long.class.isAssignableFrom(getEntityPrimaryKeyClass())
+                                                || BigInteger.class.isAssignableFrom(getEntityPrimaryKeyClass())
+                                                || String.class.isAssignableFrom(getEntityPrimaryKeyClass())
+                                                || LocalDateTime.class.isAssignableFrom(getEntityPrimaryKeyClass())
+                                                || LocalDate.class.isAssignableFrom(getEntityPrimaryKeyClass())
+                                                || LocalTime.class.isAssignableFrom(getEntityPrimaryKeyClass())
+                                )
+                )
+                        ? entity
+                        : entity.getPk(),
+                10,
                 primaryKeyFieldNames);
         JPANativeQueryHelpers.setInsertQueryColumnValues(
                 query,
