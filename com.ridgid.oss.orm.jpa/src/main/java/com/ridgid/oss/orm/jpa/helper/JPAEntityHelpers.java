@@ -52,6 +52,21 @@ public final class JPAEntityHelpers {
     }
 
     /**
+     * @param classToConstruct
+     * @param <T2>
+     * @param <PKT2>
+     * @return
+     */
+    public static <T2 extends PrimaryKeyedEntity<PKT2>, PKT2 extends Comparable<PKT2>>
+    Constructor<T2> getConstructorForEntityOrThrowRuntimeException(Class<T2> classToConstruct) {
+        try {
+            return classToConstruct.getConstructor();
+        } catch (NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
      * @param numberOfTestRecords
      * @param entityConstructor
      * @param primaryKeyGenerator
@@ -78,13 +93,32 @@ public final class JPAEntityHelpers {
         });
     }
 
+    public static <T2 extends PrimaryKeyedEntity<PKT2>, PKT2 extends Comparable<PKT2>>
+    List<T2> generateEntitiesFromPrimaryKeys(int numberOfTestRecords,
+                                             Constructor<T2> entityConstructor) {
+        return generateEntities(numberOfTestRecords, (idx) -> {
+            try {
+                T2 rv = entityConstructor.newInstance();
+                JPAFieldPopulationHelpers.populateBaseFields
+                        (
+                                idx,
+                                rv
+                        );
+                return rv;
+            } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
 
     /**
      * @param columnAndFieldNames
      * @param outColumnNames
      * @param outFieldNames
      */
-    public static void separateColumnAndFieldNames(List<String> columnAndFieldNames, List<String> outColumnNames, List<String> outFieldNames) {
+    public static void separateColumnAndFieldNames(List<String> columnAndFieldNames,
+                                                   List<String> outColumnNames,
+                                                   List<String> outFieldNames) {
         for (int i = 0; i < columnAndFieldNames.size() - 1; i += 2) {
             outColumnNames.add(columnAndFieldNames.get(i));
             outFieldNames.add(columnAndFieldNames.get(i + 1));
