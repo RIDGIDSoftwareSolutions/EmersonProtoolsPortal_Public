@@ -13,7 +13,7 @@ import java.util.Objects;
 @SuppressWarnings("unused")
 @Embeddable
 public class JPACreateModifyTracking
-        implements CreateModifyTracking {
+        implements CreateModifyTracking, Comparable<CreateModifyTracking> {
 
     @Column(name = "Created", updatable = false, nullable = false)
     private LocalDateTime created;
