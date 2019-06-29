@@ -1,8 +1,10 @@
 package com.ridgid.oss.orm.convert;
 
 /**
- * @param <TField>
- * @param <TDatabaseColumn>
+ * Interface that all Attribute Converters must implement
+ *
+ * @param <TField> type of the internal Java representation for the Field
+ * @param <TDatabaseColumn> type (Java Type) of how the field should be persisted into the database column
  */
 @SuppressWarnings("unused")
 public interface AttributeConverter<TField, TDatabaseColumn> {
