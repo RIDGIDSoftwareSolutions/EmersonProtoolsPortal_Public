@@ -39,7 +39,7 @@ package com.ridgid.oss.orm;
  * </pre>
  * <p>
  * This interface exists for purposes of having an Enum that can easily be converted to/from the database in a format
- * specific to the database through a General Enum Attribute converter. @code{com.ridgid.oss.orm.convert.EnumConverter) class
+ * specific to the database through a General Enum Attribute converter. @code{com.ridgid.oss.orm.convert.EnumConverter} class
  * provides a Generic converter implementation that works with this interface.
  *
  * @param <EnumType>     type of the Enum that is implementing this interface
