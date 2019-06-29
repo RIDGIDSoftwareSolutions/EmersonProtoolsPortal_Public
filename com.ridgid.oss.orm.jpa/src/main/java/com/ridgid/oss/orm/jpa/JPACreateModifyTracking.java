@@ -5,6 +5,7 @@ import com.ridgid.oss.orm.CreateModifyTracking;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  *
@@ -64,5 +65,42 @@ public class JPACreateModifyTracking
     @Override
     public void setModifiedBy(String modifiedBy) {
         this.modifiedBy = modifiedBy;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof JPACreateModifyTracking)) return false;
+        JPACreateModifyTracking that = (JPACreateModifyTracking) o;
+        return created.equals(that.created) &&
+                createdBy.equals(that.createdBy) &&
+                modified.equals(that.modified) &&
+                modifiedBy.equals(that.modifiedBy);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(created, createdBy, modified, modifiedBy);
+    }
+
+    @Override
+    public String toString() {
+        return "JPACreateModifyTracking{" +
+                "created=" + created +
+                ", createdBy='" + createdBy + '\'' +
+                ", modified=" + modified +
+                ", modifiedBy='" + modifiedBy + '\'' +
+                '}';
+    }
+
+    @Override
+    public int compareTo(CreateModifyTracking o) {
+        int rv = modified.compareTo(o.getModified());
+        if (rv != 0) return rv;
+        rv = created.compareTo(o.getCreated());
+        if (rv != 0) return rv;
+        rv = modifiedBy.compareTo(o.getModifiedBy());
+        if (rv != 0) return rv;
+        return createdBy.compareTo(o.getCreatedBy());
     }
 }

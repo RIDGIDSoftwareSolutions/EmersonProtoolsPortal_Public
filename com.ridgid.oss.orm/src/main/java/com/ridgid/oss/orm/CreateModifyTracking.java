@@ -3,7 +3,7 @@ package com.ridgid.oss.orm;
 import java.time.LocalDateTime;
 
 @SuppressWarnings("unused")
-public interface CreateModifyTracking {
+public interface CreateModifyTracking extends Comparable<CreateModifyTracking> {
     LocalDateTime getCreated();
 
     void setCreated(LocalDateTime created);

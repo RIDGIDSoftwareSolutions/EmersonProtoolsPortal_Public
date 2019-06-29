@@ -5,10 +5,10 @@ import com.ridgid.oss.orm.DBConvertibleEnum;
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
 
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "SpellCheckingInspection"})
 @Converter
-public class EnumConverter<ET extends DBConvertibleEnum<IET, DBCT>, IET extends Enum, DBCT>
-        extends com.ridgid.oss.orm.convert.EnumConverter<ET, IET, DBCT>
+public class EnumConverter<ET extends DBConvertibleEnum<? extends Enum, DBCT>, DBCT>
+        extends com.ridgid.oss.orm.convert.EnumConverter<ET, DBCT>
         implements AttributeConverter<ET, DBCT> {
 
     public EnumConverter(Class<ET> entityValueClass,

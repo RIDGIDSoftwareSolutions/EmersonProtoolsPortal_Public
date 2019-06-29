@@ -379,7 +379,7 @@ public final class FieldModificationHelpers {
      */
     public static void deterministicallyModifyCharacterField(Object obj, Field field) {
         try {
-            field.set(obj, ((char) field.get(obj) - Character.SPACE_SEPARATOR + 1) % 95 + Character.SPACE_SEPARATOR);
+            field.set(obj, ((char) field.get(obj) - ' ' + 1) % 95 + ' ');
         } catch (IllegalAccessException e) {
             throwAsRuntimeExceptionUnableToSetField(obj, field, e);
         }

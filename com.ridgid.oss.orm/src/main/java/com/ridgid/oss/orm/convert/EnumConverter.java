@@ -18,17 +18,16 @@ import java.lang.reflect.InvocationTargetException;
  *      {@literal @}Entity
  *      public BarEntity {
  *
- *          {@literal @}Convert(converter = Y1900JulianDateConverter.class)
+ *          {@literal @}Convert(converter = EnumConverter.class)
  *      }
  * }
  * </pre>
  *
  * @param <ET>
- * @param <IET>
  * @param <DBCT>
  */
-@SuppressWarnings("unused")
-public class EnumConverter<ET extends DBConvertibleEnum<IET, DBCT>, IET extends Enum, DBCT>
+@SuppressWarnings({"unused", "SpellCheckingInspection"})
+public class EnumConverter<ET extends DBConvertibleEnum<? extends Enum, DBCT>, DBCT>
         implements AttributeConverter<ET, DBCT> {
 
     private final Class<ET> entityValueClass;

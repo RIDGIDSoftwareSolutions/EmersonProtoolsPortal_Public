@@ -406,7 +406,7 @@ public final class FieldPopulationHelpers {
      */
     public static void deterministicallyPopulateCharacterField(Object obj, Field field, int idx, int fieldIdx) {
         try {
-            field.set(obj, (char) (Character.SPACE_SEPARATOR + (idx + fieldIdx) % 95));
+            field.set(obj, (char) (' ' + (idx + fieldIdx) % 95));
         } catch (IllegalAccessException e) {
             throwAsRuntimeExceptionUnableToSetField(obj, field, idx, fieldIdx, e);
         }
@@ -428,7 +428,7 @@ public final class FieldPopulationHelpers {
             int length = lengthOrScaleMapper.apply(field);
             StringBuilder val = new StringBuilder();
             for (int i = 0; i < length; i++)
-                val.append((char) (Character.SPACE_SEPARATOR + (idx + fieldIdx) % 95));
+                val.append((char) (' ' + (idx + fieldIdx) % 95));
             field.set(obj, val.toString());
         } catch (IllegalAccessException e) {
             throwAsRuntimeExceptionUnableToSetField(obj, field, idx, fieldIdx, e);
@@ -451,7 +451,7 @@ public final class FieldPopulationHelpers {
             int length = lengthOrScaleMapper.apply(field);
             char[] val = new char[length];
             for (int i = 0; i < length; i++)
-                val[i] = (char) (Character.SPACE_SEPARATOR + (idx + fieldIdx) % 95);
+                val[i] = (char) (' ' + (idx + fieldIdx) % 95);
             field.set(obj, val);
         } catch (IllegalAccessException e) {
             throwAsRuntimeExceptionUnableToSetField(obj, field, idx, fieldIdx, e);
