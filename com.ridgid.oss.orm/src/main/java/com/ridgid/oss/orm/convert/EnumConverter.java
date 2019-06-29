@@ -23,8 +23,8 @@ import java.lang.reflect.InvocationTargetException;
  * }
  * </pre>
  *
- * @param <ET>
- * @param <DBCT>
+ * @param <ET> Enum Type of the Enum to Convert
+ * @param <DBCT> Java Type to use when persisting the Enum value to the Database
  */
 @SuppressWarnings({"unused", "SpellCheckingInspection"})
 public class EnumConverter<ET extends DBConvertibleEnum<? extends Enum, DBCT>, DBCT>
