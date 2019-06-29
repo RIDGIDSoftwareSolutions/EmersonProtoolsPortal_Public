@@ -1,6 +1,7 @@
 package com.ridgid.oss.orm.jpa.helper;
 
 import com.ridgid.oss.common.helper.FieldReflectionHelpers;
+import com.ridgid.oss.common.helper.PrimaryKeyAutoGenerationType;
 import com.ridgid.oss.orm.CreateModifyTracking;
 
 import javax.persistence.AttributeConverter;
@@ -16,6 +17,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.ridgid.oss.common.helper.FieldReflectionHelpers.getFieldValueOrThrowRuntimeException;
+import static com.ridgid.oss.common.helper.PrimaryKeyAutoGenerationType.IDENTITY;
 
 /**
  *
@@ -35,6 +37,7 @@ public final class JPANativeQueryHelpers {
      * @return
      */
     public static String createNativeInsertQueryStringFrom(String tableName,
+                                                           PrimaryKeyAutoGenerationType primaryKeyAutoGenerationType,
                                                            List<String> primaryKeyColumnNames,
                                                            List<String> primaryKeyFieldNames,
                                                            List<String> entityColumnNames,
@@ -43,6 +46,7 @@ public final class JPANativeQueryHelpers {
                 (
                         null,
                         tableName,
+                        primaryKeyAutoGenerationType,
                         primaryKeyColumnNames,
                         primaryKeyFieldNames,
                         entityColumnNames,
@@ -51,6 +55,7 @@ public final class JPANativeQueryHelpers {
     }
 
     public static String createNativeInsertQueryStringFrom(String tableName,
+                                                           PrimaryKeyAutoGenerationType primaryKeyAutoGenerationType,
                                                            List<String> primaryKeyColumnNames,
                                                            List<String> primaryKeyFieldNames,
                                                            List<String> entityColumnNames,
@@ -60,6 +65,7 @@ public final class JPANativeQueryHelpers {
                 (
                         null,
                         tableName,
+                        primaryKeyAutoGenerationType,
                         primaryKeyColumnNames,
                         primaryKeyFieldNames,
                         entityColumnNames,
@@ -70,6 +76,7 @@ public final class JPANativeQueryHelpers {
 
     public static String createNativeInsertQueryStringFrom(String schemaName,
                                                            String tableName,
+                                                           PrimaryKeyAutoGenerationType primaryKeyAutoGenerationType,
                                                            List<String> primaryKeyColumnNames,
                                                            List<String> primaryKeyFieldNames,
                                                            List<String> entityColumnNames,
@@ -79,6 +86,7 @@ public final class JPANativeQueryHelpers {
                 (
                         null,
                         tableName,
+                        primaryKeyAutoGenerationType,
                         primaryKeyColumnNames,
                         primaryKeyFieldNames,
                         entityColumnNames,
@@ -89,6 +97,7 @@ public final class JPANativeQueryHelpers {
 
     public static String createNativeInsertQueryStringFrom(String schemaName,
                                                            String tableName,
+                                                           PrimaryKeyAutoGenerationType primaryKeyAutoGenerationType,
                                                            List<String> primaryKeyColumnNames,
                                                            List<String> primaryKeyFieldNames,
                                                            List<String> entityColumnNames,
@@ -105,7 +114,9 @@ public final class JPANativeQueryHelpers {
                 (
                         Stream.concat
                                 (
-                                        primaryKeyColumnNames.stream(),
+                                        primaryKeyAutoGenerationType.equals(IDENTITY)
+                                                ? Stream.empty()
+                                                : primaryKeyColumnNames.stream(),
                                         entityColumnNames.stream()
                                 ),
                         additionalColumnNames.stream()
@@ -117,7 +128,9 @@ public final class JPANativeQueryHelpers {
                 (
                         Stream.concat
                                 (
-                                        primaryKeyColumnNames.stream(),
+                                        primaryKeyAutoGenerationType.equals(IDENTITY)
+                                                ? Stream.empty()
+                                                : primaryKeyColumnNames.stream(),
                                         entityColumnNames.stream()
                                 ),
                         additionalColumnNames.stream()

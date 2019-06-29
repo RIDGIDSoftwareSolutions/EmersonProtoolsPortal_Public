@@ -40,6 +40,19 @@ public final class FieldReflectionHelpers {
     }
 
     /**
+     * @param entity
+     * @param field
+     * @param fieldValue
+     */
+    public static void setFieldValueOrThrowException(Object entity, Field field, Object fieldValue) {
+        try {
+            field.set(entity, fieldValue);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
      * @param field
      */
     public static void enableFieldAccess(Field field) {
@@ -82,4 +95,5 @@ public final class FieldReflectionHelpers {
             return false;
         }
     }
+
 }
