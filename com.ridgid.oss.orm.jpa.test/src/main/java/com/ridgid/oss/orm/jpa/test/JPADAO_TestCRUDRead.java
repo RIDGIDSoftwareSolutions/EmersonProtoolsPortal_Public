@@ -3,6 +3,7 @@ package com.ridgid.oss.orm.jpa.test;
 import com.ridgid.oss.common.helper.PrimaryKeyAutoGenerationType;
 import com.ridgid.oss.orm.PrimaryKeyedEntity;
 import com.ridgid.oss.orm.jpa.JPAEntityCRUDRead;
+import com.ridgid.oss.orm.jpa.helper.JPAEntityHelpers;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -180,7 +181,7 @@ public abstract class JPADAO_TestCRUDRead<DAO extends JPAEntityCRUDRead<ET, PKT>
 
         // Arrange & Set-Up Expectations
         List<ET> expected
-                = generateTestEntities();
+                = generateTestEntitiesAndFillForeignKeys();
         for (ET entity : expected) {
             Query query = createNativeInsertQueryFrom(
                     getSchemaName(),
@@ -196,6 +197,7 @@ public abstract class JPADAO_TestCRUDRead<DAO extends JPAEntityCRUDRead<ET, PKT>
         List<ET> actual
                 = getDao()
                 .findAll(0, Integer.MAX_VALUE);
+        actual.forEach(JPAEntityHelpers::unproxy);
 
         // Assert that everything is equal
         validateExpectedAndActualEntitiesAreAllEqual

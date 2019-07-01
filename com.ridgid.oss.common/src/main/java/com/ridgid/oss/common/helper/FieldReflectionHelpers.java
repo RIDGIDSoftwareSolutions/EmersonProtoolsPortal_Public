@@ -1,11 +1,17 @@
 package com.ridgid.oss.common.helper;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  *
  */
-@SuppressWarnings({"JavaDoc", "WeakerAccess"})
+@SuppressWarnings({"JavaDoc", "WeakerAccess", "unused"})
 public final class FieldReflectionHelpers {
 
     private FieldReflectionHelpers() {
@@ -24,6 +30,24 @@ public final class FieldReflectionHelpers {
         } catch (NoSuchFieldException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    /**
+     * @param obj
+     * @param fieldName
+     * @return
+     */
+    public static Map.Entry<Object, Field> determineObjectAndFieldForPathIntoObject(Object obj, String fieldName) {
+        String[] fieldNamePath = fieldName.split("\\.");
+        Object valueObj = obj;
+        fieldName = fieldNamePath[0];
+        for (int j = 1; j < fieldNamePath.length; j++) {
+            Field f = FieldReflectionHelpers.getFieldOrThrowRuntimeException(valueObj.getClass(), fieldName);
+            valueObj = FieldReflectionHelpers.getFieldValueOrThrowRuntimeException(valueObj, f);
+            fieldName = fieldNamePath[j];
+        }
+        Field f = FieldReflectionHelpers.getFieldOrThrowRuntimeException(valueObj.getClass(), fieldName);
+        return new AbstractMap.SimpleEntry<>(valueObj, f);
     }
 
     /**
@@ -93,6 +117,60 @@ public final class FieldReflectionHelpers {
             return true;
         } catch (NoSuchMethodException e) {
             return false;
+        }
+    }
+
+
+    /**
+     *
+     * @param classType
+     * @return
+     */
+    public static Iterable<? extends Field> getAllNonStaticFieldsFor(Class<?> classType) {
+        Stream<Field> fields = Arrays.stream(classType.getDeclaredFields());
+        for (Class<?> clazz = classType.getSuperclass(); clazz != null && clazz != Object.class; clazz = clazz.getSuperclass())
+            fields = Stream.concat(fields, Arrays.stream(clazz.getDeclaredFields()));
+        return fields
+                .peek(f -> {
+                    if (!f.isAccessible()) f.setAccessible(true);
+                })
+                .filter
+                        (
+                                f -> !(Modifier.isStatic(f.getModifiers())
+                                        || Modifier.isFinal(f.getModifiers())
+                                        || Modifier.isTransient(f.getModifiers())
+                                        || Modifier.isVolatile(f.getModifiers())
+                                        || Modifier.isNative(f.getModifiers()))
+                        )
+                .collect(toList());
+    }
+
+    /**
+     * Applies
+     *
+     * @param obj               object whose fields should have the designated fieldValueHandler operation applied to
+     * @param fieldValueHandler performs whatever operation is needed on the target field value (Object) and then return the Object if it needs recursed into; otherwise return null.
+     */
+    public static void applyToFieldsRecursively(Object obj,
+                                                Function<Object, Object> fieldValueHandler) {
+        Set<Object> objectsVisited = new HashSet<>();
+        applyToFieldsRecursively(objectsVisited, obj, fieldValueHandler);
+    }
+
+    private static void applyToFieldsRecursively(Set<Object> objectsVisited,
+                                                 Object obj,
+                                                 Function<Object, Object> fieldValueHandler) {
+        for (Field field : getAllNonStaticFieldsFor(obj.getClass())) {
+            Object fieldValue = getFieldValueOrThrowRuntimeException(obj, field);
+            if (fieldValue != null) {
+                Object updatedObject = fieldValueHandler.apply(fieldValue);
+                if (updatedObject != null) {
+                    setFieldValueOrThrowException(obj, field, updatedObject);
+                    if (!objectsVisited.contains(updatedObject))
+                        applyToFieldsRecursively(objectsVisited, updatedObject, fieldValueHandler);
+                }
+                objectsVisited.add(updatedObject);
+            }
         }
     }
 

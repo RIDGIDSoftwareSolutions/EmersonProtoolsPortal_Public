@@ -3,13 +3,10 @@ package com.ridgid.oss.common.helper;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Stream;
-
-import static java.util.stream.Collectors.toList;
 
 @SuppressWarnings({"WeakerAccess", "JavaDoc"})
 public final class EqualityHelpers {
@@ -29,13 +26,20 @@ public final class EqualityHelpers {
                                          List<String> outErrors) {
         boolean areEqual = true;
         for (String fieldName : entityFieldNames) {
-            Field field = FieldReflectionHelpers.getFieldOrThrowRuntimeException(obj1.getClass(), fieldName);
+
+            Map.Entry<Object, Field> objectField = FieldReflectionHelpers.determineObjectAndFieldForPathIntoObject(obj1, fieldName);
+            Object valueObj1 = objectField.getKey();
+            Field field = objectField.getValue();
+
+            objectField = FieldReflectionHelpers.determineObjectAndFieldForPathIntoObject(obj2, fieldName);
+            Object valueObj2 = objectField.getKey();
+
             areEqual = areEqual
                     &&
                     fieldIsEqual
                             (
-                                    obj1,
-                                    obj2,
+                                    valueObj1,
+                                    valueObj2,
                                     field,
                                     outErrors
                             );
@@ -53,7 +57,7 @@ public final class EqualityHelpers {
                                           Object obj2,
                                           List<String> outErrors) {
         boolean areEqual = true;
-        for (Field field : getAllNonStaticFieldsFor(obj1.getClass())) {
+        for (Field field : FieldReflectionHelpers.getAllNonStaticFieldsFor(obj1.getClass())) {
             FieldReflectionHelpers.enableFieldAccess(field);
             areEqual = areEqual
                     &&
@@ -132,24 +136,6 @@ public final class EqualityHelpers {
                 (Comparable.class.isAssignableFrom(objType) && fieldsAreEqual(obj1, obj2, outErrors));
     }
 
-    public static Iterable<? extends Field> getAllNonStaticFieldsFor(Class<?> classType) {
-        Stream<Field> fields = Arrays.stream(classType.getDeclaredFields());
-        for (Class<?> clazz = classType.getSuperclass(); clazz != null && clazz != Object.class; clazz = clazz.getSuperclass())
-            fields = Stream.concat(fields, Arrays.stream(clazz.getDeclaredFields()));
-        return fields
-                .peek(f -> {
-                    if (!f.isAccessible()) f.setAccessible(true);
-                })
-                .filter
-                        (
-                                f -> !(Modifier.isStatic(f.getModifiers())
-                                        || Modifier.isFinal(f.getModifiers())
-                                        || Modifier.isTransient(f.getModifiers())
-                                        || Modifier.isVolatile(f.getModifiers())
-                                        || Modifier.isNative(f.getModifiers()))
-                        )
-                .collect(toList());
-    }
 
     /**
      * @param entityFieldNames

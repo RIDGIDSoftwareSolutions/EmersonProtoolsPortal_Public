@@ -1,6 +1,9 @@
 package com.ridgid.oss.orm.jpa.helper;
 
+import com.ridgid.oss.common.helper.FieldReflectionHelpers;
 import com.ridgid.oss.orm.PrimaryKeyedEntity;
+import org.hibernate.Hibernate;
+import org.hibernate.proxy.HibernateProxy;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -125,4 +128,14 @@ public final class JPAEntityHelpers {
         }
     }
 
+    public static void unproxy(Object obj) {
+        FieldReflectionHelpers.applyToFieldsRecursively(obj, JPAEntityHelpers::unproxyProxiedValue);
+
+    }
+
+    private static Object unproxyProxiedValue(Object o) {
+        if (o instanceof HibernateProxy)
+            return Hibernate.unproxy(o);
+        return null;
+    }
 }

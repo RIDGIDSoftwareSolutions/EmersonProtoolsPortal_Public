@@ -158,15 +158,9 @@ public final class JPANativeQueryHelpers {
                                                   int offset,
                                                   List<String> fieldNames) {
         for (int i = 0; i < fieldNames.size(); i++) {
-            String[] fieldNamePath = fieldNames.get(i).split("\\.");
-            Object valueObj = obj;
-            String fieldName = fieldNamePath[0];
-            for (int j = 1; j < fieldNamePath.length; i++) {
-                Field f = FieldReflectionHelpers.getFieldOrThrowRuntimeException(valueObj.getClass(), fieldName);
-                obj = FieldReflectionHelpers.getFieldValueOrThrowRuntimeException(obj, f);
-                fieldName = fieldNamePath[j];
-            }
-            Field f = FieldReflectionHelpers.getFieldOrThrowRuntimeException(valueObj.getClass(), fieldName);
+            Map.Entry<Object, Field> objectField = FieldReflectionHelpers.determineObjectAndFieldForPathIntoObject(obj, fieldNames.get(i));
+            Object valueObj = objectField.getKey();
+            Field f = objectField.getValue();
             if (f.isAnnotationPresent(Convert.class))
                 setConvertedParameterValue(q, valueObj, offset, i, f);
             else
