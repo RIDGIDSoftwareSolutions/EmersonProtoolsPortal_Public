@@ -3,10 +3,7 @@ package com.ridgid.oss.common.helper;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 @SuppressWarnings({"WeakerAccess", "JavaDoc"})
 public final class EqualityHelpers {
@@ -27,22 +24,29 @@ public final class EqualityHelpers {
         boolean areEqual = true;
         for (String fieldName : entityFieldNames) {
 
-            Map.Entry<Object, Field> objectField = FieldReflectionHelpers.determineObjectAndFieldForPathIntoObject(obj1, fieldName);
-            Object valueObj1 = objectField.getKey();
-            Field field = objectField.getValue();
+            Optional<Map.Entry<Object, Field>> objectField = FieldReflectionHelpers.determineObjectAndFieldForPathIntoObject(obj1, fieldName);
+            Optional<Object> valueObj1 = objectField.map(Map.Entry::getKey);
+            Optional<Field> field = objectField.map(Map.Entry::getValue);
 
             objectField = FieldReflectionHelpers.determineObjectAndFieldForPathIntoObject(obj2, fieldName);
-            Object valueObj2 = objectField.getKey();
+            Optional<Object> valueObj2 = objectField.map(Map.Entry::getKey);
+            if (!field.isPresent()) field = objectField.map(Map.Entry::getValue);
 
             areEqual = areEqual
                     &&
-                    fieldIsEqual
-                            (
-                                    valueObj1,
-                                    valueObj2,
-                                    field,
-                                    outErrors
-                            );
+                    (!valueObj1.isPresent() && !valueObj2.isPresent())
+                    ||
+                    (
+                            field.isPresent()
+                                    &&
+                                    fieldIsEqual
+                                            (
+                                                    valueObj1.orElse(null),
+                                                    valueObj2.orElse(null),
+                                                    field.get(),
+                                                    outErrors
+                                            )
+                    );
         }
         return areEqual;
     }
@@ -83,6 +87,11 @@ public final class EqualityHelpers {
                                        Object obj2,
                                        Field field,
                                        List<String> outErrors) {
+        if ((obj1 == null && obj2 != null)
+                ||
+                (obj1 != null && obj2 == null))
+            return false;
+
         int fieldModifiers = field.getModifiers();
         Class<?> fieldType = field.getType();
         if (Modifier.isStatic(fieldModifiers)

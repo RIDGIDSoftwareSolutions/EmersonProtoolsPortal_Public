@@ -158,13 +158,15 @@ public final class JPANativeQueryHelpers {
                                                   int offset,
                                                   List<String> fieldNames) {
         for (int i = 0; i < fieldNames.size(); i++) {
-            Map.Entry<Object, Field> objectField = FieldReflectionHelpers.determineObjectAndFieldForPathIntoObject(obj, fieldNames.get(i));
-            Object valueObj = objectField.getKey();
-            Field f = objectField.getValue();
-            if (f.isAnnotationPresent(Convert.class))
-                setConvertedParameterValue(q, valueObj, offset, i, f);
+            Optional<Map.Entry<Object, Field>> objectField = FieldReflectionHelpers.determineObjectAndFieldForPathIntoObject(obj, fieldNames.get(i));
+            Optional<Object> valueObj = objectField.map(Map.Entry::getKey);
+            Optional<Field> f = objectField.map(Map.Entry::getValue);
+            if (!f.isPresent())
+                q.setParameter(offset + i + 1, null);
+            else if (f.get().isAnnotationPresent(Convert.class))
+                setConvertedParameterValue(q, valueObj.orElse(null), offset, i, f.get());
             else
-                setBasicParameterValue(q, valueObj, offset, i, f);
+                setBasicParameterValue(q, valueObj.orElse(null), offset, i, f.get());
         }
     }
 

@@ -225,6 +225,7 @@ public abstract class JPADAO_TestCRUDRead<DAO extends JPAEntityCRUDRead<ET, PKT>
      */
     protected final void findAndCompareAllWithoutSetup(boolean validateChildCollections) {
         List<ET> actual = getDao().findAll(0, Integer.MAX_VALUE).stream().sorted(comparing(ET::getPk)).collect(toList());
+        actual.forEach(JPAEntityHelpers::unproxy);
         List<ET> expected = getAllEntitiesFromTestSet(getEntityClass()).stream().sorted(comparing(ET::getPk)).collect(toList());
         validateExpectedAndActualEntitiesAreAllEqual(actual, expected, validateChildCollections);
     }

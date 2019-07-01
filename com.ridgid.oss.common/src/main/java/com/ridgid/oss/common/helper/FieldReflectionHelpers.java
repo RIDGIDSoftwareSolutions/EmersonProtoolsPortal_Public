@@ -37,7 +37,8 @@ public final class FieldReflectionHelpers {
      * @param fieldName
      * @return
      */
-    public static Map.Entry<Object, Field> determineObjectAndFieldForPathIntoObject(Object obj, String fieldName) {
+    public static Optional<Map.Entry<Object, Field>> determineObjectAndFieldForPathIntoObject(Object obj, String fieldName) {
+        if (obj == null) return Optional.empty();
         String[] fieldNamePath = fieldName.split("\\.");
         Object valueObj = obj;
         fieldName = fieldNamePath[0];
@@ -46,8 +47,9 @@ public final class FieldReflectionHelpers {
             valueObj = FieldReflectionHelpers.getFieldValueOrThrowRuntimeException(valueObj, f);
             fieldName = fieldNamePath[j];
         }
+        if (valueObj == null) return Optional.empty();
         Field f = FieldReflectionHelpers.getFieldOrThrowRuntimeException(valueObj.getClass(), fieldName);
-        return new AbstractMap.SimpleEntry<>(valueObj, f);
+        return Optional.of(new AbstractMap.SimpleEntry<>(valueObj, f));
     }
 
     /**
@@ -122,7 +124,6 @@ public final class FieldReflectionHelpers {
 
 
     /**
-     *
      * @param classType
      * @return
      */
