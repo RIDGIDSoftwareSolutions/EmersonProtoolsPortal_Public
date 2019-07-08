@@ -17,6 +17,6 @@ public abstract class ImpliedDecimalConverter implements AttributeConverter<BigD
 
     @Override
     public BigDecimal convertToEntityAttribute(Integer dbValue) {
-        return multiplier.multiply(BigDecimal.valueOf(dbValue));
+        return BigDecimal.valueOf(dbValue).divide(multiplier);
     }
 }
