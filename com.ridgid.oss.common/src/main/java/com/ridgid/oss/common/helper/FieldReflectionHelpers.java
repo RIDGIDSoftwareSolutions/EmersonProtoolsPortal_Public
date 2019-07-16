@@ -128,6 +128,14 @@ public final class FieldReflectionHelpers {
      * @return
      */
     public static Iterable<? extends Field> getAllNonStaticFieldsFor(Class<?> classType) {
+        return streamAllNonStaticFieldsFor(classType).collect(toList());
+    }
+
+    /**
+     * @param classType
+     * @return
+     */
+    public static Stream<Field> streamAllNonStaticFieldsFor(Class<?> classType) {
         Stream<Field> fields = Arrays.stream(classType.getDeclaredFields());
         for (Class<?> clazz = classType.getSuperclass(); clazz != null && clazz != Object.class; clazz = clazz.getSuperclass())
             fields = Stream.concat(fields, Arrays.stream(clazz.getDeclaredFields()));
@@ -142,8 +150,7 @@ public final class FieldReflectionHelpers {
                                         || Modifier.isTransient(f.getModifiers())
                                         || Modifier.isVolatile(f.getModifiers())
                                         || Modifier.isNative(f.getModifiers()))
-                        )
-                .collect(toList());
+                        );
     }
 
     /**

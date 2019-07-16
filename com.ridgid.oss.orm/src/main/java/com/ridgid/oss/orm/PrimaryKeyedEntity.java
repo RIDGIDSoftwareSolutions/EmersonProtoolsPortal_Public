@@ -1,5 +1,7 @@
 package com.ridgid.oss.orm;
 
+import com.ridgid.oss.common.helper.CopyableModel;
+
 import java.io.Serializable;
 
 /**
@@ -17,7 +19,7 @@ import java.io.Serializable;
  *
  * @param <PKT> type of the Primary Key of the entity
  */
-public interface PrimaryKeyedEntity<PKT extends Comparable<PKT>> extends Serializable {
+public interface PrimaryKeyedEntity<PKT extends Comparable<PKT>> extends Serializable, CopyableModel {
 
     /**
      * Gets the primary key

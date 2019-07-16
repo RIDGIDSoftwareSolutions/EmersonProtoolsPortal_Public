@@ -1,9 +1,11 @@
 package com.ridgid.oss.orm;
 
+import com.ridgid.oss.common.helper.CopyableModel;
+
 import java.time.LocalDateTime;
 
 @SuppressWarnings("unused")
-public interface CreateModifyTracking {
+public interface CreateModifyTracking extends CopyableModel {
     LocalDateTime getCreated();
 
     void setCreated(LocalDateTime created);
