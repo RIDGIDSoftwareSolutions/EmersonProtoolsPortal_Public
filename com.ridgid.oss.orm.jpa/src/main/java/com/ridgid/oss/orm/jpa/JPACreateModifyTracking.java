@@ -1,5 +1,6 @@
 package com.ridgid.oss.orm.jpa;
 
+import com.ridgid.oss.common.helper.CopyableModel;
 import com.ridgid.oss.orm.CreateModifyTracking;
 
 import javax.persistence.Column;
@@ -13,7 +14,7 @@ import java.util.Objects;
 @SuppressWarnings("unused")
 @Embeddable
 public class JPACreateModifyTracking
-        implements CreateModifyTracking, Comparable<CreateModifyTracking> {
+        implements CreateModifyTracking, Comparable<CreateModifyTracking>, CopyableModel {
 
     @Column(name = "Created", updatable = false, nullable = false)
     private LocalDateTime created;
