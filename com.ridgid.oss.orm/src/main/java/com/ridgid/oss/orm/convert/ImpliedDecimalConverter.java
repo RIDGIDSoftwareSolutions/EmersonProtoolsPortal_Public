@@ -7,7 +7,7 @@ public abstract class ImpliedDecimalConverter implements AttributeConverter<BigD
     private final BigDecimal multiplier;
 
     protected ImpliedDecimalConverter(int numberOfDecimalPlaces) {
-        this.multiplier = BigDecimal.valueOf(10 * numberOfDecimalPlaces).setScale(numberOfDecimalPlaces);
+        this.multiplier = BigDecimal.valueOf(Math.pow(10, numberOfDecimalPlaces)).setScale(numberOfDecimalPlaces);
     }
 
     @Override
