@@ -1,5 +1,7 @@
 package com.ridgid.oss.common.helper;
 
+import com.ridgid.oss.emerson.common.tuple.Pair;
+
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.function.Function;
@@ -7,6 +9,7 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 
 @SuppressWarnings({"unused", "unchecked"})
 public final class CopyHelpers {
@@ -110,6 +113,22 @@ public final class CopyHelpers {
     public static <ModelFrom extends CopyableModel, ModelTo extends CopyableModel>
     ModelTransformer<ModelFrom, ModelTo> copyTransformerFor(Class<ModelFrom> modelFromClass,
                                                             Class<ModelTo> modelToClass,
+                                                            Map<String, String> fromToFieldAliases,
+                                                            Pair<String, Function<Object, Object>>... fromTypeMappers) {
+        return copyTransformerFor
+                (
+                        modelFromClass,
+                        modelToClass,
+                        Collections.EMPTY_SET,
+                        fromToFieldAliases,
+                        Collections.EMPTY_SET,
+                        Arrays.stream(fromTypeMappers).collect(toMap(p -> p.left, p -> p.right))
+                );
+    }
+
+    public static <ModelFrom extends CopyableModel, ModelTo extends CopyableModel>
+    ModelTransformer<ModelFrom, ModelTo> copyTransformerFor(Class<ModelFrom> modelFromClass,
+                                                            Class<ModelTo> modelToClass,
                                                             Set<String> excludeFromFields,
                                                             Map<String, String> fromToFieldAliases,
                                                             Map<String, Function<Object, Object>> fromTypeMappers) {
@@ -121,6 +140,23 @@ public final class CopyHelpers {
                         fromToFieldAliases,
                         Collections.EMPTY_SET,
                         fromTypeMappers
+                );
+    }
+
+    public static <ModelFrom extends CopyableModel, ModelTo extends CopyableModel>
+    ModelTransformer<ModelFrom, ModelTo> copyTransformerFor(Class<ModelFrom> modelFromClass,
+                                                            Class<ModelTo> modelToClass,
+                                                            Set<String> excludeFromFields,
+                                                            Map<String, String> fromToFieldAliases,
+                                                            Pair<String, Function<Object, Object>>... fromTypeMappers) {
+        return copyTransformerFor
+                (
+                        modelFromClass,
+                        modelToClass,
+                        excludeFromFields,
+                        fromToFieldAliases,
+                        Collections.EMPTY_SET,
+                        Arrays.stream(fromTypeMappers).collect(toMap(p -> p.left, p -> p.right))
                 );
     }
 
@@ -140,6 +176,24 @@ public final class CopyHelpers {
                         fromTypeMappers
                 );
     }
+
+    public static <ModelFrom extends CopyableModel, ModelTo extends CopyableModel>
+    ModelTransformer<ModelFrom, ModelTo> copyTransformerFor(Class<ModelFrom> modelFromClass,
+                                                            Class<ModelTo> modelToClass,
+                                                            Map<String, String> fromToFieldAliases,
+                                                            Set<String> excludeToFields,
+                                                            Pair<String, Function<Object, Object>>... fromTypeMappers) {
+        return copyTransformerFor
+                (
+                        modelFromClass,
+                        modelToClass,
+                        Collections.EMPTY_SET,
+                        fromToFieldAliases,
+                        excludeToFields,
+                        Arrays.stream(fromTypeMappers).collect(toMap(p -> p.left, p -> p.right))
+                );
+    }
+
 
     private static <ModelFrom extends CopyableModel, ModelTo extends CopyableModel>
     ModelTransformer<ModelFrom, ModelTo> copyTransformerFor(Class<ModelFrom> modelFromClass,

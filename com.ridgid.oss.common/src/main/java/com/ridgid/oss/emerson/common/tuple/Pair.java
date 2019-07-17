@@ -64,4 +64,8 @@ public final class Pair<L, R> implements Comparable<Pair<L, R>> {
         if (rv != 0) return rv;
         return rightComparer.apply(right, o.right);
     }
+
+    public static <L, R> Pair<L, R> of(L l, R r) {
+        return new Pair<>(l, r);
+    }
 }
