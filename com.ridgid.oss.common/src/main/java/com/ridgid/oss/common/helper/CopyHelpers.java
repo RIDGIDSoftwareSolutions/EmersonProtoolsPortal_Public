@@ -1,6 +1,7 @@
 package com.ridgid.oss.common.helper;
 
 import com.ridgid.oss.emerson.common.tuple.Pair;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -235,15 +236,25 @@ public final class CopyHelpers {
 
         ModelTo transform(ModelFrom fromModel);
 
-        Stream<ModelTo> transform(ModelFrom... fromModels);
+        default Stream<ModelTo> transform(ModelFrom... fromModels) {
+            throw new NotImplementedException();
+        }
 
-        Stream<ModelTo> transform(Collection<ModelFrom> fromModels);
+        default Stream<ModelTo> transform(Collection<ModelFrom> fromModels) {
+            throw new NotImplementedException();
+        }
 
-        ModelTo transform(Supplier<ModelTo> modelToSupplier, ModelFrom fromModel);
+        default ModelTo transform(Supplier<ModelTo> modelToSupplier, ModelFrom fromModel) {
+            throw new NotImplementedException();
+        }
 
-        Stream<ModelTo> transform(Supplier<ModelTo> modelToSupplier, ModelFrom... fromModels);
+        default Stream<ModelTo> transform(Supplier<ModelTo> modelToSupplier, ModelFrom... fromModels) {
+            throw new NotImplementedException();
+        }
 
-        Stream<ModelTo> transform(Supplier<ModelTo> modelToSupplier, Collection<ModelFrom> fromModels);
+        default Stream<ModelTo> transform(Supplier<ModelTo> modelToSupplier, Collection<ModelFrom> fromModels) {
+            throw new NotImplementedException();
+        }
     }
 
     @SuppressWarnings("FieldCanBeLocal")
