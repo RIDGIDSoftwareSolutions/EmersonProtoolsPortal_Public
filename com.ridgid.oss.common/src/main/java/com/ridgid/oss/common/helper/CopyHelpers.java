@@ -2,7 +2,9 @@ package com.ridgid.oss.common.helper;
 
 import com.ridgid.oss.emerson.common.tuple.Pair;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -230,6 +232,13 @@ public final class CopyHelpers {
     }
 
     public interface ModelTransformer<ModelFrom extends CopyableModel, ModelTo extends CopyableModel> {
+
+        ModelTo transform(ModelFrom fromModel);
+
+        Stream<ModelTo> transform(ModelFrom... fromModels);
+
+        Stream<ModelTo> transform(Collection<ModelFrom> fromModels);
+
         ModelTo transform(Supplier<ModelTo> modelToSupplier, ModelFrom fromModel);
 
         Stream<ModelTo> transform(Supplier<ModelTo> modelToSupplier, ModelFrom... fromModels);
@@ -243,6 +252,7 @@ public final class CopyHelpers {
 
         private final Class<ModelFrom> modelFromClass;
         private final Class<ModelTo> modelToClass;
+        private final Supplier<ModelTo> modelToSupplier;
         private final List<FieldTransformer> fieldsMap;
 
         ModelTransformerImpl(Class<ModelFrom> modelFromClass,
@@ -250,7 +260,40 @@ public final class CopyHelpers {
                              List<FieldTransformer> fieldsMap) {
             this.modelFromClass = modelFromClass;
             this.modelToClass = modelToClass;
+            this.modelToSupplier = prepareModelToSupplier(modelToClass);
             this.fieldsMap = fieldsMap;
+        }
+
+        private Supplier<ModelTo> prepareModelToSupplier(Class<ModelTo> modelToClass) {
+            try {
+                Constructor<ModelTo> modelToConstructor = modelToClass.getConstructor();
+                return () -> {
+                    try {
+                        return modelToConstructor.newInstance();
+                    } catch (NullPointerException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
+                        throw new RuntimeException("ModelTo type does not have a valid no argument constructor", e);
+                    }
+                };
+            } catch (NoSuchMethodException e) {
+                return () -> {
+                    throw new RuntimeException("ModelTo type does not have a valid no argument constructor", e);
+                };
+            }
+        }
+
+        @Override
+        public ModelTo transform(ModelFrom fromModel) {
+            return transform(modelToSupplier, fromModel);
+        }
+
+        @Override
+        public Stream<ModelTo> transform(ModelFrom... fromModels) {
+            return transform(modelToSupplier, fromModels);
+        }
+
+        @Override
+        public Stream<ModelTo> transform(Collection<ModelFrom> fromModels) {
+            return transform(modelToSupplier, fromModels);
         }
 
         @Override
