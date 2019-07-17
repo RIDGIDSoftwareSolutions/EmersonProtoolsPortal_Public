@@ -257,8 +257,17 @@ class Pair_Test {
             assertFalse(pairDouble.getKey() == pairDouble.getValue());
             assertTrue
                     (
-                            !pairDouble.getKey().equals(pairDouble.getValue())
-                                    || pairDouble.getKey().compareTo((Pair) pairDouble.getValue()) == 0,
+                            (
+                                    (
+                                            pairDouble.getKey().equals(pairDouble.getValue())
+                                                    && pairDouble.getKey().compareTo((Pair) pairDouble.getValue()) == 0
+                                    )
+                                            ||
+                                            (
+                                                    !pairDouble.getKey().equals(pairDouble.getValue())
+                                                            && pairDouble.getKey().compareTo((Pair) pairDouble.getValue()) != 0
+                                            )
+                            ),
                             "CompareTo incompatible with equals: " + pairDouble.getKey() + " " + pairDouble.getValue()
                     );
         }
