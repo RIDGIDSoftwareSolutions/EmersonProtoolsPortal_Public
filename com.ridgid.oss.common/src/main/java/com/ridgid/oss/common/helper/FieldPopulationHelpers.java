@@ -182,20 +182,20 @@ public final class FieldPopulationHelpers {
             deterministicallyPopulateEnumField(obj, field, ft, idx, fieldIdx);
             // Integral Numeric Primitive & Primitive Wrapper Types
         else if (ft.equals(Byte.class) || ft.equals(Byte.TYPE))
-            deterministicallyPopulateByteField(obj, field, idx, fieldIdx);
+            deterministicallyPopulateByteField(obj, field, idx, fieldIdx, precisionMapper);
         else if (ft.equals(Short.class) || ft.equals(Short.TYPE))
-            deterministicallyPopulateShortField(obj, field, idx, fieldIdx);
+            deterministicallyPopulateShortField(obj, field, idx, fieldIdx, precisionMapper);
         else if (ft.equals(Integer.class) || ft.equals(Integer.TYPE))
-            deterministicallyPopulateIntegerField(obj, field, idx, fieldIdx);
+            deterministicallyPopulateIntegerField(obj, field, idx, fieldIdx, precisionMapper);
         else if (ft.equals(Long.class) || ft.equals(Long.TYPE))
-            deterministicallyPopulateLongField(obj, field, idx, fieldIdx);
+            deterministicallyPopulateLongField(obj, field, idx, fieldIdx, precisionMapper);
         else if (ft.equals(BigInteger.class))
-            deterministicallyPopulateBigIntegerField(obj, field, idx, fieldIdx);
+            deterministicallyPopulateBigIntegerField(obj, field, idx, fieldIdx, precisionMapper);
             // Floating-Point & Decimal Numeric Primitive & Primitive Wrapper Types
         else if (ft.equals(Float.class) || ft.equals(Float.TYPE))
-            deterministicallyPopulateFloatField(obj, field, idx, fieldIdx);
+            deterministicallyPopulateFloatField(obj, field, idx, fieldIdx, precisionMapper);
         else if (ft.equals(Double.class) || ft.equals(Double.TYPE))
-            deterministicallyPopulateDoubleField(obj, field, idx, fieldIdx);
+            deterministicallyPopulateDoubleField(obj, field, idx, fieldIdx, precisionMapper);
         else if (ft.equals(BigDecimal.class))
             deterministicallyPopulateBigDecimalField(obj, field, idx, fieldIdx, lengthOrScaleMapper, precisionMapper);
             // Boolean Primitive and Primitive Wrapper Types
@@ -280,10 +280,12 @@ public final class FieldPopulationHelpers {
      * @param field
      * @param idx
      * @param fieldIdx
+     * @param precisionMapper
      */
-    public static void deterministicallyPopulateByteField(Object obj, Field field, int idx, int fieldIdx) {
+    public static void deterministicallyPopulateByteField(Object obj, Field field, int idx, int fieldIdx, Function<Field, Integer> precisionMapper) {
         try {
-            field.set(obj, (byte) (Math.abs(idx + fieldIdx) % (Byte.MAX_VALUE * 2 + 1) - Byte.MAX_VALUE - 1));
+            int maxValue = getMaxValueForPrecisionOrDefault(precisionMapper, Byte.MAX_VALUE, field);
+            field.set(obj, (byte) (Math.abs(idx + fieldIdx) % (maxValue * 2 + 1) - maxValue - 1));
         } catch (IllegalAccessException e) {
             throwAsRuntimeExceptionUnableToSetField(obj, field, idx, fieldIdx, e);
         }
@@ -294,10 +296,12 @@ public final class FieldPopulationHelpers {
      * @param field
      * @param idx
      * @param fieldIdx
+     * @param precisionMapper
      */
-    public static void deterministicallyPopulateShortField(Object obj, Field field, int idx, int fieldIdx) {
+    public static void deterministicallyPopulateShortField(Object obj, Field field, int idx, int fieldIdx, Function<Field, Integer> precisionMapper) {
         try {
-            field.set(obj, (short) (Math.abs(idx + fieldIdx) % (Short.MAX_VALUE * 2 + 1) - Short.MAX_VALUE - 1));
+            int maxValue = getMaxValueForPrecisionOrDefault(precisionMapper, Short.MAX_VALUE, field);
+            field.set(obj, (short) (Math.abs(idx + fieldIdx) % (maxValue * 2 + 1) - maxValue - 1));
         } catch (IllegalAccessException e) {
             throwAsRuntimeExceptionUnableToSetField(obj, field, idx, fieldIdx, e);
         }
@@ -308,10 +312,12 @@ public final class FieldPopulationHelpers {
      * @param field
      * @param idx
      * @param fieldIdx
+     * @param precisionMapper
      */
-    public static void deterministicallyPopulateIntegerField(Object obj, Field field, int idx, int fieldIdx) {
+    public static void deterministicallyPopulateIntegerField(Object obj, Field field, int idx, int fieldIdx, Function<Field, Integer> precisionMapper) {
         try {
-            field.set(obj, (int) (Math.abs((long) idx + (long) fieldIdx) % (Integer.MAX_VALUE * 2L + 1L) - Integer.MAX_VALUE - 1L));
+            int maxValue = getMaxValueForPrecisionOrDefault(precisionMapper, Integer.MAX_VALUE, field);
+            field.set(obj, (int) (Math.abs((long) idx + (long) fieldIdx) % (maxValue * 2L + 1L) - maxValue - 1L));
         } catch (IllegalAccessException e) {
             throwAsRuntimeExceptionUnableToSetField(obj, field, idx, fieldIdx, e);
         }
@@ -322,10 +328,16 @@ public final class FieldPopulationHelpers {
      * @param field
      * @param idx
      * @param fieldIdx
+     * @param precisionMapper
      */
-    public static void deterministicallyPopulateLongField(Object obj, Field field, int idx, int fieldIdx) {
+    public static void deterministicallyPopulateLongField(Object obj, Field field, int idx, int fieldIdx, Function<Field, Integer> precisionMapper) {
         try {
-            field.set(obj, Math.abs((long) idx + (long) fieldIdx));
+            int precision = precisionMapper.apply(field);
+            if (precision == 0) {
+                field.set(obj, Math.abs((long) idx + (long) fieldIdx));
+            } else {
+                field.set(obj, Math.abs((long) idx + (long) fieldIdx) % (Math.pow(10, precision) * 2L + 1L) - Math.pow(10, precision) - 1L);
+            }
         } catch (IllegalAccessException e) {
             throwAsRuntimeExceptionUnableToSetField(obj, field, idx, fieldIdx, e);
         }
@@ -336,10 +348,17 @@ public final class FieldPopulationHelpers {
      * @param field
      * @param idx
      * @param fieldIdx
+     * @param precisionMapper
      */
-    public static void deterministicallyPopulateBigIntegerField(Object obj, Field field, int idx, int fieldIdx) {
+    public static void deterministicallyPopulateBigIntegerField(Object obj, Field field, int idx, int fieldIdx, Function<Field, Integer> precisionMapper) {
         try {
-            field.set(obj, BigInteger.valueOf((long) idx + (long) fieldIdx));
+            int precision = precisionMapper.apply(field);
+            if (precision == 0) {
+                field.set(obj, BigInteger.valueOf((long) idx + (long) fieldIdx));
+            } else {
+                BigInteger precisionMaxValue = BigInteger.TEN.pow(precision);
+                field.set(obj, BigInteger.valueOf((long) idx + (long) fieldIdx).mod(precisionMaxValue.multiply(BigInteger.valueOf(2)).add(BigInteger.ONE)).subtract(precisionMaxValue).subtract(BigInteger.ONE));
+            }
         } catch (IllegalAccessException e) {
             throwAsRuntimeExceptionUnableToSetField(obj, field, idx, fieldIdx, e);
         }
@@ -350,10 +369,12 @@ public final class FieldPopulationHelpers {
      * @param field
      * @param idx
      * @param fieldIdx
+     * @param precisionMapper
      */
-    public static void deterministicallyPopulateFloatField(Object obj, Field field, int idx, int fieldIdx) {
+    public static void deterministicallyPopulateFloatField(Object obj, Field field, int idx, int fieldIdx, Function<Field, Integer> precisionMapper) {
         try {
-            field.set(obj, idx + (float) Integer.MAX_VALUE / (fieldIdx + 1));
+            float maxValue = getMaxValueForPrecisionOrDefault(precisionMapper, Integer.MAX_VALUE, field);
+            field.set(obj, idx + maxValue / (fieldIdx + 1));
         } catch (IllegalAccessException e) {
             throwAsRuntimeExceptionUnableToSetField(obj, field, idx, fieldIdx, e);
         }
@@ -364,10 +385,12 @@ public final class FieldPopulationHelpers {
      * @param field
      * @param idx
      * @param fieldIdx
+     * @param precisionMapper
      */
-    public static void deterministicallyPopulateDoubleField(Object obj, Field field, int idx, int fieldIdx) {
+    public static void deterministicallyPopulateDoubleField(Object obj, Field field, int idx, int fieldIdx, Function<Field, Integer> precisionMapper) {
         try {
-            field.set(obj, idx + (double) Integer.MAX_VALUE / (fieldIdx + 1));
+            double maxValue = getMaxValueForPrecisionOrDefault(precisionMapper, Integer.MAX_VALUE, field);
+            field.set(obj, idx + maxValue / (fieldIdx + 1));
         } catch (IllegalAccessException e) {
             throwAsRuntimeExceptionUnableToSetField(obj, field, idx, fieldIdx, e);
         }
@@ -379,6 +402,7 @@ public final class FieldPopulationHelpers {
      * @param idx
      * @param fieldIdx
      * @param lengthOrScaleMapper
+     * @param precisionMapper
      */
     public static void deterministicallyPopulateBigDecimalField(Object obj,
             Field field,
@@ -946,10 +970,20 @@ public final class FieldPopulationHelpers {
         return TIMESTAMP;
     }
 
-    private static Integer defaulLengthOrScaleMapper(Field field) {
+    private static Integer defaultLengthOrScaleMapper(Field field) {
         return field.getType() == BigDecimal.class
                 ? 4
                 : 20;
     }
 
+    private static Integer defaultPrecisionMapper(Field field) {
+        return field.getType() == BigDecimal.class
+                ? 35
+                : 8;
+    }
+
+    private static int getMaxValueForPrecisionOrDefault(Function<Field, Integer> precisionMapper, int defaultValue, Field field) {
+        int precision = precisionMapper.apply(field);
+        return precision == 0 ? defaultValue : (int) Math.pow(10, precision);
+    }
 }
