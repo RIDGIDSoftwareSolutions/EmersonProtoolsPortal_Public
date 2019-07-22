@@ -53,11 +53,11 @@ public final class FieldPopulationHelpers {
      * @param ambiguousTemporalTypeMapper
      */
     public static void deterministicallyPopulateBaseFields(int idx,
-            Object obj,
-            BiPredicate<Field, Class<?>> populateCompositePredicate,
-            Function<Field, TemporalType> ambiguousTemporalTypeMapper,
-            Function<Field, Integer> lengthOrScaleMapper,
-            Function<Field, Integer> precisionMapper) {
+                                                           Object obj,
+                                                           BiPredicate<Field, Class<?>> populateCompositePredicate,
+                                                           Function<Field, TemporalType> ambiguousTemporalTypeMapper,
+                                                           Function<Field, Integer> lengthOrScaleMapper,
+                                                           Function<Field, Integer> precisionMapper) {
         deterministicallyPopulateBaseFields
                 (
                         idx,
@@ -77,12 +77,12 @@ public final class FieldPopulationHelpers {
      * @param ambiguousTemporalTypeMapper
      */
     public static void deterministicallyPopulateBaseFields(int idx,
-            Object obj,
-            Predicate<Field> fieldExclusionPredicate,
-            BiPredicate<Field, Class<?>> populateCompositePredicate,
-            Function<Field, TemporalType> ambiguousTemporalTypeMapper,
-            Function<Field, Integer> lengthOrScaleMapper,
-            Function<Field, Integer> precisionMapper) {
+                                                           Object obj,
+                                                           Predicate<Field> fieldExclusionPredicate,
+                                                           BiPredicate<Field, Class<?>> populateCompositePredicate,
+                                                           Function<Field, TemporalType> ambiguousTemporalTypeMapper,
+                                                           Function<Field, Integer> lengthOrScaleMapper,
+                                                           Function<Field, Integer> precisionMapper) {
         int fieldIdx = 0;
         for (Field field : obj.getClass().getDeclaredFields()) {
             if (deterministicallyPopulateBaseField
@@ -141,7 +141,7 @@ public final class FieldPopulationHelpers {
                                                              BiPredicate<Field, Class<?>> populateCompositePredicate,
                                                              Function<Field, TemporalType> ambiguousTemporalTypeMapper,
                                                              Function<Field, Integer> lengthOrScaleMapper,
-                                                             Function<Field, Integer> precisionMapper   ) {
+                                                             Function<Field, Integer> precisionMapper) {
         return deterministicallyPopulateBaseField
                 (
                         obj,
@@ -284,7 +284,7 @@ public final class FieldPopulationHelpers {
      */
     public static void deterministicallyPopulateByteField(Object obj, Field field, int idx, int fieldIdx, Function<Field, Integer> precisionMapper) {
         try {
-            int maxValue = getMaxValueForPrecisionOrDefault(precisionMapper, Byte.MAX_VALUE, field);
+            int maxValue = (int) getMaxValueForPrecisionOrDefault(precisionMapper, Byte.MAX_VALUE, field);
             field.set(obj, (byte) (Math.abs(idx + fieldIdx) % (maxValue * 2 + 1) - maxValue - 1));
         } catch (IllegalAccessException e) {
             throwAsRuntimeExceptionUnableToSetField(obj, field, idx, fieldIdx, e);
@@ -300,7 +300,7 @@ public final class FieldPopulationHelpers {
      */
     public static void deterministicallyPopulateShortField(Object obj, Field field, int idx, int fieldIdx, Function<Field, Integer> precisionMapper) {
         try {
-            int maxValue = getMaxValueForPrecisionOrDefault(precisionMapper, Short.MAX_VALUE, field);
+            int maxValue = (int) getMaxValueForPrecisionOrDefault(precisionMapper, Short.MAX_VALUE, field);
             field.set(obj, (short) (Math.abs(idx + fieldIdx) % (maxValue * 2 + 1) - maxValue - 1));
         } catch (IllegalAccessException e) {
             throwAsRuntimeExceptionUnableToSetField(obj, field, idx, fieldIdx, e);
@@ -316,7 +316,7 @@ public final class FieldPopulationHelpers {
      */
     public static void deterministicallyPopulateIntegerField(Object obj, Field field, int idx, int fieldIdx, Function<Field, Integer> precisionMapper) {
         try {
-            int maxValue = getMaxValueForPrecisionOrDefault(precisionMapper, Integer.MAX_VALUE, field);
+            int maxValue = (int) getMaxValueForPrecisionOrDefault(precisionMapper, Integer.MAX_VALUE, field);
             field.set(obj, (int) (Math.abs((long) idx + (long) fieldIdx) % (maxValue * 2L + 1L) - maxValue - 1L));
         } catch (IllegalAccessException e) {
             throwAsRuntimeExceptionUnableToSetField(obj, field, idx, fieldIdx, e);
@@ -332,7 +332,7 @@ public final class FieldPopulationHelpers {
      */
     public static void deterministicallyPopulateLongField(Object obj, Field field, int idx, int fieldIdx, Function<Field, Integer> precisionMapper) {
         try {
-            int precision = precisionMapper.apply(field);
+            long precision = precisionMapper.apply(field);
             if (precision == 0) {
                 field.set(obj, Math.abs((long) idx + (long) fieldIdx));
             } else {
@@ -373,16 +373,14 @@ public final class FieldPopulationHelpers {
      * @param precisionMapper
      */
     public static void deterministicallyPopulateFloatField(Object obj,
-            Field field,
-            int idx,
-            int fieldIdx,
-            Function<Field, Integer> scaleMapper,
-            Function<Field, Integer> precisionMapper) {
+                                                           Field field,
+                                                           int idx,
+                                                           int fieldIdx,
+                                                           Function<Field, Integer> scaleMapper,
+                                                           Function<Field, Integer> precisionMapper) {
         try {
-            int scale = scaleMapper.apply(field);
-            int precision = precisionMapper.apply(field);
-            float maxValue = precision == 0 ? Integer.MAX_VALUE : (float) Math.pow(10, precision);
-            field.set(obj, (float) Math.floor(idx + maxValue / (fieldIdx + 1)) * (float) Math.pow(10, -scale));
+            long maxValue = getMaxValueForScaleAndPrecisionOrDefault(scaleMapper, precisionMapper, Integer.MAX_VALUE, field);
+            field.set(obj, (float) Math.floor(idx + maxValue / (fieldIdx + 1)));
         } catch (IllegalAccessException e) {
             throwAsRuntimeExceptionUnableToSetField(obj, field, idx, fieldIdx, e);
         }
@@ -397,16 +395,14 @@ public final class FieldPopulationHelpers {
      * @param precisionMapper
      */
     public static void deterministicallyPopulateDoubleField(Object obj,
-            Field field,
-            int idx,
-            int fieldIdx,
-            Function<Field, Integer> scaleMapper,
-            Function<Field, Integer> precisionMapper) {
+                                                            Field field,
+                                                            int idx,
+                                                            int fieldIdx,
+                                                            Function<Field, Integer> scaleMapper,
+                                                            Function<Field, Integer> precisionMapper) {
         try {
-            int scale = scaleMapper.apply(field);
-            int precision = precisionMapper.apply(field);
-            double maxValue = precision == 0 ? Integer.MAX_VALUE : Math.pow(10, precision);
-            field.set(obj, Math.floor(idx + maxValue / (fieldIdx + 1)) * Math.pow(10, -scale));
+            long maxValue = getMaxValueForScaleAndPrecisionOrDefault(scaleMapper, precisionMapper, Integer.MAX_VALUE, field);
+            field.set(obj, Math.floor(idx + maxValue / (fieldIdx + 1)));
         } catch (IllegalAccessException e) {
             throwAsRuntimeExceptionUnableToSetField(obj, field, idx, fieldIdx, e);
         }
@@ -417,18 +413,18 @@ public final class FieldPopulationHelpers {
      * @param field
      * @param idx
      * @param fieldIdx
-     * @param lengthOrScaleMapper
+     * @param scaleMapper
      * @param precisionMapper
      */
     public static void deterministicallyPopulateBigDecimalField(Object obj,
-            Field field,
-            int idx,
-            int fieldIdx,
-            Function<Field, Integer> lengthOrScaleMapper, Function<Field, Integer> precisionMapper) {
+                                                                Field field,
+                                                                int idx,
+                                                                int fieldIdx,
+                                                                Function<Field, Integer> scaleMapper,
+                                                                Function<Field, Integer> precisionMapper) {
         try {
-            int scale = lengthOrScaleMapper.apply(field);
-            int precision = precisionMapper.apply(field);
-            BigDecimal maxValue = precision == 0 ? BigDecimal.valueOf(Integer.MAX_VALUE) : BigDecimal.TEN.pow(precision - scale);
+            int scale = scaleMapper.apply(field);
+            BigDecimal maxValue = BigDecimal.valueOf(getMaxValueForScaleAndPrecisionOrDefault(scaleMapper, precisionMapper, Integer.MAX_VALUE, field));
             field.set(obj, BigDecimal.valueOf(idx).add(maxValue.divide(BigDecimal.valueOf(fieldIdx + 1), RoundingMode.HALF_UP)).setScale(scale, RoundingMode.HALF_EVEN));
         } catch (IllegalAccessException e) {
             throwAsRuntimeExceptionUnableToSetField(obj, field, idx, fieldIdx, e);
@@ -468,15 +464,15 @@ public final class FieldPopulationHelpers {
      * @param field
      * @param idx
      * @param fieldIdx
-     * @param lengthOrScaleMapper
+     * @param lengthMapper
      */
     public static void deterministicallyPopulateStringField(Object obj,
                                                             Field field,
                                                             int idx,
                                                             int fieldIdx,
-                                                            Function<Field, Integer> lengthOrScaleMapper) {
+                                                            Function<Field, Integer> lengthMapper) {
         try {
-            int length = lengthOrScaleMapper.apply(field);
+            int length = lengthMapper.apply(field);
             StringBuilder val = new StringBuilder();
             for (int i = 0; i < length; i++)
                 val.append((char) (' ' + (idx + fieldIdx) % 95));
@@ -491,15 +487,15 @@ public final class FieldPopulationHelpers {
      * @param field
      * @param idx
      * @param fieldIdx
-     * @param lengthOrScaleMapper
+     * @param lengthMapper
      */
     public static void deterministicallyPopulateCharacterArrayField(Object obj,
                                                                     Field field,
                                                                     int idx,
                                                                     int fieldIdx,
-                                                                    Function<Field, Integer> lengthOrScaleMapper) {
+                                                                    Function<Field, Integer> lengthMapper) {
         try {
-            int length = lengthOrScaleMapper.apply(field);
+            int length = lengthMapper.apply(field);
             char[] val = new char[length];
             for (int i = 0; i < length; i++)
                 val[i] = (char) (' ' + (idx + fieldIdx) % 95);
@@ -514,15 +510,15 @@ public final class FieldPopulationHelpers {
      * @param field
      * @param idx
      * @param fieldIdx
-     * @param lengthOrScaleMapper
+     * @param lengthMapper
      */
     public static void deterministicallyPopulateByteArrayField(Object obj,
                                                                Field field,
                                                                int idx,
                                                                int fieldIdx,
-                                                               Function<Field, Integer> lengthOrScaleMapper) {
+                                                               Function<Field, Integer> lengthMapper) {
         try {
-            int length = lengthOrScaleMapper.apply(field);
+            int length = lengthMapper.apply(field);
             byte[] val = new byte[length];
             for (int i = 0; i < length; i++)
                 val[i] = (byte) (Math.abs(idx + fieldIdx) % (Byte.MAX_VALUE * 2 + 1) - Byte.MAX_VALUE - 1);
@@ -999,8 +995,20 @@ public final class FieldPopulationHelpers {
                 : 8;
     }
 
-    private static int getMaxValueForPrecisionOrDefault(Function<Field, Integer> precisionMapper, int defaultValue, Field field) {
+    private static long getMaxValueForPrecisionOrDefault(Function<Field, Integer> precisionMapper,
+                                                         long defaultValue,
+                                                         Field field) {
         int precision = precisionMapper.apply(field);
-        return precision == 0 ? defaultValue : (int) Math.pow(10, precision);
+        return (precision == 0 ? defaultValue : (long) Math.pow(10, precision)) - 1;
+    }
+
+    @SuppressWarnings("SameParameterValue")
+    private static long getMaxValueForScaleAndPrecisionOrDefault(Function<Field, Integer> scaleMapper,
+                                                                 Function<Field, Integer> precisionMapper,
+                                                                 long defaultValue,
+                                                                 Field field) {
+        int scale = scaleMapper.apply(field);
+        int maxWholeDigits = precisionMapper.apply(field) - scale;
+        return ((maxWholeDigits == 0 ? defaultValue : (long) Math.pow(10, maxWholeDigits)) - 1);
     }
 }
