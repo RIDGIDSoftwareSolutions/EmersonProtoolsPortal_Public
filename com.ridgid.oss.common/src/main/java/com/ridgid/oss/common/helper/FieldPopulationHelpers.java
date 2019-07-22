@@ -336,7 +336,7 @@ public final class FieldPopulationHelpers {
             if (precision == 0) {
                 field.set(obj, Math.abs((long) idx + (long) fieldIdx));
             } else {
-                field.set(obj, Math.abs((long) idx + (long) fieldIdx) % (Math.pow(10, precision) * 2L + 1L) - Math.pow(10, precision) - 1L);
+                field.set(obj, Math.abs((long) idx + (long) fieldIdx) % ((long) Math.pow(10, precision) * 2L + 1L) - (long) Math.pow(10, precision) - 1L);
             }
         } catch (IllegalAccessException e) {
             throwAsRuntimeExceptionUnableToSetField(obj, field, idx, fieldIdx, e);
