@@ -72,6 +72,12 @@ public final class JPAFieldReflectionHelpers {
                 : 0;
     }
 
+    public static int getPrecisionForField(Field field) {
+        return field.isAnnotationPresent(Column.class)
+                ? field.getAnnotation(Column.class).precision()
+                : 1;
+    }
+
     /**
      * @param field
      * @param fieldType

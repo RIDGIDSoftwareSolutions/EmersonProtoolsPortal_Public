@@ -23,8 +23,8 @@ public final class JPAFieldPopulationHelpers {
                         JPAFieldReflectionHelpers::shouldExcludeBecauseIsSpecializedEntityField,
                         JPAFieldReflectionHelpers::shouldPopulateCompositeField,
                         JPAFieldReflectionHelpers::getTemporalTypeForAmbiguousTemporalField,
-                        JPAFieldReflectionHelpers::getScaleOrLengthForField
-
+                        JPAFieldReflectionHelpers::getScaleOrLengthForField,
+                        JPAFieldReflectionHelpers::getPrecisionForField
                 );
     }
 
@@ -48,7 +48,8 @@ public final class JPAFieldPopulationHelpers {
                         JPAFieldReflectionHelpers::shouldExcludeBecauseIsSpecializedEntityField,
                         JPAFieldReflectionHelpers::shouldPopulateCompositeField,
                         JPAFieldReflectionHelpers::getTemporalTypeForAmbiguousTemporalField,
-                        JPAFieldReflectionHelpers::getScaleOrLengthForField
+                        JPAFieldReflectionHelpers::getScaleOrLengthForField,
+                        JPAFieldReflectionHelpers::getPrecisionForField
                 );
     }
 
