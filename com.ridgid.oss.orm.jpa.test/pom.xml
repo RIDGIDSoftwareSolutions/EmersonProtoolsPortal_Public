@@ -10,7 +10,6 @@
     </parent>
 
     <artifactId>com.ridgid.oss.orm.jpa.test</artifactId>
-    <version>2.56-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <!-- Required to publish to Maven Central -->
@@ -47,17 +46,17 @@
         <dependency>
             <groupId>com.ridgid.oss</groupId>
             <artifactId>com.ridgid.oss.common</artifactId>
-            <version>2.56-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.ridgid.oss</groupId>
             <artifactId>com.ridgid.oss.orm</artifactId>
-            <version>2.56-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.ridgid.oss</groupId>
             <artifactId>com.ridgid.oss.orm.jpa</artifactId>
-            <version>2.56-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
