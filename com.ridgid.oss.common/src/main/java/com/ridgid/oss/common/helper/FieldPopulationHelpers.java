@@ -380,7 +380,7 @@ public final class FieldPopulationHelpers {
                                                            Function<Field, Integer> precisionMapper) {
         try {
             long maxValue = getMaxValueForScaleAndPrecisionOrDefault(scaleMapper, precisionMapper, Integer.MAX_VALUE, field);
-            field.set(obj, (float) Math.floor(idx + maxValue / (fieldIdx + 1)));
+            field.set(obj, Math.max(-maxValue, Math.min(maxValue, (float) Math.floor(idx + maxValue / (fieldIdx + 1)))));
         } catch (IllegalAccessException e) {
             throwAsRuntimeExceptionUnableToSetField(obj, field, idx, fieldIdx, e);
         }
@@ -402,7 +402,7 @@ public final class FieldPopulationHelpers {
                                                             Function<Field, Integer> precisionMapper) {
         try {
             long maxValue = getMaxValueForScaleAndPrecisionOrDefault(scaleMapper, precisionMapper, Integer.MAX_VALUE, field);
-            field.set(obj, Math.floor(idx + maxValue / (fieldIdx + 1)));
+            field.set(obj, Math.max(-maxValue, Math.min(maxValue, Math.floor(idx + maxValue / (fieldIdx + 1)))));
         } catch (IllegalAccessException e) {
             throwAsRuntimeExceptionUnableToSetField(obj, field, idx, fieldIdx, e);
         }
@@ -424,8 +424,8 @@ public final class FieldPopulationHelpers {
                                                                 Function<Field, Integer> precisionMapper) {
         try {
             int scale = scaleMapper.apply(field);
-            BigDecimal maxValue = BigDecimal.valueOf(getMaxValueForScaleAndPrecisionOrDefault(scaleMapper, precisionMapper, Integer.MAX_VALUE, field));
-            field.set(obj, BigDecimal.valueOf(idx).add(maxValue.divide(BigDecimal.valueOf(fieldIdx + 1), RoundingMode.HALF_UP)).setScale(scale, RoundingMode.HALF_EVEN));
+            long maxValue = getMaxValueForScaleAndPrecisionOrDefault(scaleMapper, precisionMapper, Integer.MAX_VALUE, field);
+            field.set(obj, BigDecimal.valueOf(Math.max(-maxValue, Math.min(maxValue, idx + maxValue / (fieldIdx + 1)))).setScale(scale, RoundingMode.HALF_EVEN));
         } catch (IllegalAccessException e) {
             throwAsRuntimeExceptionUnableToSetField(obj, field, idx, fieldIdx, e);
         }
