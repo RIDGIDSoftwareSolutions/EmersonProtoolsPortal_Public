@@ -42,7 +42,8 @@ public final class FieldPopulationHelpers {
                         FieldPopulationHelpers::defaultFieldExclusionPredicate,
                         FieldPopulationHelpers::defaultPopulateCompositePredicate,
                         FieldPopulationHelpers::defaultAmbiguousTemporalTypeMapper,
-                        FieldPopulationHelpers::defaulLengthOrScaleMapper
+                        FieldPopulationHelpers::defaultLengthOrScaleMapper,
+                        FieldPopulationHelpers::defaultPrecisionMapper
                 );
     }
 
@@ -52,10 +53,11 @@ public final class FieldPopulationHelpers {
      * @param ambiguousTemporalTypeMapper
      */
     public static void deterministicallyPopulateBaseFields(int idx,
-                                                           Object obj,
-                                                           BiPredicate<Field, Class<?>> populateCompositePredicate,
-                                                           Function<Field, TemporalType> ambiguousTemporalTypeMapper,
-                                                           Function<Field, Integer> lengthOrScaleMapper) {
+            Object obj,
+            BiPredicate<Field, Class<?>> populateCompositePredicate,
+            Function<Field, TemporalType> ambiguousTemporalTypeMapper,
+            Function<Field, Integer> lengthOrScaleMapper,
+            Function<Field, Integer> precisionMapper) {
         deterministicallyPopulateBaseFields
                 (
                         idx,
@@ -63,7 +65,8 @@ public final class FieldPopulationHelpers {
                         FieldPopulationHelpers::defaultFieldExclusionPredicate,
                         populateCompositePredicate,
                         ambiguousTemporalTypeMapper,
-                        lengthOrScaleMapper
+                        lengthOrScaleMapper,
+                        precisionMapper
                 );
     }
 
@@ -74,11 +77,12 @@ public final class FieldPopulationHelpers {
      * @param ambiguousTemporalTypeMapper
      */
     public static void deterministicallyPopulateBaseFields(int idx,
-                                                           Object obj,
-                                                           Predicate<Field> fieldExclusionPredicate,
-                                                           BiPredicate<Field, Class<?>> populateCompositePredicate,
-                                                           Function<Field, TemporalType> ambiguousTemporalTypeMapper,
-                                                           Function<Field, Integer> lengthOrScaleMapper) {
+            Object obj,
+            Predicate<Field> fieldExclusionPredicate,
+            BiPredicate<Field, Class<?>> populateCompositePredicate,
+            Function<Field, TemporalType> ambiguousTemporalTypeMapper,
+            Function<Field, Integer> lengthOrScaleMapper,
+            Function<Field, Integer> precisionMapper) {
         int fieldIdx = 0;
         for (Field field : obj.getClass().getDeclaredFields()) {
             if (deterministicallyPopulateBaseField
@@ -90,7 +94,8 @@ public final class FieldPopulationHelpers {
                             fieldExclusionPredicate,
                             populateCompositePredicate,
                             ambiguousTemporalTypeMapper,
-                            lengthOrScaleMapper
+                            lengthOrScaleMapper,
+                            precisionMapper
                     )
             ) fieldIdx++;
         }
@@ -116,7 +121,8 @@ public final class FieldPopulationHelpers {
                         FieldPopulationHelpers::defaultFieldExclusionPredicate,
                         FieldPopulationHelpers::defaultPopulateCompositePredicate,
                         FieldPopulationHelpers::defaultAmbiguousTemporalTypeMapper,
-                        FieldPopulationHelpers::defaulLengthOrScaleMapper
+                        FieldPopulationHelpers::defaultLengthOrScaleMapper,
+                        FieldPopulationHelpers::defaultPrecisionMapper
                 );
     }
 
@@ -134,7 +140,8 @@ public final class FieldPopulationHelpers {
                                                              int fieldIdx,
                                                              BiPredicate<Field, Class<?>> populateCompositePredicate,
                                                              Function<Field, TemporalType> ambiguousTemporalTypeMapper,
-                                                             Function<Field, Integer> lengthOrScaleMapper) {
+                                                             Function<Field, Integer> lengthOrScaleMapper,
+                                                             Function<Field, Integer> precisionMapper   ) {
         return deterministicallyPopulateBaseField
                 (
                         obj,
@@ -144,7 +151,8 @@ public final class FieldPopulationHelpers {
                         FieldPopulationHelpers::defaultFieldExclusionPredicate,
                         populateCompositePredicate,
                         ambiguousTemporalTypeMapper,
-                        lengthOrScaleMapper
+                        lengthOrScaleMapper,
+                        precisionMapper
                 );
     }
 
@@ -163,7 +171,8 @@ public final class FieldPopulationHelpers {
                                                              Predicate<Field> fieldExclusionPredicate,
                                                              BiPredicate<Field, Class<?>> populateCompositePredicate,
                                                              Function<Field, TemporalType> ambiguousTemporalTypeMapper,
-                                                             Function<Field, Integer> lengthOrScaleMapper) {
+                                                             Function<Field, Integer> lengthOrScaleMapper,
+                                                             Function<Field, Integer> precisionMapper) {
         if (!field.isAccessible()) field.setAccessible(true);
         if (Modifier.isFinal(field.getModifiers())
                 || Modifier.isStatic(field.getModifiers())
@@ -188,7 +197,7 @@ public final class FieldPopulationHelpers {
         else if (ft.equals(Double.class) || ft.equals(Double.TYPE))
             deterministicallyPopulateDoubleField(obj, field, idx, fieldIdx);
         else if (ft.equals(BigDecimal.class))
-            deterministicallyPopulateBigDecimalField(obj, field, idx, fieldIdx, lengthOrScaleMapper);
+            deterministicallyPopulateBigDecimalField(obj, field, idx, fieldIdx, lengthOrScaleMapper, precisionMapper);
             // Boolean Primitive and Primitive Wrapper Types
         else if (ft.equals(Boolean.class) || ft.equals(Boolean.TYPE))
             deterministicallyPopulateBooleanField(obj, field, idx, fieldIdx);
@@ -372,13 +381,14 @@ public final class FieldPopulationHelpers {
      * @param lengthOrScaleMapper
      */
     public static void deterministicallyPopulateBigDecimalField(Object obj,
-                                                                Field field,
-                                                                int idx,
-                                                                int fieldIdx,
-                                                                Function<Field, Integer> lengthOrScaleMapper) {
+            Field field,
+            int idx,
+            int fieldIdx,
+            Function<Field, Integer> lengthOrScaleMapper, Function<Field, Integer> precisionMapper) {
         try {
             int scale = lengthOrScaleMapper.apply(field);
-            field.set(obj, BigDecimal.valueOf(idx + (double) Integer.MAX_VALUE / (fieldIdx + 1)).setScale(scale, RoundingMode.HALF_EVEN));
+            int precision = precisionMapper.apply(field);
+            field.set(obj, BigDecimal.valueOf(idx + Math.pow(10,precision) / (fieldIdx + 1)).setScale(scale, RoundingMode.HALF_EVEN));
         } catch (IllegalAccessException e) {
             throwAsRuntimeExceptionUnableToSetField(obj, field, idx, fieldIdx, e);
         }
