@@ -11,6 +11,7 @@
 
     <artifactId>com.ridgid.oss.common</artifactId>
     <packaging>jar</packaging>
+    <version>2.56-SNAPSHOT</version>
 
     <!-- Required to publish to Maven Central -->
     <name>RIDGID (Emerson Professional Tools) Java Common</name>
