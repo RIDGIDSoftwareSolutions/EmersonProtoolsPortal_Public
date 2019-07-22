@@ -414,7 +414,8 @@ public final class FieldPopulationHelpers {
         try {
             int scale = lengthOrScaleMapper.apply(field);
             int precision = precisionMapper.apply(field);
-            field.set(obj, BigDecimal.valueOf(idx + Math.pow(10,precision) / (fieldIdx + 1)).setScale(scale, RoundingMode.HALF_EVEN));
+            BigDecimal maxValue = precision == 0 ? BigDecimal.valueOf(Integer.MAX_VALUE) : BigDecimal.TEN.pow(precision);
+            field.set(obj, BigDecimal.valueOf(idx).add(maxValue.divide(BigDecimal.valueOf(fieldIdx + 1), RoundingMode.HALF_UP)).setScale(scale, RoundingMode.HALF_EVEN));
         } catch (IllegalAccessException e) {
             throwAsRuntimeExceptionUnableToSetField(obj, field, idx, fieldIdx, e);
         }
