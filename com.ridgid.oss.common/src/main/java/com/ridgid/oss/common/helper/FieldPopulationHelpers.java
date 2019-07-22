@@ -373,7 +373,8 @@ public final class FieldPopulationHelpers {
      */
     public static void deterministicallyPopulateFloatField(Object obj, Field field, int idx, int fieldIdx, Function<Field, Integer> precisionMapper) {
         try {
-            float maxValue = getMaxValueForPrecisionOrDefault(precisionMapper, Integer.MAX_VALUE, field);
+            int precision = precisionMapper.apply(field);
+            float maxValue = precision == 0 ? Integer.MAX_VALUE : (float) Math.pow(10, precision);
             field.set(obj, idx + maxValue / (fieldIdx + 1));
         } catch (IllegalAccessException e) {
             throwAsRuntimeExceptionUnableToSetField(obj, field, idx, fieldIdx, e);
@@ -389,7 +390,8 @@ public final class FieldPopulationHelpers {
      */
     public static void deterministicallyPopulateDoubleField(Object obj, Field field, int idx, int fieldIdx, Function<Field, Integer> precisionMapper) {
         try {
-            double maxValue = getMaxValueForPrecisionOrDefault(precisionMapper, Integer.MAX_VALUE, field);
+            int precision = precisionMapper.apply(field);
+            double maxValue = precision == 0 ? Integer.MAX_VALUE : Math.pow(10, precision);
             field.set(obj, idx + maxValue / (fieldIdx + 1));
         } catch (IllegalAccessException e) {
             throwAsRuntimeExceptionUnableToSetField(obj, field, idx, fieldIdx, e);
