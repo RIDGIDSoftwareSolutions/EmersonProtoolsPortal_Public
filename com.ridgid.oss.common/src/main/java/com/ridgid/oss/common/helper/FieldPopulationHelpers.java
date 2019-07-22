@@ -193,9 +193,9 @@ public final class FieldPopulationHelpers {
             deterministicallyPopulateBigIntegerField(obj, field, idx, fieldIdx, precisionMapper);
             // Floating-Point & Decimal Numeric Primitive & Primitive Wrapper Types
         else if (ft.equals(Float.class) || ft.equals(Float.TYPE))
-            deterministicallyPopulateFloatField(obj, field, idx, fieldIdx, precisionMapper);
+            deterministicallyPopulateFloatField(obj, field, idx, fieldIdx, lengthOrScaleMapper, precisionMapper);
         else if (ft.equals(Double.class) || ft.equals(Double.TYPE))
-            deterministicallyPopulateDoubleField(obj, field, idx, fieldIdx, precisionMapper);
+            deterministicallyPopulateDoubleField(obj, field, idx, fieldIdx, lengthOrScaleMapper, precisionMapper);
         else if (ft.equals(BigDecimal.class))
             deterministicallyPopulateBigDecimalField(obj, field, idx, fieldIdx, lengthOrScaleMapper, precisionMapper);
             // Boolean Primitive and Primitive Wrapper Types
@@ -369,13 +369,20 @@ public final class FieldPopulationHelpers {
      * @param field
      * @param idx
      * @param fieldIdx
+     * @param scaleMapper
      * @param precisionMapper
      */
-    public static void deterministicallyPopulateFloatField(Object obj, Field field, int idx, int fieldIdx, Function<Field, Integer> precisionMapper) {
+    public static void deterministicallyPopulateFloatField(Object obj,
+            Field field,
+            int idx,
+            int fieldIdx,
+            Function<Field, Integer> scaleMapper,
+            Function<Field, Integer> precisionMapper) {
         try {
+            int scale = scaleMapper.apply(field);
             int precision = precisionMapper.apply(field);
             float maxValue = precision == 0 ? Integer.MAX_VALUE : (float) Math.pow(10, precision);
-            field.set(obj, idx + maxValue / (fieldIdx + 1));
+            field.set(obj, (float) Math.floor(idx + maxValue / (fieldIdx + 1)) * (float) Math.pow(10, -scale));
         } catch (IllegalAccessException e) {
             throwAsRuntimeExceptionUnableToSetField(obj, field, idx, fieldIdx, e);
         }
@@ -386,13 +393,20 @@ public final class FieldPopulationHelpers {
      * @param field
      * @param idx
      * @param fieldIdx
+     * @param scaleMapper
      * @param precisionMapper
      */
-    public static void deterministicallyPopulateDoubleField(Object obj, Field field, int idx, int fieldIdx, Function<Field, Integer> precisionMapper) {
+    public static void deterministicallyPopulateDoubleField(Object obj,
+            Field field,
+            int idx,
+            int fieldIdx,
+            Function<Field, Integer> scaleMapper,
+            Function<Field, Integer> precisionMapper) {
         try {
+            int scale = scaleMapper.apply(field);
             int precision = precisionMapper.apply(field);
             double maxValue = precision == 0 ? Integer.MAX_VALUE : Math.pow(10, precision);
-            field.set(obj, idx + maxValue / (fieldIdx + 1));
+            field.set(obj, Math.floor(idx + maxValue / (fieldIdx + 1)) * Math.pow(10, -scale));
         } catch (IllegalAccessException e) {
             throwAsRuntimeExceptionUnableToSetField(obj, field, idx, fieldIdx, e);
         }
