@@ -12,7 +12,7 @@
 
         <!-- External Dependency Versions -->
         <hamcrest.version>2.1</hamcrest.version>
-        <hibernate-entitymanager.version>5.4.2.Final</hibernate-entitymanager.version>
+        <hibernate-entitymanager.version>5.4.3.Final</hibernate-entitymanager.version>
         <jackson-core.version>2.4.4</jackson-core.version>
         <jackson-databind.version>${jackson-core.version}</jackson-databind.version>
         <jsoup.version>1.11.3</jsoup.version>
