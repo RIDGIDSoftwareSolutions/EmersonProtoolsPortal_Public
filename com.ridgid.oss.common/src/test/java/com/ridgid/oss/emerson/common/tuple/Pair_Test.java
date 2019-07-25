@@ -243,7 +243,7 @@ class Pair_Test {
                     (
                             !pairDouble.getKey().equals(pairDouble.getValue())
                                     || pairDouble.getKey().hashCode() == pairDouble.getValue().hashCode(),
-                            "Hashcode incompatible with equals: " + pairDouble.getKey() + " " + pairDouble.getValue()
+                            "Hashcode incompatible one equals: " + pairDouble.getKey() + " " + pairDouble.getValue()
                     );
         }
     }
@@ -268,7 +268,7 @@ class Pair_Test {
                                                             && pairDouble.getKey().compareTo((Pair) pairDouble.getValue()) != 0
                                             )
                             ),
-                            "CompareTo incompatible with equals: " + pairDouble.getKey() + " " + pairDouble.getValue()
+                            "CompareTo incompatible one equals: " + pairDouble.getKey() + " " + pairDouble.getValue()
                     );
         }
     }

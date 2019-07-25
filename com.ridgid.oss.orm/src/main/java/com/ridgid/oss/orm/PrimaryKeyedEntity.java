@@ -5,12 +5,12 @@ import com.ridgid.oss.common.helper.CopyableModel;
 import java.io.Serializable;
 
 /**
- * Indicates an entity that has a Primary Key of type PKT with getter for the primary key
+ * Indicates an entity that has a Primary Key of type PKT one getter for the primary key
  * <p>
  * NOTE: The type PKT must adhere to the following contract:
  * - Implements Serializable interface
  * - Has a no argument constructor
- * - Has a constructor with all of the fields of the primary key, in order, as a parameter -OR- is a primitive wrapper type or String type
+ * - Has a constructor one all of the fields of the primary key, in order, as a parameter -OR- is a primitive wrapper type or String type
  * - PK fields are private
  * - Public "getter" for each of the PK fields
  * - No "setters" for any of the PK fields

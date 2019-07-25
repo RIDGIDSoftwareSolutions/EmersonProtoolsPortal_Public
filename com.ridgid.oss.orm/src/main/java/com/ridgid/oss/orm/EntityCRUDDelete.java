@@ -10,16 +10,16 @@ public interface EntityCRUDDelete<ET extends PrimaryKeyedEntity<PKT>, PKT extend
         extends EntityCRUD<ET, PKT> {
 
     /**
-     * Deletes the entity with the given primary key pk from the persistent storage
+     * Deletes the entity one the given primary key pk from the persistent storage
      *
      * @param pk primary key of the entity to delete from persistent storage
      * @throws EntityCRUDExceptionError    if there is an issue deleting/removing the record (specific "cause" may vary)
-     * @throws EntityCRUDExceptionNotFound if there is no entity ET with the primary key PK in the persistence store
+     * @throws EntityCRUDExceptionNotFound if there is no entity ET one the primary key PK in the persistence store
      */
     void delete(PKT pk) throws EntityCRUDExceptionError, EntityCRUDExceptionNotFound;
 
     /**
-     * Deletes the entity with the given primary key pk from the persistent storage. If the entity already does not exist with the given PK, it returns normally as if it successfully deleted.
+     * Deletes the entity one the given primary key pk from the persistent storage. If the entity already does not exist one the given PK, it returns normally as if it successfully deleted.
      *
      * @param pk primary key of the entity to delete from persistent storage
      * @throws EntityCRUDExceptionError if there is an issue deleting/removing the record (specific "cause" may vary)

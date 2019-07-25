@@ -1,9 +1,13 @@
 package com.ridgid.oss.orm.jpa;
 
+import com.ridgid.oss.common.hierarchy.Hierarchy;
 import com.ridgid.oss.orm.EntityCRUD;
 import com.ridgid.oss.orm.PrimaryKeyedEntity;
+import org.hibernate.Hibernate;
 
 import javax.persistence.EntityManager;
+
+import static com.ridgid.oss.common.hierarchy.Hierarchy.Traversal.DEPTH_FIRST;
 
 /**
  * Base Class for a DAO for a PrimaryKeyedEntity where the implementation of the DAO uses JPA and the entity is expected to have the needed JPA annotations
@@ -35,5 +39,18 @@ public abstract class JPAEntityCRUD<ET extends PrimaryKeyedEntity<PKT>, PKT exte
      */
     public final EntityManager getEntityManager() {
         return entityManager;
+    }
+
+
+    @Override
+    public ET initializeAndDetach(ET entity, Hierarchy<ET> hierarchyToLoad) {
+        hierarchyToLoad.visit
+                (
+                        entity,
+                        Hibernate::initialize,
+                        DEPTH_FIRST
+                );
+        entityManager.detach(entity);
+        return entity;
     }
 }

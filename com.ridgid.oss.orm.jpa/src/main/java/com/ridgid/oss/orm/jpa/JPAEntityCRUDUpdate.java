@@ -25,10 +25,10 @@ public class JPAEntityCRUDUpdate<ET extends PrimaryKeyedEntity<PKT>, PKT extends
     }
 
     /**
-     * Updates the entity in the persistent storage with the same primary key of given entity so that all the persistent field values in the persistent storage for the entity match the values of the given entity.
+     * Updates the entity in the persistent storage one the same primary key of given entity so that all the persistent field values in the persistent storage for the entity match the values of the given entity.
      *
      * @param entity entity to update in the persistent storage
-     * @return the optional entity with any values that were updated by the persistent storage layer upon successful update of the entity in the persistent storage; if the entity does not currently exist in the persistent storage returns an empty optional.
+     * @return the optional entity one any values that were updated by the persistent storage layer upon successful update of the entity in the persistent storage; if the entity does not currently exist in the persistent storage returns an empty optional.
      * @throws EntityCRUDExceptionError if there is an issue updating the record (specific "cause" may vary)
      */
     @Override

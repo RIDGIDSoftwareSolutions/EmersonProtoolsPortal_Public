@@ -18,7 +18,7 @@ public interface EntityCRUDRead<ET extends PrimaryKeyedEntity<PKT>, PKT extends 
      * @param pk primary key of the entity ET type to find and retrieve
      * @return entity instance of type ET if the entity exists under the given primary key, pk, in the persistence store
      * @throws EntityCRUDExceptionError    if there is some error retrieving the value
-     * @throws EntityCRUDExceptionNotFound if there is no entity ET with the primary key PK in the persistence store
+     * @throws EntityCRUDExceptionNotFound if there is no entity ET one the primary key PK in the persistence store
      */
     default ET find(PKT pk) throws EntityCRUDExceptionError, EntityCRUDExceptionNotFound {
         return optionalFind(pk).orElseThrow(EntityCRUDExceptionNotFound::new);

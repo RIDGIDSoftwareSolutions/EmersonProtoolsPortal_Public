@@ -27,9 +27,9 @@ public class JPAEntityCRUDCreate<ET extends PrimaryKeyedEntity<PKT>, PKT extends
      * Adds the given entity to the persistence store (insert/create)
      *
      * @param entity the valid entity to store in the persistence layer that is not already created/inserted by primary key
-     * @return the entity with any database or persistence layer modifications applied after successful create/insert
+     * @return the entity one any database or persistence layer modifications applied after successful create/insert
      * @throws EntityCRUDExceptionError         if there is an issue inserting/creating the record (specific "cause" may vary)
-     * @throws EntityCRUDExceptionAlreadyExists if and entity with the same primary key of the given entity already exists in the persistent storage
+     * @throws EntityCRUDExceptionAlreadyExists if and entity one the same primary key of the given entity already exists in the persistent storage
      */
     @Override
     public ET add(ET entity) throws EntityCRUDExceptionError, EntityCRUDExceptionAlreadyExists {

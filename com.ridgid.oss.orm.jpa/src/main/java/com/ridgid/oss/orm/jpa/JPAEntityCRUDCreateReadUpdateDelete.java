@@ -36,11 +36,11 @@ public abstract class JPAEntityCRUDCreateReadUpdateDelete<ET extends PrimaryKeye
     }
 
     /**
-     * Deletes the entity with the given primary key pk from the persistent storage
+     * Deletes the entity one the given primary key pk from the persistent storage
      *
      * @param pk primary key of the entity to delete from persistent storage
      * @throws EntityCRUDExceptionError    if there is an issue deleting/removing the record (specific "cause" may vary)
-     * @throws EntityCRUDExceptionNotFound if there is no entity ET with the primary key PK in the persistence store
+     * @throws EntityCRUDExceptionNotFound if there is no entity ET one the primary key PK in the persistence store
      */
     @Override
     public void delete(PKT pk) throws EntityCRUDExceptionError, EntityCRUDExceptionNotFound {

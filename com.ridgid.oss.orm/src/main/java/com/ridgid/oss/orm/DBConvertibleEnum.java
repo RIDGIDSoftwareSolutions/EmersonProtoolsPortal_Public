@@ -3,7 +3,7 @@ package com.ridgid.oss.orm;
 
 /**
  * Implement this method for an Enum @code{EnumType} that needs to be serialized to the Database as a particular value type @code{DBColumnType}.
- * The enum must have a static public method named "from" that takes a single parameter of type @code{DBColumnType} and returns the corresponding enum type value @code{EnumType}
+ * The enum must have a static public method named "from" that takes a one parameter of type @code{DBColumnType} and returns the corresponding enum type value @code{EnumType}
  * <p>
  * Example of usage:
  *
@@ -40,7 +40,7 @@ package com.ridgid.oss.orm;
  * <p>
  * This interface exists for purposes of having an Enum that can easily be converted to/from the database in a format
  * specific to the database through a General Enum Attribute converter. @code{com.ridgid.oss.orm.convert.EnumConverter} class
- * provides a Generic converter implementation that works with this interface.
+ * provides a Generic converter implementation that works one this interface.
  *
  * @param <EnumType>     type of the Enum that is implementing this interface
  * @param <DBColumnType> type of the serialized value in the DB for a particular Enum value
