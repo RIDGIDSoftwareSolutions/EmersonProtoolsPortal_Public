@@ -160,14 +160,17 @@ public abstract class JPADAO_TestCRUDCreateRead<DAO extends JPAEntityCRUDCreateR
                 )
                 .executeUpdate();
         assertEquals(0, getDao().findAll(0, 10).size(), "Should be 0 records found");
-        int i = 0;
+        int childCollectionIndex = 0;
+        int recordNumber = 0;
         for (ET rec : generateTestEntities()) {
             if (validateChildCollections) {
-                deterministicallyPopulateChildCollections(i, rec);
-                i++;
+                deterministicallyPopulateChildCollections(childCollectionIndex, rec);
+                childCollectionIndex++;
             }
+            foreignKeysUpdater(recordNumber, rec);
             storeSetupRecord(rec);
             assertDoesNotThrow(() -> getDao().add(rec));
+            recordNumber++;
         }
         findAndCompareAllWithoutSetup(validateChildCollections);
     }
