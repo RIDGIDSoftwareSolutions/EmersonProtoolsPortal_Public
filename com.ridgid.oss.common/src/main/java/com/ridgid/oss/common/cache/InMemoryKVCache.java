@@ -61,13 +61,16 @@ public class InMemoryKVCache<K, V extends Expirable> implements Cache<K, V> {
         };
     }
 
-    private void cleanup() {
+    protected void cleanup() {
         synchronized (cleanupTimer) {
-            cache.entrySet().removeIf(this::normalEvictionApplies);
+            cache.entrySet()
+                    .stream()
+                    .filter(this::normalEvictionApplies)
+                    .forEach(e -> this.remove(e.getKey()));
             if (cache.size() > maxCapacity)
                 overCapacityEvictionSelector(cache.size(), evictToCapacity, cache.entrySet().stream())
                         .filter(entry -> cache.size() > evictToCapacity)
-                        .forEach(entry -> cache.remove(entry.getKey()));
+                        .forEach(entry -> this.remove(entry.getKey()));
         }
     }
 

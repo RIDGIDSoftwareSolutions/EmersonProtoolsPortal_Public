@@ -31,11 +31,14 @@ public final class InMemoryKVExpirableLRUCache<K, V extends Expirable> extends I
     protected Stream<Map.Entry<K, V>> overCapacityEvictionSelector(int currentEntryCount,
                                                                    int targetEntryCount,
                                                                    Stream<Map.Entry<K, V>> entries) {
-        long removeBeforeTime = lastUsed.values()
+        long removeBeforeTime
+                = lastUsed
+                .values()
                 .stream()
+                .mapToLong(l -> l)
                 .sorted()
-                .skip(currentEntryCount - targetEntryCount)
-                .findFirst()
+                .limit(currentEntryCount - targetEntryCount)
+                .max()
                 .orElse(System.currentTimeMillis());
         return entries.filter
                 (
