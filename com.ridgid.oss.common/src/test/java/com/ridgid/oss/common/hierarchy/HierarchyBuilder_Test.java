@@ -52,7 +52,7 @@ class HierarchyBuilder_Test {
     void root_can_create_with_a_singular_child() {
         Hierarchy<Person> h
                 = Hierarchy.root(Person.class)
-                .hasOne(Person::getSpouse)
+                .single(Person::getSpouse)
                 .build();
         assertNotNull(h);
     }
@@ -61,8 +61,8 @@ class HierarchyBuilder_Test {
     void root_can_create_a_complex_hierarchy() {
         Hierarchy<Person> h
                 = Hierarchy.root(Person.class)
-                .hasMany(Person::getFriends,
-                        f -> f.hasOne(Person::getSpouse))
+                .many(Person::getFriends,
+                        f -> f.single(Person::getSpouse))
                 .build();
         assertNotNull(h);
     }
@@ -72,14 +72,14 @@ class HierarchyBuilder_Test {
         Hierarchy<Person> h
                 = Hierarchy
                 .root(Person.class)
-                .hasOne(Person::getSpouse,
-                        s -> s.hasMany_i(
+                .single(Person::getSpouse,
+                        s -> s.collection(
                                 Person::getPets,
-                                p -> p.hasMany_a(Pet::getFavoriteFoods)
+                                p -> p.array(Pet::getFavoriteFoods)
                         )
                 )
-                .hasMany(Person::getFriends,
-                        f -> f.hasOne(Person::getSpouse))
+                .many(Person::getFriends,
+                        f -> f.single(Person::getSpouse))
                 .build();
         assertNotNull(h);
 

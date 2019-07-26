@@ -48,11 +48,11 @@ public class Hierarchy<PARENT_T> {
             this.rootClass = rootClass;
         }
 
-        public <CHILD_T> Builder<T> hasOne(Function<T, CHILD_T> selector) {
-            return hasOne(selector, null);
+        public <CHILD_T> Builder<T> single(Function<T, CHILD_T> selector) {
+            return single(selector, null);
         }
 
-        public <CHILD_T> Builder<T> hasOne(Function<T, CHILD_T> selector,
+        public <CHILD_T> Builder<T> single(Function<T, CHILD_T> selector,
                                            Consumer<Node<CHILD_T>> childrenSelector) {
             SingleChild<T, CHILD_T> child = new SingleChild<>(selector);
             if (childrenSelector != null) childrenSelector.accept(child);
@@ -60,36 +60,36 @@ public class Hierarchy<PARENT_T> {
             return this;
         }
 
-        public <CHILD_T> Builder<T> hasMany(Function<T, Stream<CHILD_T>> selector) {
-            return hasMany(selector, null);
+        public <CHILD_T> Builder<T> many(Function<T, Stream<CHILD_T>> selector) {
+            return many(selector, null);
         }
 
-        public <CHILD_T> Builder<T> hasMany(Function<T, Stream<CHILD_T>> selector,
-                                            Consumer<Node<CHILD_T>> childrenSelector) {
+        public <CHILD_T> Builder<T> many(Function<T, Stream<CHILD_T>> selector,
+                                         Consumer<Node<CHILD_T>> childrenSelector) {
             StreamChild<T, CHILD_T> child = new StreamChild<>(selector);
             if (childrenSelector != null) childrenSelector.accept(child);
             childNodes.add(child);
             return this;
         }
 
-        public <CHILD_T> Builder<T> hasMany_i(Function<T, Iterable<CHILD_T>> selector) {
-            return hasMany_i(selector, null);
+        public <CHILD_T> Builder<T> collection(Function<T, Iterable<CHILD_T>> selector) {
+            return collection(selector, null);
         }
 
-        public <CHILD_T> Builder<T> hasMany_i(Function<T, Iterable<CHILD_T>> selector,
-                                              Consumer<Node<CHILD_T>> childrenSelector) {
+        public <CHILD_T> Builder<T> collection(Function<T, Iterable<CHILD_T>> selector,
+                                               Consumer<Node<CHILD_T>> childrenSelector) {
             IterableChild<T, CHILD_T> child = new IterableChild<>(selector);
             if (childrenSelector != null) childrenSelector.accept(child);
             childNodes.add(child);
             return this;
         }
 
-        public <CHILD_T> Builder<T> hasMany_a(Function<T, CHILD_T[]> selector) {
-            return hasMany_a(selector, null);
+        public <CHILD_T> Builder<T> array(Function<T, CHILD_T[]> selector) {
+            return array(selector, null);
         }
 
-        public <CHILD_T> Builder<T> hasMany_a(Function<T, CHILD_T[]> selector,
-                                              Consumer<Node<CHILD_T>> childrenSelector) {
+        public <CHILD_T> Builder<T> array(Function<T, CHILD_T[]> selector,
+                                          Consumer<Node<CHILD_T>> childrenSelector) {
             ArrayChild<T, CHILD_T> child = new ArrayChild<>(selector);
             if (childrenSelector != null) childrenSelector.accept(child);
             childNodes.add(child);
@@ -114,7 +114,7 @@ public class Hierarchy<PARENT_T> {
         protected List<VisitableNode> childNodes = new ArrayList<>();
 
         @Override
-        public <CHILD_T> Node<T> hasOne(Function<T, CHILD_T> selector,
+        public <CHILD_T> Node<T> single(Function<T, CHILD_T> selector,
                                         Consumer<Node<CHILD_T>> childrenSelector) {
             SingleChild<T, CHILD_T> child = new SingleChild<>(selector);
             if (childrenSelector != null) childrenSelector.accept(child);
@@ -123,8 +123,8 @@ public class Hierarchy<PARENT_T> {
         }
 
         @Override
-        public <CHILD_T> Node<T> hasMany(Function<T, Stream<CHILD_T>> selector,
-                                         Consumer<Node<CHILD_T>> childrenSelector) {
+        public <CHILD_T> Node<T> many(Function<T, Stream<CHILD_T>> selector,
+                                      Consumer<Node<CHILD_T>> childrenSelector) {
             StreamChild<T, CHILD_T> child = new StreamChild<>(selector);
             if (childrenSelector != null) childrenSelector.accept(child);
             childNodes.add(child);
@@ -132,8 +132,8 @@ public class Hierarchy<PARENT_T> {
         }
 
         @Override
-        public <CHILD_T> Node<T> hasMany_i(Function<T, Iterable<CHILD_T>> selector,
-                                           Consumer<Node<CHILD_T>> childrenSelector) {
+        public <CHILD_T> Node<T> collection(Function<T, Iterable<CHILD_T>> selector,
+                                            Consumer<Node<CHILD_T>> childrenSelector) {
             IterableChild<T, CHILD_T> child = new IterableChild<>(selector);
             if (childrenSelector != null) childrenSelector.accept(child);
             childNodes.add(child);
@@ -141,8 +141,8 @@ public class Hierarchy<PARENT_T> {
         }
 
         @Override
-        public <CHILD_T> Node<T> hasMany_a(Function<T, CHILD_T[]> selector,
-                                           Consumer<Node<CHILD_T>> childrenSelector) {
+        public <CHILD_T> Node<T> array(Function<T, CHILD_T[]> selector,
+                                       Consumer<Node<CHILD_T>> childrenSelector) {
             ArrayChild<T, CHILD_T> child = new ArrayChild<>(selector);
             if (childrenSelector != null) childrenSelector.accept(child);
             childNodes.add(child);
