@@ -10,6 +10,7 @@ import java.util.stream.Stream;
 public final class InMemoryKVExpirableLRUCache<K, V extends Expirable> extends InMemoryKVCache<K, V> {
 
     private final ConcurrentHashMap<K, Long> lastUsed = new ConcurrentHashMap<>();
+    private long removeBeforeTime;
 
     public InMemoryKVExpirableLRUCache(short timeoutCheckIntervalSeconds,
                                        short initialCapacity,
@@ -31,8 +32,7 @@ public final class InMemoryKVExpirableLRUCache<K, V extends Expirable> extends I
     protected Stream<Map.Entry<K, V>> overCapacityEvictionSelector(int currentEntryCount,
                                                                    int targetEntryCount,
                                                                    Stream<Map.Entry<K, V>> entries) {
-        long removeBeforeTime
-                = lastUsed
+        removeBeforeTime = lastUsed
                 .values()
                 .stream()
                 .mapToLong(l -> l)
@@ -40,14 +40,15 @@ public final class InMemoryKVExpirableLRUCache<K, V extends Expirable> extends I
                 .limit(currentEntryCount - targetEntryCount)
                 .max()
                 .orElse(System.currentTimeMillis());
-        return entries.filter
+        return entries.filter(this::isLastUsedBeforeCutoff);
+    }
+
+    private boolean isLastUsedBeforeCutoff(Map.Entry<K, V> e) {
+        return lastUsed.computeIfAbsent
                 (
-                        e -> lastUsed.computeIfAbsent
-                                (
-                                        e.getKey(),
-                                        k -> System.currentTimeMillis()
-                                ) <= removeBeforeTime
-                );
+                        e.getKey(),
+                        k -> System.currentTimeMillis()
+                ) <= removeBeforeTime;
     }
 
     private void updateLastUsed(K key) {
