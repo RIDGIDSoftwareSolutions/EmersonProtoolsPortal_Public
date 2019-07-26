@@ -14,6 +14,7 @@ public class InMemoryKVCache<K, V extends Expirable> implements Cache<K, V> {
     private final Timer cleanupTimer;
     private final short maxCapacity;
     private final short evictToCapacity;
+    private Thread cleanupThread;
 
     public InMemoryKVCache(short timeoutCheckIntervalSeconds,
                            short initialCapacity,
@@ -61,17 +62,30 @@ public class InMemoryKVCache<K, V extends Expirable> implements Cache<K, V> {
         };
     }
 
-    protected void cleanup() {
+    private void cleanup() {
         synchronized (cleanupTimer) {
-            cache.entrySet()
-                    .stream()
-                    .filter(this::normalEvictionApplies)
-                    .forEach(e -> this.remove(e.getKey()));
-            if (cache.size() > maxCapacity)
-                overCapacityEvictionSelector(cache.size(), evictToCapacity, cache.entrySet().stream())
-                        .filter(entry -> cache.size() > evictToCapacity)
-                        .forEach(entry -> this.remove(entry.getKey()));
+            if (cleanupThread != null) return;
+            cleanupThread = Thread.currentThread();
         }
+        try {
+            performCleanup();
+        } finally {
+            synchronized (cleanupTimer) {
+                if (cleanupThread == Thread.currentThread())
+                    cleanupThread = null;
+            }
+        }
+    }
+
+    private void performCleanup() {
+        cache.entrySet()
+                .stream()
+                .filter(this::normalEvictionApplies)
+                .forEach(e -> this.remove(e.getKey()));
+        if (cache.size() > maxCapacity)
+            overCapacityEvictionSelector(cache.size(), evictToCapacity, cache.entrySet().stream())
+                    .filter(entry -> cache.size() > evictToCapacity)
+                    .forEach(entry -> this.remove(entry.getKey()));
     }
 
     protected boolean normalEvictionApplies(Map.Entry<K, V> entry) {
