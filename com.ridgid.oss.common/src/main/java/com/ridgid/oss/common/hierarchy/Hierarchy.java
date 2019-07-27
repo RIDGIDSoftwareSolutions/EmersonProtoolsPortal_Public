@@ -225,6 +225,15 @@ public class Hierarchy<PARENT_T> {
             return this;
         }
 
+        private VisitStatus invokeVisitHandlers(T self,
+                                                HandlerList<T, VisitStatus> visitHandlers) {
+            return visitHandlers == null
+                    ? CONTINUE_PROCESSING
+                    : visitHandlers
+                    .invoke(self, VisitStatus::isNotOk)
+                    .orElse(CONTINUE_PROCESSING);
+        }
+
         protected final VisitStatus visit(UUID key,
                                           Consumer<Object> visitor,
                                           Traversal traversal,
@@ -250,15 +259,6 @@ public class Hierarchy<PARENT_T> {
             return CONTINUE_PROCESSING;
         }
 
-        private VisitStatus invokeVisitHandlers(T self,
-                                                HandlerList<T, VisitStatus> visitHandlers) {
-            return visitHandlers == null
-                    ? CONTINUE_PROCESSING
-                    : visitHandlers
-                    .invoke(self, VisitStatus::isNotOk)
-                    .orElse(CONTINUE_PROCESSING);
-        }
-
         private VisitStatus visitChildren(UUID key,
                                           Consumer<Object> visitor,
                                           Traversal traversal, T self) {
@@ -267,7 +267,6 @@ public class Hierarchy<PARENT_T> {
             if (vs.isSkipNode()) return vs;
             vs = visitEachChild(key, visitor, traversal, self);
             if (vs.isSkipNode()) return vs;
-
             return invokeVisitHandlers(self, afterAllChildrenVisitHandlers);
         }
 
@@ -290,27 +289,25 @@ public class Hierarchy<PARENT_T> {
                     if (vs.isStop()) return vs;
                     if (vs.isSkipSiblings()) break;
                     if (vs.isSkipNode()) continue;
-
                     vs = childNode.visitOnlySelf(key, self, visitor);
                     if (vs.isStop()) return vs;
                     if (vs.isSkipSiblings()) break;
                     if (vs.isSkipNode()) continue;
-
                     includedChildren.add(childNode);
                 }
 
             for (VisitableNode childNode : childNodes) {
                 if (traversal.equals(BREADTH_FIRST) && !includedChildren.contains(childNode)) continue;
-                VisitStatus vs = invokeVisitHandlers(self, beforeEachChildVisitHandlers);
+                if (traversal.equals(DEPTH_FIRST)) {
+                    VisitStatus vs = invokeVisitHandlers(self, beforeEachChildVisitHandlers);
+                    if (vs.isStop()) return vs;
+                    if (vs.isSkipSiblings()) break;
+                    if (vs.isSkipNode()) continue;
+                }
+                VisitStatus vs = childNode.visit(key, self, visitor, traversal);
                 if (vs.isStop()) return vs;
                 if (vs.isSkipSiblings()) break;
                 if (vs.isSkipNode()) continue;
-
-                vs = childNode.visit(key, self, visitor, traversal);
-                if (vs.isStop()) return vs;
-                if (vs.isSkipSiblings()) break;
-                if (vs.isSkipNode()) continue;
-
                 vs = invokeVisitHandlers(self, afterEachChildVisitHandlers);
                 if (vs.isStop()) return vs;
                 if (vs.isSkipSiblings()) break;
