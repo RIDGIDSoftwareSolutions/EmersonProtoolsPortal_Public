@@ -2,9 +2,12 @@ package com.ridgid.oss.orm.jpa;
 
 import com.ridgid.oss.common.helper.CopyableModel;
 import com.ridgid.oss.orm.CreateModifyTracking;
+import org.hibernate.annotations.LazyGroup;
 
+import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
+import javax.persistence.FetchType;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
@@ -17,15 +20,23 @@ public class JPACreateModifyTracking
         implements CreateModifyTracking, Comparable<CreateModifyTracking>, CopyableModel {
 
     @Column(name = "Created", updatable = false, nullable = false)
+    @Basic(fetch = FetchType.LAZY)
+    @LazyGroup("CreateModifyTracking")
     private LocalDateTime created;
 
     @Column(name = "CreatedBy", length = 64, updatable = false, nullable = false)
+    @Basic(fetch = FetchType.LAZY)
+    @LazyGroup("CreateModifyTracking")
     private String createdBy;
 
     @Column(name = "Modified", nullable = false)
+    @Basic(fetch = FetchType.LAZY)
+    @LazyGroup("CreateModifyTracking")
     private LocalDateTime modified;
 
     @Column(name = "ModifiedBy", length = 64, nullable = false)
+    @Basic(fetch = FetchType.LAZY)
+    @LazyGroup("CreateModifyTracking")
     private String modifiedBy;
 
     @Override

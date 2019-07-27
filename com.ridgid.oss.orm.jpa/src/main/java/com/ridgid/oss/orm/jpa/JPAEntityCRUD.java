@@ -2,6 +2,7 @@ package com.ridgid.oss.orm.jpa;
 
 import com.ridgid.oss.common.hierarchy.Hierarchy;
 import com.ridgid.oss.orm.EntityCRUD;
+import com.ridgid.oss.orm.EntityCRUDExceptionError;
 import com.ridgid.oss.orm.PrimaryKeyedEntity;
 import org.hibernate.Hibernate;
 
@@ -45,14 +46,31 @@ public abstract class JPAEntityCRUD<ET extends PrimaryKeyedEntity<PKT>, PKT exte
     @Override
     public ET initializeAndDetach(ET entity,
                                   Hierarchy<ET> hierarchyToLoad) {
-        hierarchyToLoad.visit
-                (
-                        entity,
-                        Hibernate::initialize,
-                        DEPTH_FIRST
-                );
-        entityManager.detach(entity);
+        try {
+            hierarchyToLoad.visit
+                    (
+                            entity,
+                            Hibernate::initialize,
+                            DEPTH_FIRST
+                    );
+            entityManager.detach(entity);
+        } catch (Exception e) {
+            throw enhanceWithEntityManagerNullCheck(e);
+        }
         return entity;
     }
 
+    protected RuntimeException enhanceWithEntityManagerNullCheck(Exception e) throws EntityManagerNullException {
+        if (entityManager == null)
+            throw new EntityManagerNullException(e);
+        else
+            throw new EntityCRUDExceptionError(e);
+    }
+
+    public static class EntityManagerNullException extends RuntimeException {
+        public EntityManagerNullException(Exception e) {
+            super("EntityManager is null: Ensure you have set the Entity Manager manually or that you are in a container managed context and transaction such that the container has auto-wired the entity manager",
+                    e);
+        }
+    }
 }

@@ -66,7 +66,7 @@ public class JPAEntityCRUDRead<ET extends PrimaryKeyedEntity<PKT>, PKT extends C
                     .setMaxResults(limit)
                     .getResultList();
         } catch (Exception ex) {
-            throw new EntityCRUDExceptionError(ex);
+            throw enhanceWithEntityManagerNullCheck(ex);
         }
     }
 

@@ -41,8 +41,8 @@ public class JPAEntityCRUDDelete<ET extends PrimaryKeyedEntity<PKT>, PKT extends
             getEntityManager().flush();
         } catch (EntityCRUDExceptionNotFound ex) {
             throw ex;
-        } catch (Exception ex) {
-            throw new EntityCRUDExceptionError(ex);
+        } catch (RuntimeException ex) {
+            throw enhanceWithEntityManagerNullCheck(ex);
         }
     }
 }

@@ -33,9 +33,13 @@ public class JPAEntityCRUDCreate<ET extends PrimaryKeyedEntity<PKT>, PKT extends
      */
     @Override
     public ET add(ET entity) throws EntityCRUDExceptionError, EntityCRUDExceptionAlreadyExists {
-        getEntityManager().persist(entity);
-        getEntityManager().flush();
-        getEntityManager().refresh(entity);
-        return entity;
+        try {
+            getEntityManager().persist(entity);
+            getEntityManager().flush();
+            getEntityManager().refresh(entity);
+            return entity;
+        } catch (RuntimeException e) {
+            throw enhanceWithEntityManagerNullCheck(e);
+        }
     }
 }
