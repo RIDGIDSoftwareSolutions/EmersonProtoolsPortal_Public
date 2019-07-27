@@ -3,6 +3,8 @@ package com.ridgid.oss.common.hierarchy;
 import com.ridgid.oss.common.callback.HandlerList;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -25,7 +27,12 @@ public class Hierarchy<PARENT_T> {
     }
 
     public void visit(PARENT_T parent, Consumer<Object> visitor, Traversal traversal) {
-        built.visit(parent, visitor, traversal);
+        UUID key = UUID.randomUUID();
+        try {
+            built.visit(key, parent, visitor, traversal);
+        } finally {
+            SAVED_STATE.remove(key);
+        }
     }
 
     public enum Traversal {
@@ -33,10 +40,12 @@ public class Hierarchy<PARENT_T> {
         BREADTH_FIRST
     }
 
-    private interface VisitableNode<PARENT_T, CHILD_T> extends Node<CHILD_T> {
-        VisitStatus visit(PARENT_T parent, Consumer<Object> visitor, Traversal traversal);
+    private static ConcurrentMap<UUID, ConcurrentMap<VisitableNode, Object>> SAVED_STATE = new ConcurrentHashMap<>();
 
-        VisitStatus visitOnlySelf(PARENT_T parent, Consumer<Object> visitor);
+    private interface VisitableNode<PARENT_T, CHILD_T> extends Node<CHILD_T> {
+        VisitStatus visit(UUID traversalKey, PARENT_T parent, Consumer<Object> visitor, Traversal traversal);
+
+        VisitStatus visitOnlySelf(UUID traversalKey, PARENT_T parent, Consumer<Object> visitor);
     }
 
     @SuppressWarnings("FieldCanBeLocal")
@@ -103,24 +112,22 @@ public class Hierarchy<PARENT_T> {
         }
 
         @SuppressWarnings({"unchecked", "ResultOfMethodCallIgnored"})
-        private void visit(T obj, Consumer<Object> visitor, Traversal traversal) {
+        private void visit(UUID key, T obj, Consumer<Object> visitor, Traversal traversal) {
             visitor.accept(obj);
             if (traversal.equals(BREADTH_FIRST))
                 if (childNodes
                         .stream()
-                        .map(child -> child.visitOnlySelf(obj, visitor))
+                        .map(child -> child.visitOnlySelf(key, obj, visitor))
                         .anyMatch(VisitStatus::isSkipSiblings))
                     return;
             childNodes
                     .stream()
-                    .map(child -> child.visit(obj, visitor, traversal))
+                    .map(child -> child.visit(key, obj, visitor, traversal))
                     .anyMatch(VisitStatus::isSkipSiblings);
         }
     }
 
     private static abstract class BaseNode<PARENT_T, T> implements VisitableNode<PARENT_T, T>, NodeVisitorConfiguration<T> {
-
-        private final Set<VisitableNode> includedChildren = new HashSet<>();
 
         protected List<VisitableNode> childNodes;
         protected HandlerList<T, VisitStatus> beforeVisitHandlers;
@@ -218,19 +225,23 @@ public class Hierarchy<PARENT_T> {
             return this;
         }
 
-        protected final VisitStatus visit(Consumer<Object> visitor, Traversal traversal, T self) {
+        protected final VisitStatus visit(UUID key,
+                                          Consumer<Object> visitor,
+                                          Traversal traversal,
+                                          T self) {
             if (self != null) {
                 if (traversal.equals(DEPTH_FIRST)) {
-                    VisitStatus vs = visitStart(visitor, self);
+                    VisitStatus vs = visitStart(key, visitor, self);
                     if (vs.isSkipNode()) return vs;
                 }
-                VisitStatus vs = visitChildren(visitor, traversal, self);
+                VisitStatus vs = visitChildren(key, visitor, traversal, self);
                 if (vs.isSkipNode()) return vs;
             }
-            return visitEnd(self);
+            return visitEnd(key, self);
         }
 
-        protected final VisitStatus visitStart(Consumer<Object> visitor,
+        protected final VisitStatus visitStart(UUID key,
+                                               Consumer<Object> visitor,
                                                T self) {
             if (self == null) return CONTINUE_PROCESSING;
             VisitStatus vs = invokeVisitHandlers(self, beforeVisitHandlers);
@@ -239,7 +250,8 @@ public class Hierarchy<PARENT_T> {
             return CONTINUE_PROCESSING;
         }
 
-        private VisitStatus invokeVisitHandlers(T self, HandlerList<T, VisitStatus> visitHandlers) {
+        private VisitStatus invokeVisitHandlers(T self,
+                                                HandlerList<T, VisitStatus> visitHandlers) {
             return visitHandlers == null
                     ? CONTINUE_PROCESSING
                     : visitHandlers
@@ -247,21 +259,31 @@ public class Hierarchy<PARENT_T> {
                     .orElse(CONTINUE_PROCESSING);
         }
 
-        private VisitStatus visitChildren(Consumer<Object> visitor, Traversal traversal, T self) {
+        private VisitStatus visitChildren(UUID key,
+                                          Consumer<Object> visitor,
+                                          Traversal traversal, T self) {
             VisitStatus vs
                     = invokeVisitHandlers(self, beforeAllChildrenVisitHandlers);
             if (vs.isSkipNode()) return vs;
-            vs = visitEachChild(visitor, traversal, self);
+            vs = visitEachChild(key, visitor, traversal, self);
             if (vs.isSkipNode()) return vs;
 
             return invokeVisitHandlers(self, afterAllChildrenVisitHandlers);
         }
 
         @SuppressWarnings("unchecked")
-        private VisitStatus visitEachChild(Consumer<Object> visitor, Traversal traversal, T self) {
+        private VisitStatus visitEachChild(UUID key,
+                                           Consumer<Object> visitor,
+                                           Traversal traversal,
+                                           T self) {
             if (childNodes == null) return CONTINUE_PROCESSING;
 
+            HashSet<VisitableNode> includedChildren
+                    = (HashSet<VisitableNode>) SAVED_STATE
+                    .computeIfAbsent(key, k -> new ConcurrentHashMap<>())
+                    .computeIfAbsent(this, k -> new HashSet<VisitableNode>());
             includedChildren.clear();
+
             if (traversal.equals(BREADTH_FIRST))
                 for (VisitableNode childNode : childNodes) {
                     VisitStatus vs = invokeVisitHandlers(self, beforeEachChildVisitHandlers);
@@ -269,7 +291,7 @@ public class Hierarchy<PARENT_T> {
                     if (vs.isSkipSiblings()) break;
                     if (vs.isSkipNode()) continue;
 
-                    vs = childNode.visitOnlySelf(self, visitor);
+                    vs = childNode.visitOnlySelf(key, self, visitor);
                     if (vs.isStop()) return vs;
                     if (vs.isSkipSiblings()) break;
                     if (vs.isSkipNode()) continue;
@@ -284,7 +306,7 @@ public class Hierarchy<PARENT_T> {
                 if (vs.isSkipSiblings()) break;
                 if (vs.isSkipNode()) continue;
 
-                vs = childNode.visit(self, visitor, traversal);
+                vs = childNode.visit(key, self, visitor, traversal);
                 if (vs.isStop()) return vs;
                 if (vs.isSkipSiblings()) break;
                 if (vs.isSkipNode()) continue;
@@ -296,7 +318,8 @@ public class Hierarchy<PARENT_T> {
             return CONTINUE_PROCESSING;
         }
 
-        private VisitStatus visitEnd(T self) {
+        private VisitStatus visitEnd(UUID key,
+                                     T self) {
             return invokeVisitHandlers(self, afterVisitHandlers);
         }
 
@@ -311,39 +334,52 @@ public class Hierarchy<PARENT_T> {
         }
 
         @Override
-        public VisitStatus visit(PARENT_T parent, Consumer<Object> visitor, Traversal traversal) {
+        public VisitStatus visit(UUID key, PARENT_T parent, Consumer<Object> visitor, Traversal traversal) {
             CHILD_T self = childSelector.apply(parent);
-            return visit(visitor, traversal, self);
+            return visit(key, visitor, traversal, self);
         }
 
         @Override
-        public VisitStatus visitOnlySelf(PARENT_T parent, Consumer<Object> visitor) {
+        public VisitStatus visitOnlySelf(UUID key, PARENT_T parent, Consumer<Object> visitor) {
             CHILD_T self = childSelector.apply(parent);
-            return visitStart(visitor, self);
+            return visitStart(key, visitor, self);
         }
 
     }
 
     private static abstract class ManyBaseNode<PARENT_T, CHILD_T> extends BaseNode<PARENT_T, CHILD_T> {
 
-        private final Set<CHILD_T> includedEntries = new HashSet<>();
-
-        protected final VisitStatus visit(Consumer<Object> visitor, Traversal traversal, Iterator<CHILD_T> it) {
+        @SuppressWarnings("unchecked")
+        protected final VisitStatus visit(UUID key,
+                                          Consumer<Object> visitor,
+                                          Traversal traversal,
+                                          Iterator<CHILD_T> it) {
+            HashSet<CHILD_T> includedEntries
+                    = (HashSet<CHILD_T>) SAVED_STATE
+                    .computeIfAbsent(key, k -> new ConcurrentHashMap<>())
+                    .computeIfAbsent(this, k -> new HashSet<CHILD_T>());
             while (it.hasNext()) {
                 CHILD_T self = it.next();
                 if (traversal.equals(BREADTH_FIRST) && !includedEntries.contains(self)) continue;
-                VisitStatus vs = visit(visitor, traversal, self);
+                VisitStatus vs = visit(key, visitor, traversal, self);
                 if (vs.isStop()) return vs;
                 if (vs.isSkipSiblings()) return CONTINUE_PROCESSING;
             }
             return CONTINUE_PROCESSING;
         }
 
-        protected final VisitStatus visitOnlySelf(Consumer<Object> visitor, Iterator<CHILD_T> it) {
+        @SuppressWarnings("unchecked")
+        protected final VisitStatus visitOnlySelf(UUID key,
+                                                  Consumer<Object> visitor,
+                                                  Iterator<CHILD_T> it) {
+            HashSet<CHILD_T> includedEntries
+                    = (HashSet<CHILD_T>) SAVED_STATE
+                    .computeIfAbsent(key, k -> new ConcurrentHashMap<>())
+                    .computeIfAbsent(this, k -> new HashSet<CHILD_T>());
             includedEntries.clear();
             while (it.hasNext()) {
                 CHILD_T self = it.next();
-                VisitStatus vs = visitStart(visitor, self);
+                VisitStatus vs = visitStart(key, visitor, self);
                 if (vs.isStop()) return vs;
                 if (vs.isSkipSiblings()) break;
                 if (vs.isSkipNode()) continue;
@@ -356,7 +392,6 @@ public class Hierarchy<PARENT_T> {
 
     private static class StreamChild<PARENT_T, CHILD_T> extends ManyBaseNode<PARENT_T, CHILD_T> {
 
-        private final Set<CHILD_T> includedEntries = new HashSet<>();
         private final Function<PARENT_T, Stream<CHILD_T>> childSelector;
 
         public StreamChild(Function<PARENT_T, Stream<CHILD_T>> selector) {
@@ -364,15 +399,20 @@ public class Hierarchy<PARENT_T> {
         }
 
         @Override
-        public VisitStatus visit(PARENT_T parent, Consumer<Object> visitor, Traversal traversal) {
+        public VisitStatus visit(UUID key,
+                                 PARENT_T parent,
+                                 Consumer<Object> visitor,
+                                 Traversal traversal) {
             Iterator<CHILD_T> it = childSelector.apply(parent).iterator();
-            return visit(visitor, traversal, it);
+            return visit(key, visitor, traversal, it);
         }
 
         @Override
-        public VisitStatus visitOnlySelf(PARENT_T parent, Consumer<Object> visitor) {
+        public VisitStatus visitOnlySelf(UUID key,
+                                         PARENT_T parent,
+                                         Consumer<Object> visitor) {
             Iterator<CHILD_T> it = childSelector.apply(parent).iterator();
-            return visitOnlySelf(visitor, it);
+            return visitOnlySelf(key, visitor, it);
         }
 
     }
@@ -386,15 +426,19 @@ public class Hierarchy<PARENT_T> {
         }
 
         @Override
-        public VisitStatus visit(PARENT_T parent, Consumer<Object> visitor, Traversal traversal) {
+        public VisitStatus visit(UUID key,
+                                 PARENT_T parent, Consumer<Object> visitor,
+                                 Traversal traversal) {
             Iterator<CHILD_T> it = childSelector.apply(parent).iterator();
-            return visit(visitor, traversal, it);
+            return visit(key, visitor, traversal, it);
         }
 
         @Override
-        public VisitStatus visitOnlySelf(PARENT_T parent, Consumer<Object> visitor) {
+        public VisitStatus visitOnlySelf(UUID key,
+                                         PARENT_T parent,
+                                         Consumer<Object> visitor) {
             Iterator<CHILD_T> it = childSelector.apply(parent).iterator();
-            return visitOnlySelf(visitor, it);
+            return visitOnlySelf(key, visitor, it);
         }
     }
 
@@ -407,15 +451,20 @@ public class Hierarchy<PARENT_T> {
         }
 
         @Override
-        public VisitStatus visit(PARENT_T parent, Consumer<Object> visitor, Traversal traversal) {
+        public VisitStatus visit(UUID key,
+                                 PARENT_T parent,
+                                 Consumer<Object> visitor,
+                                 Traversal traversal) {
             Iterator<CHILD_T> it = Arrays.stream(childSelector.apply(parent)).iterator();
-            return visit(visitor, traversal, it);
+            return visit(key, visitor, traversal, it);
         }
 
         @Override
-        public VisitStatus visitOnlySelf(PARENT_T parent, Consumer<Object> visitor) {
+        public VisitStatus visitOnlySelf(UUID key,
+                                         PARENT_T parent,
+                                         Consumer<Object> visitor) {
             Iterator<CHILD_T> it = Arrays.stream(childSelector.apply(parent)).iterator();
-            return visitOnlySelf(visitor, it);
+            return visitOnlySelf(key, visitor, it);
         }
     }
 }
