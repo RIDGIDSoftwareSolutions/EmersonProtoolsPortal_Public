@@ -1,5 +1,7 @@
-package com.ridgid.oss.emerson.common.tuple;
+package com.ridgid.oss.common.tuple;
 
+import com.ridgid.oss.emerson.common.tuple.Pair;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
@@ -74,7 +76,7 @@ class Pair_Test {
 
     @Test
     void it_constructs_with_2_differently_typed_noncomparables() {
-        assertDoesNotThrow(() -> new Pair<>(noncomparable1, noncomparable2));
+        Assertions.assertDoesNotThrow(() -> new Pair<>(noncomparable1, noncomparable2));
         assertDoesNotThrow(() -> new Pair<>(noncomparable2, noncomparable3));
         assertDoesNotThrow(() -> new Pair<>(noncomparable3, noncomparable4));
         assertDoesNotThrow(() -> new Pair<>(noncomparable4, noncomparable5));
