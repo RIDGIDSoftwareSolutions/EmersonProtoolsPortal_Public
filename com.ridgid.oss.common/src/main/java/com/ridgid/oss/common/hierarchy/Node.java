@@ -35,4 +35,5 @@ public interface Node<T> {
     <CHILD_T> Node<T> array(Function<T, CHILD_T[]> selector,
                             Consumer<Node<CHILD_T>> childrenSelector);
 
+    void whenVisited(Consumer<NodeVisitorConfiguration<T>> visitConfigurer);
 }

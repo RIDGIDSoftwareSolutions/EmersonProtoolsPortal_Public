@@ -43,7 +43,8 @@ public abstract class JPAEntityCRUD<ET extends PrimaryKeyedEntity<PKT>, PKT exte
 
 
     @Override
-    public ET initializeAndDetach(ET entity, Hierarchy<ET> hierarchyToLoad) {
+    public ET initializeAndDetach(ET entity,
+                                  Hierarchy<ET> hierarchyToLoad) {
         hierarchyToLoad.visit
                 (
                         entity,
@@ -53,4 +54,5 @@ public abstract class JPAEntityCRUD<ET extends PrimaryKeyedEntity<PKT>, PKT exte
         entityManager.detach(entity);
         return entity;
     }
+
 }
