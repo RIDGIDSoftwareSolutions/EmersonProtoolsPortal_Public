@@ -8,6 +8,8 @@ import com.ridgid.oss.orm.entity.PrimaryKeyedEntity;
  * @param <ET>  entity type of entity the DAO provides CREATE, READ, and UPDATE CRUD methods for
  * @param <PKT> type of the primary key of the entity type ET
  */
-public interface EntityCRUDCreateReadUpdate<ET extends PrimaryKeyedEntity<PKT>, PKT extends Comparable<PKT>>
-        extends EntityCRUDCreateRead<ET, PKT>, EntityCRUDUpdate<ET, PKT> {
+public interface EntityCRUDCachedCreateReadUpdate<ET extends PrimaryKeyedEntity<PKT>, PKT extends Comparable<PKT>>
+        extends
+        EntityCRUDCachedCreateRead<ET, PKT>,
+        EntityCRUDCachedUpdate<ET, PKT> {
 }

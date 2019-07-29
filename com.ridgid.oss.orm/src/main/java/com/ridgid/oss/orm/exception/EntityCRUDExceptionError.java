@@ -1,4 +1,4 @@
-package com.ridgid.oss.orm;
+package com.ridgid.oss.orm.exception;
 
 public class EntityCRUDExceptionError extends EntityCRUDException {
     public EntityCRUDExceptionError() {

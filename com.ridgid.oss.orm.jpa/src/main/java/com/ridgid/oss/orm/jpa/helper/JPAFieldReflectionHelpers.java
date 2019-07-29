@@ -1,7 +1,7 @@
 package com.ridgid.oss.orm.jpa.helper;
 
 import com.ridgid.oss.common.helper.TemporalType;
-import com.ridgid.oss.orm.CreateModifyTracking;
+import com.ridgid.oss.orm.entity.CreateModifyTracking;
 
 import javax.persistence.*;
 import java.lang.reflect.Field;

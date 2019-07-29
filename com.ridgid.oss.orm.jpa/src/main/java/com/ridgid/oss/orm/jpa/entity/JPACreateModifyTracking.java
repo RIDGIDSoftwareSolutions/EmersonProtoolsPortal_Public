@@ -1,7 +1,7 @@
-package com.ridgid.oss.orm.jpa;
+package com.ridgid.oss.orm.jpa.entity;
 
 import com.ridgid.oss.common.helper.CopyableModel;
-import com.ridgid.oss.orm.CreateModifyTracking;
+import com.ridgid.oss.orm.entity.CreateModifyTracking;
 import org.hibernate.annotations.LazyGroup;
 
 import javax.persistence.Basic;

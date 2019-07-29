@@ -1,10 +1,12 @@
 package com.ridgid.oss.orm.jpa;
 
-import com.ridgid.oss.orm.EntityCRUDExceptionError;
+import com.ridgid.oss.common.hierarchy.Hierarchy;
 import com.ridgid.oss.orm.EntityCRUDRead;
-import com.ridgid.oss.orm.PrimaryKeyedEntity;
+import com.ridgid.oss.orm.entity.PrimaryKeyedEntity;
+import com.ridgid.oss.orm.exception.EntityCRUDExceptionError;
 
 import javax.persistence.LockModeType;
+import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import java.util.List;
@@ -21,14 +23,30 @@ public class JPAEntityCRUDRead<ET extends PrimaryKeyedEntity<PKT>, PKT extends C
         extends JPAEntityCRUD<ET, PKT>
         implements EntityCRUDRead<ET, PKT> {
 
-    private final Class<ET> classType;
-    @SuppressWarnings("FieldCanBeLocal")
-    private final Class<PKT> pkType;
+    private TypedQuery<ET> findAllByLimitQuery;
 
     protected JPAEntityCRUDRead(Class<ET> classType,
                                 Class<PKT> pkType) {
-        this.classType = classType;
-        this.pkType = pkType;
+        super(classType, pkType);
+    }
+
+    public JPAEntityCRUDRead(Class<ET> classType,
+                             Class<PKT> pkType,
+                             String pkName) {
+        super(classType, pkType, pkName);
+    }
+
+    public JPAEntityCRUDRead(Class<ET> classType,
+                             Class<PKT> pkType,
+                             short loadBatchSize) {
+        super(classType, pkType, loadBatchSize);
+    }
+
+    public JPAEntityCRUDRead(Class<ET> classType,
+                             Class<PKT> pkType,
+                             String pkName,
+                             short loadBatchSize) {
+        super(classType, pkType, pkName, loadBatchSize);
     }
 
     /**
@@ -47,6 +65,15 @@ public class JPAEntityCRUDRead<ET extends PrimaryKeyedEntity<PKT>, PKT extends C
         }
     }
 
+    @Override
+    public Optional<ET> optionalFind(PKT pk, Hierarchy<ET> hierarchy) throws EntityCRUDExceptionError {
+        try {
+            return optionalFind(pk).map(this::initializeAndDetach);
+        } catch (Exception ex) {
+            throw new EntityCRUDExceptionError(ex);
+        }
+    }
+
     /**
      * Finds and retrieves all available entities of type ET in the persistence store between the offset (inclusive, zero-based) up to offset + limit (exclusive)
      *
@@ -58,15 +85,43 @@ public class JPAEntityCRUDRead<ET extends PrimaryKeyedEntity<PKT>, PKT extends C
     @Override
     public final List<ET> findAll(int offset, int limit) throws EntityCRUDExceptionError {
         try {
-            CriteriaQuery<ET> query = getEntityManager().getCriteriaBuilder().createQuery(classType);
-            Root<ET> root = query.from(classType);
-            return getEntityManager().createQuery(query.select(root))
-                    .setLockMode(LockModeType.NONE)
+            return getFindAllByLimitQuery()
                     .setFirstResult(offset)
                     .setMaxResults(limit)
                     .getResultList();
         } catch (Exception ex) {
-            throw enhanceWithEntityManagerNullCheck(ex);
+            throw enhanceExceptionWithEntityManagerNullCheck(ex);
+        }
+    }
+
+    private TypedQuery<ET> getFindAllByLimitQuery() {
+        if (findAllByLimitQuery == null)
+            synchronized (getEntityManager()) {
+                if (findAllByLimitQuery == null) {
+                    CriteriaQuery<ET> cb = getEntityManager().getCriteriaBuilder().createQuery(classType);
+                    Root<ET> entity = cb.from(classType);
+                    findAllByLimitQuery
+                            = getEntityManager()
+                            .createQuery(cb.select(entity))
+                            .setLockMode(LockModeType.NONE);
+                }
+            }
+        return findAllByLimitQuery;
+    }
+
+    @Override
+    public List<ET> findAll(int offset, int limit, Hierarchy<ET> hierarchy) throws EntityCRUDExceptionError {
+        try {
+            return initializeAndDetach
+                    (
+                            getFindAllByLimitQuery()
+                                    .setFirstResult(offset)
+                                    .setMaxResults(limit)
+                                    .getResultStream(),
+                            hierarchy
+                    );
+        } catch (Exception ex) {
+            throw new EntityCRUDExceptionError(ex);
         }
     }
 

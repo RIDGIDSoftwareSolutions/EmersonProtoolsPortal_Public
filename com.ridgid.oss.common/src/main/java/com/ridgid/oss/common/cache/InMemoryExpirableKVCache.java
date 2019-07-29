@@ -7,8 +7,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.*;
 import java.util.stream.Stream;
 
-@SuppressWarnings({"WeakerAccess", "FieldCanBeLocal", "unused"})
-public class InMemoryKVCache<K, V extends Expirable> implements Cache<K, V> {
+@SuppressWarnings({"WeakerAccess", "FieldCanBeLocal", "unused", "SpellCheckingInspection"})
+public class InMemoryExpirableKVCache<K, V extends Expirable> implements ExpirableCache<K, V> {
 
     private final ConcurrentHashMap<K, V> cache;
     private final Timer cleanupTimer;
@@ -16,10 +16,10 @@ public class InMemoryKVCache<K, V extends Expirable> implements Cache<K, V> {
     private final short evictToCapacity;
     private Thread cleanupThread;
 
-    public InMemoryKVCache(short timeoutCheckIntervalSeconds,
-                           short initialCapacity,
-                           short maxCapacity,
-                           short evictToCapacity) {
+    public InMemoryExpirableKVCache(short timeoutCheckIntervalSeconds,
+                                    short initialCapacity,
+                                    short maxCapacity,
+                                    short evictToCapacity) {
         this.cache = new ConcurrentHashMap<>(initialCapacity);
         this.maxCapacity = maxCapacity;
         this.evictToCapacity = evictToCapacity;

@@ -1,9 +1,9 @@
 package com.ridgid.oss.orm.jpa;
 
 import com.ridgid.oss.orm.EntityCRUDCreateRead;
-import com.ridgid.oss.orm.EntityCRUDExceptionAlreadyExists;
-import com.ridgid.oss.orm.EntityCRUDExceptionError;
-import com.ridgid.oss.orm.PrimaryKeyedEntity;
+import com.ridgid.oss.orm.entity.PrimaryKeyedEntity;
+import com.ridgid.oss.orm.exception.EntityCRUDExceptionAlreadyExists;
+import com.ridgid.oss.orm.exception.EntityCRUDExceptionError;
 
 import javax.persistence.EntityManager;
 

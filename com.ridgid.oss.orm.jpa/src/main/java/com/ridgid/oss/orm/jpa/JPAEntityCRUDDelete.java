@@ -1,9 +1,9 @@
 package com.ridgid.oss.orm.jpa;
 
 import com.ridgid.oss.orm.EntityCRUDDelete;
-import com.ridgid.oss.orm.EntityCRUDExceptionError;
-import com.ridgid.oss.orm.EntityCRUDExceptionNotFound;
-import com.ridgid.oss.orm.PrimaryKeyedEntity;
+import com.ridgid.oss.orm.entity.PrimaryKeyedEntity;
+import com.ridgid.oss.orm.exception.EntityCRUDExceptionError;
+import com.ridgid.oss.orm.exception.EntityCRUDExceptionNotFound;
 
 /**
  * Base class for a JPA DAO that provides DELETE CRUD operations only
@@ -42,7 +42,7 @@ public class JPAEntityCRUDDelete<ET extends PrimaryKeyedEntity<PKT>, PKT extends
         } catch (EntityCRUDExceptionNotFound ex) {
             throw ex;
         } catch (RuntimeException ex) {
-            throw enhanceWithEntityManagerNullCheck(ex);
+            throw enhanceExceptionWithEntityManagerNullCheck(ex);
         }
     }
 }

@@ -3,7 +3,7 @@ package com.ridgid.oss.orm.jpa.test;
 import com.ridgid.oss.common.helper.EqualityHelpers;
 import com.ridgid.oss.common.helper.FieldReflectionHelpers;
 import com.ridgid.oss.common.helper.PrimaryKeyAutoGenerationType;
-import com.ridgid.oss.orm.PrimaryKeyedEntity;
+import com.ridgid.oss.orm.entity.PrimaryKeyedEntity;
 import com.ridgid.oss.orm.jpa.JPAEntityCRUD;
 import com.ridgid.oss.orm.jpa.helper.JPAEntityHelpers;
 import com.ridgid.oss.orm.jpa.helper.JPAFieldPopulationHelpers;

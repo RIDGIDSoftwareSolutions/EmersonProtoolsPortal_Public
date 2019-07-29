@@ -2,7 +2,7 @@ package com.ridgid.oss.orm.jpa.helper;
 
 import com.ridgid.oss.common.helper.FieldReflectionHelpers;
 import com.ridgid.oss.common.helper.PrimaryKeyAutoGenerationType;
-import com.ridgid.oss.orm.CreateModifyTracking;
+import com.ridgid.oss.orm.entity.CreateModifyTracking;
 
 import javax.persistence.AttributeConverter;
 import javax.persistence.Convert;

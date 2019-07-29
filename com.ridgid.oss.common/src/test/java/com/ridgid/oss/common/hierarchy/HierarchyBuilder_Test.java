@@ -84,7 +84,7 @@ class HierarchyBuilder_Test {
         assertNotNull(h);
 
         List<String> names = new ArrayList<>();
-        h.visit(samplePerson, obj -> names.add(((Name) obj).getName()), DEPTH_FIRST);
+        h.visit(samplePerson, addToNamesFound(names), DEPTH_FIRST);
 
         assertIterableEquals(
                 Arrays.asList(
@@ -103,7 +103,7 @@ class HierarchyBuilder_Test {
         );
 
         names.clear();
-        h.visit(samplePerson, obj -> names.add(((Name) obj).getName()), BREADTH_FIRST);
+        h.visit(samplePerson, addToNamesFound(names), BREADTH_FIRST);
 
         assertIterableEquals(
                 Arrays.asList(
@@ -120,6 +120,14 @@ class HierarchyBuilder_Test {
                         + String.join(",", names)
                         + "\n"
         );
+    }
+
+    private GeneralVisitHandler addToNamesFound(List<String> names) {
+        return (p, c) -> {
+            if (c instanceof Name)
+                names.add(((Name) c).getName());
+            return VisitStatus.CONTINUE_PROCESSING;
+        };
     }
 
     @SuppressWarnings("unused")

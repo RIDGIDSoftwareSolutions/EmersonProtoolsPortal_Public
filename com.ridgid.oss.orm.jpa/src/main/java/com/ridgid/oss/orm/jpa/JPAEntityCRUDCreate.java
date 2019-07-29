@@ -1,9 +1,9 @@
 package com.ridgid.oss.orm.jpa;
 
 import com.ridgid.oss.orm.EntityCRUDCreate;
-import com.ridgid.oss.orm.EntityCRUDExceptionAlreadyExists;
-import com.ridgid.oss.orm.EntityCRUDExceptionError;
-import com.ridgid.oss.orm.PrimaryKeyedEntity;
+import com.ridgid.oss.orm.entity.PrimaryKeyedEntity;
+import com.ridgid.oss.orm.exception.EntityCRUDExceptionAlreadyExists;
+import com.ridgid.oss.orm.exception.EntityCRUDExceptionError;
 
 /**
  * Base class for a JPA DAO that provides CREATE CRUD operations only
@@ -39,7 +39,7 @@ public class JPAEntityCRUDCreate<ET extends PrimaryKeyedEntity<PKT>, PKT extends
             getEntityManager().refresh(entity);
             return entity;
         } catch (RuntimeException e) {
-            throw enhanceWithEntityManagerNullCheck(e);
+            throw enhanceExceptionWithEntityManagerNullCheck(e);
         }
     }
 }

@@ -1,9 +1,9 @@
 package com.ridgid.oss.orm.jpa;
 
 import com.ridgid.oss.orm.EntityCRUDCreateReadUpdateDelete;
-import com.ridgid.oss.orm.EntityCRUDExceptionError;
-import com.ridgid.oss.orm.EntityCRUDExceptionNotFound;
-import com.ridgid.oss.orm.PrimaryKeyedEntity;
+import com.ridgid.oss.orm.entity.PrimaryKeyedEntity;
+import com.ridgid.oss.orm.exception.EntityCRUDExceptionError;
+import com.ridgid.oss.orm.exception.EntityCRUDExceptionNotFound;
 
 import javax.persistence.EntityManager;
 

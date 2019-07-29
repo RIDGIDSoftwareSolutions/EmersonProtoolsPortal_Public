@@ -1,7 +1,7 @@
 package com.ridgid.oss.orm.jpa.test;
 
 import com.ridgid.oss.common.helper.PrimaryKeyAutoGenerationType;
-import com.ridgid.oss.orm.PrimaryKeyedEntity;
+import com.ridgid.oss.orm.entity.PrimaryKeyedEntity;
 import com.ridgid.oss.orm.jpa.JPAEntityCRUDRead;
 import com.ridgid.oss.orm.jpa.helper.JPAEntityHelpers;
 import org.junit.jupiter.api.Test;

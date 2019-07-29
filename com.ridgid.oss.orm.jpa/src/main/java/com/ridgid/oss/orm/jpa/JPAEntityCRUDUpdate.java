@@ -1,8 +1,8 @@
 package com.ridgid.oss.orm.jpa;
 
-import com.ridgid.oss.orm.EntityCRUDExceptionError;
 import com.ridgid.oss.orm.EntityCRUDUpdate;
-import com.ridgid.oss.orm.PrimaryKeyedEntity;
+import com.ridgid.oss.orm.entity.PrimaryKeyedEntity;
+import com.ridgid.oss.orm.exception.EntityCRUDExceptionError;
 
 import java.util.Optional;
 
@@ -42,7 +42,7 @@ public class JPAEntityCRUDUpdate<ET extends PrimaryKeyedEntity<PKT>, PKT extends
             getEntityManager().refresh(entity);
             return Optional.of(entity);
         } catch (Exception ex) {
-            throw enhanceWithEntityManagerNullCheck(ex);
+            throw enhanceExceptionWithEntityManagerNullCheck(ex);
         }
     }
 }

@@ -1,5 +1,10 @@
 package com.ridgid.oss.orm;
 
+import com.ridgid.oss.common.hierarchy.Hierarchy;
+import com.ridgid.oss.orm.entity.PrimaryKeyedEntity;
+import com.ridgid.oss.orm.exception.EntityCRUDExceptionAlreadyExists;
+import com.ridgid.oss.orm.exception.EntityCRUDExceptionError;
+
 /**
  * Indicates the DAO implements the CREATE (add) method for the Entity Type ET
  *
@@ -17,6 +22,9 @@ public interface EntityCRUDCreate<ET extends PrimaryKeyedEntity<PKT>, PKT extend
      * @throws EntityCRUDExceptionError         if there is an issue inserting/creating the record (specific "cause" may vary)
      * @throws EntityCRUDExceptionAlreadyExists if and entity one the same primary key of the given entity already exists in the persistent storage
      */
-    ET add(ET entity) throws EntityCRUDExceptionError, EntityCRUDExceptionAlreadyExists;
+    default ET add(ET entity) throws EntityCRUDExceptionError, EntityCRUDExceptionAlreadyExists {
+        return add(entity, null);
+    }
 
+    ET add(ET entity, Hierarchy<ET> hierarchy) throws EntityCRUDExceptionError, EntityCRUDExceptionAlreadyExists;
 }

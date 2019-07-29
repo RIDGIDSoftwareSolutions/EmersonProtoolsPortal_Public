@@ -1,6 +1,6 @@
 package com.ridgid.oss.orm.jpa.convert;
 
-import com.ridgid.oss.orm.DBConvertibleEnum;
+import com.ridgid.oss.orm.entity.DBConvertibleEnum;
 
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;

@@ -1,6 +1,6 @@
 package com.ridgid.oss.common.hierarchy;
 
-import com.ridgid.oss.common.callback.HandlerList;
+import com.ridgid.oss.common.callback.BiHandlerList;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -26,10 +26,27 @@ public class Hierarchy<PARENT_T> {
         return new Builder<>(rootClass);
     }
 
-    public void visit(PARENT_T parent, Consumer<Object> visitor, Traversal traversal) {
+    public void visit(PARENT_T parent,
+                      GeneralVisitHandler visitor,
+                      Traversal traversal) {
+        visit(parent,
+                visitor,
+                null,
+                traversal);
+    }
+
+    public void visit(PARENT_T parent,
+                      GeneralVisitHandler beforeChildrenVisitor,
+                      GeneralVisitHandler afterChildrenVisitor,
+                      Traversal traversal) {
         UUID key = UUID.randomUUID();
         try {
-            built.visit(key, parent, visitor, traversal);
+            built.visit(
+                    key,
+                    parent,
+                    beforeChildrenVisitor,
+                    Optional.ofNullable(afterChildrenVisitor),
+                    traversal);
         } finally {
             SAVED_STATE.remove(key);
         }
@@ -42,10 +59,17 @@ public class Hierarchy<PARENT_T> {
 
     private static ConcurrentMap<UUID, ConcurrentMap<VisitableNode, Object>> SAVED_STATE = new ConcurrentHashMap<>();
 
-    private interface VisitableNode<PARENT_T, CHILD_T> extends Node<CHILD_T> {
-        VisitStatus visit(UUID traversalKey, PARENT_T parent, Consumer<Object> visitor, Traversal traversal);
+    private interface VisitableNode<PARENT_T, T> extends Node<PARENT_T, T> {
+        @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+        VisitStatus visit(UUID traversalKey,
+                          PARENT_T parent,
+                          VisitHandler<Object, Object> visitor,
+                          Optional<VisitHandler<Object, Object>> afterChildrenVisitor,
+                          Traversal traversal);
 
-        VisitStatus visitOnlySelf(UUID traversalKey, PARENT_T parent, Consumer<Object> visitor);
+        VisitStatus visitOnlySelf(UUID traversalKey,
+                                  PARENT_T parent,
+                                  VisitHandler<Object, Object> visitor);
     }
 
     @SuppressWarnings("FieldCanBeLocal")
@@ -64,7 +88,7 @@ public class Hierarchy<PARENT_T> {
         }
 
         public <CHILD_T> Builder<T> single(Function<T, CHILD_T> selector,
-                                           Consumer<Node<CHILD_T>> childrenSelector) {
+                                           Consumer<Node<T, CHILD_T>> childrenSelector) {
             SingleChild<T, CHILD_T> child = new SingleChild<>(selector);
             if (childrenSelector != null) childrenSelector.accept(child);
             childNodes.add(child);
@@ -76,7 +100,7 @@ public class Hierarchy<PARENT_T> {
         }
 
         public <CHILD_T> Builder<T> many(Function<T, Stream<CHILD_T>> selector,
-                                         Consumer<Node<CHILD_T>> childrenSelector) {
+                                         Consumer<Node<T, CHILD_T>> childrenSelector) {
             StreamChild<T, CHILD_T> child = new StreamChild<>(selector);
             if (childrenSelector != null) childrenSelector.accept(child);
             childNodes.add(child);
@@ -88,7 +112,7 @@ public class Hierarchy<PARENT_T> {
         }
 
         public <CHILD_T> Builder<T> collection(Function<T, Iterable<CHILD_T>> selector,
-                                               Consumer<Node<CHILD_T>> childrenSelector) {
+                                               Consumer<Node<T, CHILD_T>> childrenSelector) {
             IterableChild<T, CHILD_T> child = new IterableChild<>(selector);
             if (childrenSelector != null) childrenSelector.accept(child);
             childNodes.add(child);
@@ -100,7 +124,7 @@ public class Hierarchy<PARENT_T> {
         }
 
         public <CHILD_T> Builder<T> array(Function<T, CHILD_T[]> selector,
-                                          Consumer<Node<CHILD_T>> childrenSelector) {
+                                          Consumer<Node<T, CHILD_T>> childrenSelector) {
             ArrayChild<T, CHILD_T> child = new ArrayChild<>(selector);
             if (childrenSelector != null) childrenSelector.accept(child);
             childNodes.add(child);
@@ -111,9 +135,13 @@ public class Hierarchy<PARENT_T> {
             return new Hierarchy<>(this);
         }
 
-        @SuppressWarnings({"unchecked", "ResultOfMethodCallIgnored"})
-        private void visit(UUID key, T obj, Consumer<Object> visitor, Traversal traversal) {
-            visitor.accept(obj);
+        @SuppressWarnings({"unchecked", "ResultOfMethodCallIgnored", "OptionalUsedAsFieldOrParameterType"})
+        private void visit(UUID key,
+                           T obj,
+                           VisitHandler<Object, Object> visitor,
+                           Optional<VisitHandler<Object, Object>> afterChildrenVisitor,
+                           Traversal traversal) {
+            if (visitor.handle(null, obj).isNotOk()) return;
             if (traversal.equals(BREADTH_FIRST))
                 if (childNodes
                         .stream()
@@ -122,20 +150,24 @@ public class Hierarchy<PARENT_T> {
                     return;
             childNodes
                     .stream()
-                    .map(child -> child.visit(key, obj, visitor, traversal))
+                    .map(child -> child.visit(key, obj, visitor, afterChildrenVisitor, traversal))
                     .anyMatch(VisitStatus::isSkipSiblings);
         }
     }
 
-    private static abstract class BaseNode<PARENT_T, T> implements VisitableNode<PARENT_T, T>, NodeVisitorConfiguration<T> {
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    private static abstract class BaseNode<PARENT_T, T>
+            implements
+            VisitableNode<PARENT_T, T>,
+            NodeVisitorConfiguration<PARENT_T, T> {
 
         protected List<VisitableNode> childNodes;
-        protected HandlerList<T, VisitStatus> beforeVisitHandlers;
-        protected HandlerList<T, VisitStatus> afterVisitHandlers;
-        protected HandlerList<T, VisitStatus> beforeEachChildVisitHandlers;
-        protected HandlerList<T, VisitStatus> afterEachChildVisitHandlers;
-        protected HandlerList<T, VisitStatus> beforeAllChildrenVisitHandlers;
-        protected HandlerList<T, VisitStatus> afterAllChildrenVisitHandlers;
+        protected BiHandlerList<PARENT_T, T, VisitStatus> beforeVisitHandlers;
+        protected BiHandlerList<PARENT_T, T, VisitStatus> afterVisitHandlers;
+        protected BiHandlerList<PARENT_T, T, VisitStatus> beforeEachChildVisitHandlers;
+        protected BiHandlerList<PARENT_T, T, VisitStatus> afterEachChildVisitHandlers;
+        protected BiHandlerList<PARENT_T, T, VisitStatus> beforeAllChildrenVisitHandlers;
+        protected BiHandlerList<PARENT_T, T, VisitStatus> afterAllChildrenVisitHandlers;
 
         private void addChild(VisitableNode child) {
             if (childNodes == null) childNodes = new ArrayList<>();
@@ -143,8 +175,8 @@ public class Hierarchy<PARENT_T> {
         }
 
         @Override
-        public <CHILD_T> Node<T> single(Function<T, CHILD_T> selector,
-                                        Consumer<Node<CHILD_T>> childrenSelector) {
+        public <CHILD_T> Node<PARENT_T, T> single(Function<T, CHILD_T> selector,
+                                                  Consumer<SingleNode<T, CHILD_T>> childrenSelector) {
             SingleChild<T, CHILD_T> child = new SingleChild<>(selector);
             if (childrenSelector != null) childrenSelector.accept(child);
             addChild(child);
@@ -152,8 +184,8 @@ public class Hierarchy<PARENT_T> {
         }
 
         @Override
-        public <CHILD_T> Node<T> many(Function<T, Stream<CHILD_T>> selector,
-                                      Consumer<Node<CHILD_T>> childrenSelector) {
+        public <CHILD_T> Node<PARENT_T, T> many(Function<T, Stream<CHILD_T>> selector,
+                                                Consumer<MultiNode<T, CHILD_T, Stream<CHILD_T>>> childrenSelector) {
             StreamChild<T, CHILD_T> child = new StreamChild<>(selector);
             if (childrenSelector != null) childrenSelector.accept(child);
             addChild(child);
@@ -161,8 +193,8 @@ public class Hierarchy<PARENT_T> {
         }
 
         @Override
-        public <CHILD_T> Node<T> collection(Function<T, Iterable<CHILD_T>> selector,
-                                            Consumer<Node<CHILD_T>> childrenSelector) {
+        public <CHILD_T> Node<PARENT_T, T> collection(Function<T, Iterable<CHILD_T>> selector,
+                                                      Consumer<MultiNode<T, CHILD_T, Iterable<CHILD_T>>> childrenSelector) {
             IterableChild<T, CHILD_T> child = new IterableChild<>(selector);
             if (childrenSelector != null) childrenSelector.accept(child);
             addChild(child);
@@ -170,8 +202,8 @@ public class Hierarchy<PARENT_T> {
         }
 
         @Override
-        public <CHILD_T> Node<T> array(Function<T, CHILD_T[]> selector,
-                                       Consumer<Node<CHILD_T>> childrenSelector) {
+        public <CHILD_T> Node<PARENT_T, T> array(Function<T, CHILD_T[]> selector,
+                                                 Consumer<MultiNode<T, CHILD_T, CHILD_T[]>> childrenSelector) {
             ArrayChild<T, CHILD_T> child = new ArrayChild<>(selector);
             if (childrenSelector != null) childrenSelector.accept(child);
             addChild(child);
@@ -179,101 +211,106 @@ public class Hierarchy<PARENT_T> {
         }
 
         @Override
-        public void whenVisited(Consumer<NodeVisitorConfiguration<T>> visitConfigurer) {
-            visitConfigurer.accept(this);
-        }
-
-        @Override
-        public NodeVisitorConfiguration<T> before(VisitHandler<T> handler) {
-            if (beforeVisitHandlers == null) beforeVisitHandlers = new HandlerList<>();
+        public NodeVisitorConfiguration<PARENT_T, T> before(VisitHandler<PARENT_T, T> handler) {
+            if (beforeVisitHandlers == null) beforeVisitHandlers = new BiHandlerList<>();
             beforeVisitHandlers.add(handler);
             return this;
         }
 
         @Override
-        public NodeVisitorConfiguration<T> after(VisitHandler<T> handler) {
-            if (afterVisitHandlers == null) afterVisitHandlers = new HandlerList<>();
+        public NodeVisitorConfiguration<PARENT_T, T> after(VisitHandler<PARENT_T, T> handler) {
+            if (afterVisitHandlers == null) afterVisitHandlers = new BiHandlerList<>();
             afterVisitHandlers.add(handler);
             return this;
         }
 
         @Override
-        public NodeVisitorConfiguration<T> beforeEachChild(VisitHandler<T> handler) {
-            if (beforeEachChildVisitHandlers == null) beforeEachChildVisitHandlers = new HandlerList<>();
+        public NodeVisitorConfiguration<PARENT_T, T> beforeEachChild(VisitHandler<PARENT_T, T> handler) {
+            if (beforeEachChildVisitHandlers == null) beforeEachChildVisitHandlers = new BiHandlerList<>();
             beforeEachChildVisitHandlers.add(handler);
             return this;
         }
 
         @Override
-        public NodeVisitorConfiguration<T> afterEachChild(VisitHandler<T> handler) {
-            if (afterEachChildVisitHandlers == null) afterEachChildVisitHandlers = new HandlerList<>();
+        public NodeVisitorConfiguration<PARENT_T, T> afterEachChild(VisitHandler<PARENT_T, T> handler) {
+            if (afterEachChildVisitHandlers == null) afterEachChildVisitHandlers = new BiHandlerList<>();
             afterEachChildVisitHandlers.add(handler);
             return this;
         }
 
         @Override
-        public NodeVisitorConfiguration<T> beforeAllChildren(VisitHandler<T> handler) {
-            if (beforeAllChildrenVisitHandlers == null) beforeAllChildrenVisitHandlers = new HandlerList<>();
+        public NodeVisitorConfiguration<PARENT_T, T> beforeAllChildren(VisitHandler<PARENT_T, T> handler) {
+            if (beforeAllChildrenVisitHandlers == null) beforeAllChildrenVisitHandlers = new BiHandlerList<>();
             beforeAllChildrenVisitHandlers.add(handler);
             return this;
         }
 
         @Override
-        public NodeVisitorConfiguration<T> afterAllChildren(VisitHandler<T> handler) {
-            if (afterAllChildrenVisitHandlers == null) afterAllChildrenVisitHandlers = new HandlerList<>();
+        public NodeVisitorConfiguration<PARENT_T, T> afterAllChildren(VisitHandler<PARENT_T, T> handler) {
+            if (afterAllChildrenVisitHandlers == null) afterAllChildrenVisitHandlers = new BiHandlerList<>();
             afterAllChildrenVisitHandlers.add(handler);
             return this;
         }
 
-        private VisitStatus invokeVisitHandlers(T self,
-                                                HandlerList<T, VisitStatus> visitHandlers) {
+        private VisitStatus invokeVisitHandlers(PARENT_T parent,
+                                                T self,
+                                                BiHandlerList<PARENT_T, T, VisitStatus> visitHandlers) {
             return visitHandlers == null
                     ? CONTINUE_PROCESSING
                     : visitHandlers
-                    .invoke(self, VisitStatus::isNotOk)
+                    .invoke(parent, self, VisitStatus::isNotOk)
                     .orElse(CONTINUE_PROCESSING);
         }
 
+        @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
         protected final VisitStatus visit(UUID key,
-                                          Consumer<Object> visitor,
+                                          VisitHandler<Object, Object> visitor,
+                                          Optional<VisitHandler<Object, Object>> afterChildrenVisitor,
                                           Traversal traversal,
+                                          PARENT_T parent,
                                           T self) {
             if (self != null) {
                 if (traversal.equals(DEPTH_FIRST)) {
-                    VisitStatus vs = visitStart(key, visitor, self);
+                    VisitStatus vs = visitStart(key, visitor, parent, self);
                     if (vs.isSkipNode()) return vs;
                 }
-                VisitStatus vs = visitChildren(key, visitor, traversal, self);
+                VisitStatus vs = visitChildren(key, visitor, afterChildrenVisitor, traversal, parent, self);
                 if (vs.isSkipNode()) return vs;
             }
-            return visitEnd(key, self);
+            return visitEnd(key, afterChildrenVisitor, parent, self);
         }
 
         protected final VisitStatus visitStart(UUID key,
-                                               Consumer<Object> visitor,
+                                               VisitHandler<Object, Object> visitor,
+                                               PARENT_T parent,
                                                T self) {
             if (self == null) return CONTINUE_PROCESSING;
-            VisitStatus vs = invokeVisitHandlers(self, beforeVisitHandlers);
+            VisitStatus vs = invokeVisitHandlers(parent, self, beforeVisitHandlers);
             if (vs.isSkipNode()) return vs;
-            visitor.accept(self);
-            return CONTINUE_PROCESSING;
+            return visitor.handle(parent, self);
         }
 
+        @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
         private VisitStatus visitChildren(UUID key,
-                                          Consumer<Object> visitor,
-                                          Traversal traversal, T self) {
+                                          VisitHandler<Object, Object> visitor,
+                                          Optional<VisitHandler<Object, Object>> afterChildrenVisitor,
+                                          Traversal traversal,
+                                          PARENT_T parent,
+                                          T self) {
             VisitStatus vs
-                    = invokeVisitHandlers(self, beforeAllChildrenVisitHandlers);
+                    = invokeVisitHandlers(parent, self, beforeAllChildrenVisitHandlers);
             if (vs.isSkipNode()) return vs;
-            vs = visitEachChild(key, visitor, traversal, self);
+            vs = visitEachChild(key, visitor, afterChildrenVisitor, traversal, parent, self);
             if (vs.isSkipNode()) return vs;
-            return invokeVisitHandlers(self, afterAllChildrenVisitHandlers);
+            return invokeVisitHandlers(parent, self, afterAllChildrenVisitHandlers);
         }
 
         @SuppressWarnings("unchecked")
         private VisitStatus visitEachChild(UUID key,
-                                           Consumer<Object> visitor,
+                                           VisitHandler<Object, Object> visitor,
+                                           Optional<VisitHandler<Object, Object>> afterChildrenVisitor,
                                            Traversal traversal,
+                                           PARENT_T parent,
                                            T self) {
             if (childNodes == null) return CONTINUE_PROCESSING;
 
@@ -285,7 +322,7 @@ public class Hierarchy<PARENT_T> {
 
             if (traversal.equals(BREADTH_FIRST))
                 for (VisitableNode childNode : childNodes) {
-                    VisitStatus vs = invokeVisitHandlers(self, beforeEachChildVisitHandlers);
+                    VisitStatus vs = invokeVisitHandlers(parent, self, beforeEachChildVisitHandlers);
                     if (vs.isStop()) return vs;
                     if (vs.isSkipSiblings()) break;
                     if (vs.isSkipNode()) continue;
@@ -299,16 +336,16 @@ public class Hierarchy<PARENT_T> {
             for (VisitableNode childNode : childNodes) {
                 if (traversal.equals(BREADTH_FIRST) && !includedChildren.contains(childNode)) continue;
                 if (traversal.equals(DEPTH_FIRST)) {
-                    VisitStatus vs = invokeVisitHandlers(self, beforeEachChildVisitHandlers);
+                    VisitStatus vs = invokeVisitHandlers(parent, self, beforeEachChildVisitHandlers);
                     if (vs.isStop()) return vs;
                     if (vs.isSkipSiblings()) break;
                     if (vs.isSkipNode()) continue;
                 }
-                VisitStatus vs = childNode.visit(key, self, visitor, traversal);
+                VisitStatus vs = childNode.visit(key, self, visitor, afterChildrenVisitor, traversal);
                 if (vs.isStop()) return vs;
                 if (vs.isSkipSiblings()) break;
                 if (vs.isSkipNode()) continue;
-                vs = invokeVisitHandlers(self, afterEachChildVisitHandlers);
+                vs = invokeVisitHandlers(parent, self, afterEachChildVisitHandlers);
                 if (vs.isStop()) return vs;
                 if (vs.isSkipSiblings()) break;
             }
@@ -316,67 +353,139 @@ public class Hierarchy<PARENT_T> {
         }
 
         private VisitStatus visitEnd(UUID key,
+                                     Optional<VisitHandler<Object, Object>> afterChildrenVisitor,
+                                     PARENT_T parent,
                                      T self) {
-            return invokeVisitHandlers(self, afterVisitHandlers);
+            if (self == null) return CONTINUE_PROCESSING;
+            VisitStatus vs
+                    = afterChildrenVisitor
+                    .map(visitor -> visitor.handle(parent, self))
+                    .orElse(CONTINUE_PROCESSING);
+            if (vs.isSkipNode()) return vs;
+            return invokeVisitHandlers(parent, self, afterVisitHandlers);
         }
 
     }
 
-    private static class SingleChild<PARENT_T, CHILD_T> extends BaseNode<PARENT_T, CHILD_T> {
+    private static class SingleChild<PARENT_T, T>
+            extends
+            BaseNode<PARENT_T, T>
+            implements SingleNode<PARENT_T, T> {
 
-        private final Function<PARENT_T, CHILD_T> childSelector;
+        private final Function<PARENT_T, T> childSelector;
 
-        private SingleChild(Function<PARENT_T, CHILD_T> childSelector) {
+        private SingleChild(Function<PARENT_T, T> childSelector) {
             this.childSelector = childSelector;
         }
 
         @Override
-        public VisitStatus visit(UUID key, PARENT_T parent, Consumer<Object> visitor, Traversal traversal) {
-            CHILD_T self = childSelector.apply(parent);
-            return visit(key, visitor, traversal, self);
+        public VisitStatus visit(UUID key,
+                                 PARENT_T parent,
+                                 VisitHandler<Object, Object> visitor,
+                                 Optional<VisitHandler<Object, Object>> afterChildrenVisitor,
+                                 Traversal traversal) {
+            T self = childSelector.apply(parent);
+            return visit(key, visitor, afterChildrenVisitor, traversal, parent, self);
         }
 
         @Override
-        public VisitStatus visitOnlySelf(UUID key, PARENT_T parent, Consumer<Object> visitor) {
-            CHILD_T self = childSelector.apply(parent);
-            return visitStart(key, visitor, self);
+        public VisitStatus visitOnlySelf(UUID key, PARENT_T parent, VisitHandler<Object, Object> visitor) {
+            T self = childSelector.apply(parent);
+            return visitStart(key, visitor, parent, self);
         }
 
+        @Override
+        public void whenVisited(Consumer<NodeVisitorConfiguration<PARENT_T, T>> visitConfigurer) {
+            visitConfigurer.accept(this);
+        }
     }
 
-    private static abstract class ManyBaseNode<PARENT_T, CHILD_T> extends BaseNode<PARENT_T, CHILD_T> {
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    private static abstract class ManyBaseNode<PARENT_T, T, CT>
+            extends
+            BaseNode<PARENT_T, T>
+            implements
+            MultiNode<PARENT_T, T, CT>,
+            MultiNodeVisitorConfiguration<PARENT_T, T, CT> {
+
+        protected BiHandlerList<PARENT_T, CT, VisitStatus> beforeManyVisitHandlers;
+        protected BiHandlerList<PARENT_T, CT, VisitStatus> afterManyVisitHandlers;
+
+        protected VisitStatus invokeVisitHandlers(PARENT_T parent,
+                                                  CT collection,
+                                                  BiHandlerList<PARENT_T, CT, VisitStatus> visitHandlers) {
+            return visitHandlers == null
+                    ? CONTINUE_PROCESSING
+                    : visitHandlers
+                    .invoke(parent, collection, VisitStatus::isNotOk)
+                    .orElse(CONTINUE_PROCESSING);
+        }
+
+        @Override
+        public MultiNodeVisitorConfiguration<PARENT_T, T, CT> beforeMany(VisitHandler<PARENT_T, CT> handler) {
+            if (beforeManyVisitHandlers == null) beforeManyVisitHandlers = new BiHandlerList<>();
+            beforeManyVisitHandlers.add(handler);
+            return this;
+        }
+
+        @Override
+        public MultiNodeVisitorConfiguration<PARENT_T, T, CT> afterMany(VisitHandler<PARENT_T, CT> handler) {
+            if (afterManyVisitHandlers == null) afterManyVisitHandlers = new BiHandlerList<>();
+            afterManyVisitHandlers.add(handler);
+            return this;
+        }
+
+        @Override
+        public void whenVisited(Consumer<MultiNodeVisitorConfiguration<PARENT_T, T, CT>> visitConfigurer) {
+            visitConfigurer.accept(this);
+        }
 
         @SuppressWarnings("unchecked")
         protected final VisitStatus visit(UUID key,
-                                          Consumer<Object> visitor,
+                                          PARENT_T parent,
+                                          VisitHandler<Object, Object> visitor,
+                                          Optional<VisitHandler<Object, Object>> afterChildrenVisitor,
                                           Traversal traversal,
-                                          Iterator<CHILD_T> it) {
-            HashSet<CHILD_T> includedEntries
-                    = (HashSet<CHILD_T>) SAVED_STATE
+                                          CT collection,
+                                          Iterator<T> it) {
+            if (traversal.equals(DEPTH_FIRST)) {
+                VisitStatus vs = visitCollection(key, parent, visitor, collection);
+                if (vs.isStop()) return vs;
+                if (vs.isSkipSiblings()) return vs;
+                if (vs.isSkipNode()) return CONTINUE_PROCESSING;
+            }
+            HashSet<T> includedEntries
+                    = (HashSet<T>) SAVED_STATE
                     .computeIfAbsent(key, k -> new ConcurrentHashMap<>())
-                    .computeIfAbsent(this, k -> new HashSet<CHILD_T>());
+                    .computeIfAbsent(this, k -> new HashSet<T>());
             while (it.hasNext()) {
-                CHILD_T self = it.next();
+                T self = it.next();
                 if (traversal.equals(BREADTH_FIRST) && !includedEntries.contains(self)) continue;
-                VisitStatus vs = visit(key, visitor, traversal, self);
+                VisitStatus vs = visit(key, visitor, afterChildrenVisitor, traversal, parent, self);
                 if (vs.isStop()) return vs;
                 if (vs.isSkipSiblings()) return CONTINUE_PROCESSING;
             }
-            return CONTINUE_PROCESSING;
+            return invokeVisitHandlers(parent, collection, afterManyVisitHandlers);
         }
 
-        @SuppressWarnings("unchecked")
+        @SuppressWarnings({"unchecked", "DuplicatedCode"})
         protected final VisitStatus visitOnlySelf(UUID key,
-                                                  Consumer<Object> visitor,
-                                                  Iterator<CHILD_T> it) {
-            HashSet<CHILD_T> includedEntries
-                    = (HashSet<CHILD_T>) SAVED_STATE
+                                                  PARENT_T parent,
+                                                  VisitHandler<Object, Object> visitor,
+                                                  CT collection,
+                                                  Iterator<T> it) {
+            VisitStatus vs = visitCollection(key, parent, visitor, collection);
+            if (vs.isStop()) return vs;
+            if (vs.isSkipSiblings()) return vs;
+            if (vs.isSkipNode()) return CONTINUE_PROCESSING;
+            HashSet<T> includedEntries
+                    = (HashSet<T>) SAVED_STATE
                     .computeIfAbsent(key, k -> new ConcurrentHashMap<>())
-                    .computeIfAbsent(this, k -> new HashSet<CHILD_T>());
+                    .computeIfAbsent(this, k -> new HashSet<T>());
             includedEntries.clear();
             while (it.hasNext()) {
-                CHILD_T self = it.next();
-                VisitStatus vs = visitStart(key, visitor, self);
+                T self = it.next();
+                vs = visitStart(key, visitor, parent, self);
                 if (vs.isStop()) return vs;
                 if (vs.isSkipSiblings()) break;
                 if (vs.isSkipNode()) continue;
@@ -385,83 +494,135 @@ public class Hierarchy<PARENT_T> {
             return CONTINUE_PROCESSING;
         }
 
+        private VisitStatus visitCollection(UUID key,
+                                            PARENT_T parent,
+                                            VisitHandler<Object, Object> visitor,
+                                            CT collection) {
+            VisitStatus vs = invokeVisitHandlers(parent, collection, beforeManyVisitHandlers);
+            if (vs.isSkipNode()) return vs;
+            return visitor.handle(parent, collection);
+        }
     }
 
-    private static class StreamChild<PARENT_T, CHILD_T> extends ManyBaseNode<PARENT_T, CHILD_T> {
+    private static class StreamChild<PARENT_T, T>
+            extends ManyBaseNode<PARENT_T, T, Stream<T>> {
 
-        private final Function<PARENT_T, Stream<CHILD_T>> childSelector;
+        private final Function<PARENT_T, Stream<T>> childSelector;
 
-        public StreamChild(Function<PARENT_T, Stream<CHILD_T>> selector) {
+        public StreamChild(Function<PARENT_T, Stream<T>> selector) {
             this.childSelector = selector;
         }
 
         @Override
-        public VisitStatus visit(UUID key,
-                                 PARENT_T parent,
-                                 Consumer<Object> visitor,
-                                 Traversal traversal) {
-            Iterator<CHILD_T> it = childSelector.apply(parent).iterator();
-            return visit(key, visitor, traversal, it);
+        public final VisitStatus visit(UUID key,
+                                       PARENT_T parent,
+                                       VisitHandler<Object, Object> visitor,
+                                       Optional<VisitHandler<Object, Object>> afterChildrenVisitor,
+                                       Traversal traversal) {
+            try (Stream<T> stream = childSelector.apply(parent)) {
+                return visit(
+                        key,
+                        parent,
+                        visitor,
+                        afterChildrenVisitor,
+                        traversal,
+                        stream,
+                        stream.iterator());
+            }
         }
 
         @Override
-        public VisitStatus visitOnlySelf(UUID key,
-                                         PARENT_T parent,
-                                         Consumer<Object> visitor) {
-            Iterator<CHILD_T> it = childSelector.apply(parent).iterator();
-            return visitOnlySelf(key, visitor, it);
+        public final VisitStatus visitOnlySelf(UUID key,
+                                               PARENT_T parent,
+                                               VisitHandler<Object, Object> visitor) {
+            try (Stream<T> stream = childSelector.apply(parent)) {
+                return visitOnlySelf(
+                        key,
+                        parent,
+                        visitor,
+                        stream,
+                        stream.iterator());
+            }
         }
-
     }
 
-    private static class IterableChild<PARENT_T, CHILD_T> extends ManyBaseNode<PARENT_T, CHILD_T> {
+    private static class IterableChild<PARENT_T, T>
+            extends ManyBaseNode<PARENT_T, T, Iterable<T>> {
 
-        private final Function<PARENT_T, Iterable<CHILD_T>> childSelector;
+        private final Function<PARENT_T, Iterable<T>> childSelector;
 
-        public IterableChild(Function<PARENT_T, Iterable<CHILD_T>> childSelector) {
+        public IterableChild(Function<PARENT_T, Iterable<T>> childSelector) {
             this.childSelector = childSelector;
         }
 
         @Override
-        public VisitStatus visit(UUID key,
-                                 PARENT_T parent, Consumer<Object> visitor,
-                                 Traversal traversal) {
-            Iterator<CHILD_T> it = childSelector.apply(parent).iterator();
-            return visit(key, visitor, traversal, it);
+        public final VisitStatus visit(UUID key,
+                                       PARENT_T parent,
+                                       VisitHandler<Object, Object> visitor,
+                                       Optional<VisitHandler<Object, Object>> afterChildrenVisitor,
+                                       Traversal traversal) {
+            Iterable<T> it = childSelector.apply(parent);
+            return visit(
+                    key,
+                    parent,
+                    visitor,
+                    afterChildrenVisitor,
+                    traversal,
+                    it,
+                    it.iterator());
         }
 
         @Override
-        public VisitStatus visitOnlySelf(UUID key,
-                                         PARENT_T parent,
-                                         Consumer<Object> visitor) {
-            Iterator<CHILD_T> it = childSelector.apply(parent).iterator();
-            return visitOnlySelf(key, visitor, it);
+        public final VisitStatus visitOnlySelf(UUID key,
+                                               PARENT_T parent,
+                                               VisitHandler<Object, Object> visitor) {
+            Iterable<T> it = childSelector.apply(parent);
+            return visitOnlySelf(
+                    key,
+                    parent,
+                    visitor,
+                    it,
+                    it.iterator());
         }
     }
 
-    private static class ArrayChild<PARENT_T, CHILD_T> extends ManyBaseNode<PARENT_T, CHILD_T> {
+    private static class ArrayChild<PARENT_T, T>
+            extends ManyBaseNode<PARENT_T, T, T[]> {
 
-        private final Function<PARENT_T, CHILD_T[]> childSelector;
+        private final Function<PARENT_T, T[]> childSelector;
 
-        public ArrayChild(Function<PARENT_T, CHILD_T[]> childSelector) {
+        public ArrayChild(Function<PARENT_T, T[]> childSelector) {
             this.childSelector = childSelector;
         }
 
         @Override
-        public VisitStatus visit(UUID key,
-                                 PARENT_T parent,
-                                 Consumer<Object> visitor,
-                                 Traversal traversal) {
-            Iterator<CHILD_T> it = Arrays.stream(childSelector.apply(parent)).iterator();
-            return visit(key, visitor, traversal, it);
+        public final VisitStatus visit(UUID key,
+                                       PARENT_T parent,
+                                       VisitHandler<Object, Object> visitor,
+                                       Optional<VisitHandler<Object, Object>> afterChildrenVisitor,
+                                       Traversal traversal) {
+            T[] array = childSelector.apply(parent);
+            return visit(
+                    key,
+                    parent,
+                    visitor,
+                    afterChildrenVisitor,
+                    traversal,
+                    array,
+                    Arrays.stream(array).iterator());
         }
 
         @Override
-        public VisitStatus visitOnlySelf(UUID key,
-                                         PARENT_T parent,
-                                         Consumer<Object> visitor) {
-            Iterator<CHILD_T> it = Arrays.stream(childSelector.apply(parent)).iterator();
-            return visitOnlySelf(key, visitor, it);
+        public final VisitStatus visitOnlySelf(UUID key,
+                                               PARENT_T parent,
+                                               VisitHandler<Object, Object> visitor) {
+            T[] array = childSelector.apply(parent);
+            return visitOnlySelf(
+                    key,
+                    parent,
+                    visitor,
+                    array,
+                    Arrays.stream(array).iterator());
         }
     }
 }

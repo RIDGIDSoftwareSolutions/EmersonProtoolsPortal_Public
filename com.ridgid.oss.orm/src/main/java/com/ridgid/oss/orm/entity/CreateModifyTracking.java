@@ -1,4 +1,4 @@
-package com.ridgid.oss.orm;
+package com.ridgid.oss.orm.entity;
 
 import com.ridgid.oss.common.helper.CopyableModel;
 

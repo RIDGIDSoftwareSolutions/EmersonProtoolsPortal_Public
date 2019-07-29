@@ -1,4 +1,4 @@
-package com.ridgid.oss.orm;
+package com.ridgid.oss.orm.exception;
 
 /**
  * Thrown when an attempt is made to add an entity to the child collection of a given entity

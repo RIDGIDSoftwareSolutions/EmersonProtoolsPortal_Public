@@ -1,6 +1,6 @@
 package com.ridgid.oss.orm.jpa.listener;
 
-import com.ridgid.oss.orm.CreateModifyTracking;
+import com.ridgid.oss.orm.entity.CreateModifyTracking;
 import com.ridgid.oss.orm.listener.CreateModifyTrackingListener;
 
 import javax.persistence.PrePersist;

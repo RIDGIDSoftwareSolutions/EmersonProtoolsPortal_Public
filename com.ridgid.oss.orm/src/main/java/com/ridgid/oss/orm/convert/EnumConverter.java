@@ -1,6 +1,6 @@
 package com.ridgid.oss.orm.convert;
 
-import com.ridgid.oss.orm.DBConvertibleEnum;
+import com.ridgid.oss.orm.entity.DBConvertibleEnum;
 
 import java.lang.reflect.InvocationTargetException;
 

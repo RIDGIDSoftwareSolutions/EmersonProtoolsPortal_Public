@@ -7,7 +7,9 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 @SuppressWarnings({"unused", "SpellCheckingInspection"})
-public final class InMemoryKVExpirableLRUCache<K, V extends Expirable> extends InMemoryKVCache<K, V> {
+public final class InMemoryKVExpirableLRUCache<K, V extends Expirable>
+        extends InMemoryExpirableKVCache<K, V>
+        implements ExpirableLRUCache<K, V> {
 
     private final ConcurrentHashMap<K, Long> lastUsed = new ConcurrentHashMap<>();
     private long removeBeforeTime;
