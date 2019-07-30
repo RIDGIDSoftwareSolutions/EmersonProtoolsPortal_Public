@@ -35,14 +35,14 @@ public class JPAEntityCRUDDelete<ET extends PrimaryKeyedEntity<PKT>, PKT extends
     @Override
     public void delete(PKT pk) throws EntityCRUDExceptionError, EntityCRUDExceptionNotFound {
         try {
-            ET entity = getEntityManager().find(classType, pk);
+            ET entity = JPAEntityCRUDDelegate.getEntityManager().find(classType, pk);
             if (entity == null) throw new EntityCRUDExceptionNotFound();
-            getEntityManager().remove(entity);
-            getEntityManager().flush();
+            JPAEntityCRUDDelegate.getEntityManager().remove(entity);
+            JPAEntityCRUDDelegate.getEntityManager().flush();
         } catch (EntityCRUDExceptionNotFound ex) {
             throw ex;
         } catch (RuntimeException ex) {
-            throw enhanceExceptionWithEntityManagerNullCheck(ex);
+            throw JPAEntityCRUDDelegate.enhanceExceptionWithEntityManagerNullCheck(ex);
         }
     }
 }

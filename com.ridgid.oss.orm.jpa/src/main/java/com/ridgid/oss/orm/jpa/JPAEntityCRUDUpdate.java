@@ -17,10 +17,25 @@ public class JPAEntityCRUDUpdate<ET extends PrimaryKeyedEntity<PKT>, PKT extends
         extends JPAEntityCRUD<ET, PKT>
         implements EntityCRUDUpdate<ET, PKT> {
 
-    private final Class<ET> classType;
+    public JPAEntityCRUDUpdate(Class<ET> classType,
+                               Class<PKT> pkType) {
+        super(classType, pkType);
+    }
+
+    public JPAEntityCRUDUpdate(Class<ET> classType, Class<PKT> pkType, String pkName) {
+        super(classType, pkType, pkName);
+    }
+
+    public JPAEntityCRUDUpdate(Class<ET> classType, Class<PKT> pkType, short loadBatchSize) {
+        super(classType, pkType, loadBatchSize);
+    }
+
+    public JPAEntityCRUDUpdate(Class<ET> classType, Class<PKT> pkType, String pkName, short loadBatchSize) {
+        super(classType, pkType, pkName, loadBatchSize);
+    }
 
     protected JPAEntityCRUDUpdate(Class<ET> classType) {
-        this.classType = classType;
+        this.JPAEntityCRUDBaseDelegate.classType = classType;
     }
 
     /**
@@ -33,16 +48,16 @@ public class JPAEntityCRUDUpdate<ET extends PrimaryKeyedEntity<PKT>, PKT extends
     @Override
     public Optional<ET> optionalUpdate(ET entity) throws EntityCRUDExceptionError {
         try {
-            if (!getEntityManager().contains(entity)) {
-                if (getEntityManager().find(classType, entity.getPk()) == null)
+            if (!JPAEntityCRUDDelegate.getEntityManager().contains(entity)) {
+                if (JPAEntityCRUDDelegate.getEntityManager().find(JPAEntityCRUDDelegate.classType, entity.getPk()) == null)
                     return Optional.empty();
-                getEntityManager().merge(entity);
+                JPAEntityCRUDDelegate.getEntityManager().merge(entity);
             }
-            getEntityManager().flush();
-            getEntityManager().refresh(entity);
+            JPAEntityCRUDDelegate.getEntityManager().flush();
+            JPAEntityCRUDDelegate.getEntityManager().refresh(entity);
             return Optional.of(entity);
         } catch (Exception ex) {
-            throw enhanceExceptionWithEntityManagerNullCheck(ex);
+            throw JPAEntityCRUDDelegate.enhanceExceptionWithEntityManagerNullCheck(ex);
         }
     }
 }

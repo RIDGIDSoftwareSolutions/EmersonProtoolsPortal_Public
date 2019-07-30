@@ -34,12 +34,12 @@ public class JPAEntityCRUDCreate<ET extends PrimaryKeyedEntity<PKT>, PKT extends
     @Override
     public ET add(ET entity) throws EntityCRUDExceptionError, EntityCRUDExceptionAlreadyExists {
         try {
-            getEntityManager().persist(entity);
-            getEntityManager().flush();
-            getEntityManager().refresh(entity);
+            JPAEntityCRUDDelegate.getEntityManager().persist(entity);
+            JPAEntityCRUDDelegate.getEntityManager().flush();
+            JPAEntityCRUDDelegate.getEntityManager().refresh(entity);
             return entity;
         } catch (RuntimeException e) {
-            throw enhanceExceptionWithEntityManagerNullCheck(e);
+            throw JPAEntityCRUDDelegate.enhanceExceptionWithEntityManagerNullCheck(e);
         }
     }
 }

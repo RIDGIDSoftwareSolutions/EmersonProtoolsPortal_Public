@@ -17,80 +17,63 @@ import java.util.stream.Stream;
 
 import static com.ridgid.oss.common.hierarchy.Hierarchy.Traversal.DEPTH_FIRST;
 
-/**
- * Base Class for a DAO for a PrimaryKeyedEntity where the implementation of the DAO uses JPA and the entity is expected to have the needed JPA annotations
- * <p>
- * NOTE: This base class should not normally be inherited from directly. Instead, extend one of the JPAEntityCRUD* base classes that extend this class.
- *
- * @param <ET>  entity type of the entity that the DAO provides persistence methods for
- * @param <PKT> primary key type of the entity type that the DAO provides persistence methods for
- */
 @SuppressWarnings({"WeakerAccess", "unused"})
-public class JPAEntityCRUD<ET extends PrimaryKeyedEntity<PKT>, PKT extends Comparable<PKT>>
-        implements EntityCRUD<ET, PKT> {
+final class JPAEntityCRUDDelegate<ET extends PrimaryKeyedEntity<PKT>, PKT extends Comparable<PKT>>
+        implements JPAEntityCRUDDelegateRequired<ET, PKT> {
 
-    private final String PK_NAME;
-    protected final Class<ET> classType;
-    protected final Class<PKT> pkType;
-    private final short loadBatchSize;
+    public final String PK_NAME;
+    public final Class<ET> classType;
+    public final Class<PKT> pkType;
+    public final short loadBatchSize;
 
-    public JPAEntityCRUD(Class<ET> classType,
-                         Class<PKT> pkType) {
+    EntityManager entityManager;
+    CriteriaQuery<ET> entitiesForPrimaryKeysCriteriaQuery;
+
+    public JPAEntityCRUDDelegate(Class<ET> classType,
+                                 Class<PKT> pkType) {
         this.classType = classType;
         this.pkType = pkType;
         this.PK_NAME = "pk";
         this.loadBatchSize = 1000;
     }
 
-    public JPAEntityCRUD(Class<ET> classType,
-                         Class<PKT> pkType,
-                         String pkName) {
+    public JPAEntityCRUDDelegate(Class<ET> classType,
+                                 Class<PKT> pkType,
+                                 String pkName) {
         this.classType = classType;
         this.pkType = pkType;
         this.PK_NAME = pkName;
         this.loadBatchSize = 1000;
     }
 
-    public JPAEntityCRUD(Class<ET> classType,
-                         Class<PKT> pkType,
-                         short loadBatchSize) {
+    public JPAEntityCRUDDelegate(Class<ET> classType,
+                                 Class<PKT> pkType,
+                                 short loadBatchSize) {
         this.classType = classType;
         this.pkType = pkType;
         this.PK_NAME = "pk";
         this.loadBatchSize = loadBatchSize;
     }
 
-    public JPAEntityCRUD(Class<ET> classType,
-                         Class<PKT> pkType,
-                         String pkName,
-                         short loadBatchSize) {
+    public JPAEntityCRUDDelegate(Class<ET> classType,
+                                 Class<PKT> pkType,
+                                 String pkName,
+                                 short loadBatchSize) {
         this.classType = classType;
         this.pkType = pkType;
         this.PK_NAME = pkName;
         this.loadBatchSize = loadBatchSize;
     }
 
-    private EntityManager entityManager;
-    private CriteriaQuery<ET> entitiesForPrimaryKeysCriteriaQuery;
-
-    /**
-     * Sets the JPA entity manager used by the DAO
-     *
-     * @param entityManager that the DAO should use for all JPA Entity Manager actions
-     */
+    @Override
     public void setEntityManager(EntityManager entityManager) {
         this.entityManager = entityManager;
     }
 
-    /**
-     * Gets the JPA entity manager set for the DAO
-     *
-     * @return JPA EntityManager or null if not set
-     */
+    @Override
     public final EntityManager getEntityManager() {
         return entityManager;
     }
-
 
     @Override
     public final ET initializeAndDetach(ET entity,
@@ -163,13 +146,13 @@ public class JPAEntityCRUD<ET extends PrimaryKeyedEntity<PKT>, PKT extends Compa
                 (
                         entity,
                         hierarchy,
-                        NO_OP_VISIT_HANDLER,
+                        EntityCRUD.NO_OP_VISIT_HANDLER,
                         this::detachEntityVisitHandler
                 );
         return entity;
     }
 
-    protected final RuntimeException enhanceExceptionWithEntityManagerNullCheck(Exception e) {
+    final RuntimeException enhanceExceptionWithEntityManagerNullCheck(Exception e) {
         if (entityManager == null)
             return new EntityManagerNullException(e);
         else
@@ -221,5 +204,4 @@ public class JPAEntityCRUD<ET extends PrimaryKeyedEntity<PKT>, PKT extends Compa
         if (o instanceof PrimaryKeyedEntity) entityManager.detach(o);
         return VisitStatus.CONTINUE_PROCESSING;
     }
-
 }
