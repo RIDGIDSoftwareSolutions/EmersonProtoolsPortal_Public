@@ -50,4 +50,8 @@ public final class ExceptionHelpers {
                         e
                 );
     }
+
+//    public static <RTE extends RuntimeException> RTE wrapExceptions() {
+//
+//    }
 }
