@@ -52,6 +52,7 @@ public interface EntityCRUDCached<ET extends PrimaryKeyedEntity<PKT>, PKT extend
                         entityStream,
                         hierarchy
                 )
+                .stream()
                 .map(e -> cache().put(e.getPk(), e));
     }
 
@@ -69,6 +70,7 @@ public interface EntityCRUDCached<ET extends PrimaryKeyedEntity<PKT>, PKT extend
                         pktStream,
                         hierarchy
                 )
+                .stream()
                 .map(e -> cache().put(e.getPk(), e));
     }
 
