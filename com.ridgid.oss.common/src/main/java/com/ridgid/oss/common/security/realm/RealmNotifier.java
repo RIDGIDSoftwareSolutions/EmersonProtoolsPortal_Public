@@ -1,4 +1,4 @@
-package com.ridigid.oss.common.security.realm;
+package com.ridgid.oss.common.security.realm;
 
 /**
  * @param <RIDT> Realm ID Type

@@ -1,4 +1,8 @@
-package com.ridigid.oss.common.security.realm;
+package com.ridgid.oss.common.security.realm.authentication.storage;
+
+import com.ridgid.oss.common.security.realm.authentication.AuthenticationStorage;
+import com.ridgid.oss.common.security.realm.authentication.RealmAuthentication;
+import com.ridgid.oss.common.security.realm.authentication.StandardRealmAuthentication;
 
 import java.net.InetAddress;
 import java.util.function.Function;

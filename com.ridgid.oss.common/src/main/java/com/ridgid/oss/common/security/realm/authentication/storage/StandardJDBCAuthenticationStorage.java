@@ -1,7 +1,8 @@
-package com.ridigid.oss.common.security.realm;
+package com.ridgid.oss.common.security.realm.authentication.storage;
 
-import com.ridgid.oss.common.cache.jdbc.NamedParameterJdbcQuery;
 import com.ridgid.oss.common.helper.JdbcHelpers;
+import com.ridgid.oss.common.jdbc.NamedParameterJdbcQuery;
+import com.ridgid.oss.common.security.realm.authentication.RealmAuthentication;
 
 import javax.sql.DataSource;
 import java.net.InetAddress;
@@ -12,7 +13,7 @@ import java.sql.SQLException;
 import java.util.Optional;
 import java.util.function.Function;
 
-@SuppressWarnings({"unused", "SpellCheckingInspection"})
+@SuppressWarnings({"unused", "SpellCheckingInspection", "WeakerAccess"})
 public class StandardJDBCAuthenticationStorage<RIDT, IDT, ATT>
         extends StandardBaseAuthenticationStorage<RIDT, IDT, ATT> {
 

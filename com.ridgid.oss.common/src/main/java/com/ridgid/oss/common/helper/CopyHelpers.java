@@ -1,6 +1,6 @@
 package com.ridgid.oss.common.helper;
 
-import com.ridgid.oss.emerson.common.tuple.Pair;
+import com.ridgid.oss.common.tuple.Pair;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.lang.reflect.Constructor;

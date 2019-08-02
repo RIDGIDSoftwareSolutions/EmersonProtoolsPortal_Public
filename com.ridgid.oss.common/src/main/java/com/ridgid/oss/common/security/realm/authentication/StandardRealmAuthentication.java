@@ -1,8 +1,8 @@
-package com.ridigid.oss.common.security.realm;
+package com.ridgid.oss.common.security.realm.authentication;
 
 import java.net.InetAddress;
 
-@SuppressWarnings({"unused", "SpellCheckingInspection", "WeakerAccess"})
+@SuppressWarnings({"unused", "SpellCheckingInspection"})
 public final class StandardRealmAuthentication<RIDT, IDT, ATT>
         implements RealmAuthentication<RIDT, IDT, ATT> {
 

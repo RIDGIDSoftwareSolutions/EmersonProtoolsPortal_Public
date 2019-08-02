@@ -1,6 +1,6 @@
 package com.ridgid.oss.common.helper;
 
-import com.ridgid.oss.common.cache.jdbc.NamedParameterJdbcQuery;
+import com.ridgid.oss.common.jdbc.NamedParameterJdbcQuery;
 
 @SuppressWarnings("unused")
 public final class JdbcHelpers {

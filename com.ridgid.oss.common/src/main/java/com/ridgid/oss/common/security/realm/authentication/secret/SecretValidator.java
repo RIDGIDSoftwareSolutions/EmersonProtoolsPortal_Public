@@ -1,4 +1,4 @@
-package com.ridigid.oss.common.security.realm;
+package com.ridgid.oss.common.security.realm.authentication.secret;
 
 import java.util.Optional;
 
@@ -10,5 +10,8 @@ import java.util.Optional;
  */
 @SuppressWarnings({"unused", "SpellCheckingInspection"})
 public interface SecretValidator<RIDT, IDT, ST, ATT> {
-    Optional<ATT> authenticate(RIDT realmId, IDT userId, ST userSecret);
+
+    Optional<ATT> authenticate(RIDT realmId,
+                               IDT userId,
+                               ST userSecret);
 }

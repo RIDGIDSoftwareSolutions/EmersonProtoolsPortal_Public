@@ -1,4 +1,4 @@
-package com.ridigid.oss.common.security.realm;
+package com.ridgid.oss.common.security.realm.authentication;
 
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class RealmAuthenticationException extends Exception {

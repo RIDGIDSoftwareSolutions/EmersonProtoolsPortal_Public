@@ -1,4 +1,4 @@
-package com.ridigid.oss.common.security.realm;
+package com.ridgid.oss.common.security.realm.authentication;
 
 import com.ridgid.oss.common.cache.Expirable;
 

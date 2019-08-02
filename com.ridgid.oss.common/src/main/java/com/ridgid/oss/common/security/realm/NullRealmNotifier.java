@@ -1,4 +1,4 @@
-package com.ridigid.oss.common.security.realm;
+package com.ridgid.oss.common.security.realm;
 
 @SuppressWarnings({"unused", "SpellCheckingInspection"})
 public class NullRealmNotifier<RIDT, IDT, ST, ATT> implements RealmNotifier<RIDT, IDT, ST, ATT> {

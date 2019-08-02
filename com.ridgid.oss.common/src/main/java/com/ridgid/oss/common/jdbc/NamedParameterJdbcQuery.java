@@ -1,4 +1,4 @@
-package com.ridgid.oss.common.cache.jdbc;
+package com.ridgid.oss.common.jdbc;
 
 import java.sql.*;
 import java.util.*;
@@ -54,6 +54,7 @@ public class NamedParameterJdbcQuery {
 
     @SuppressWarnings("WeakerAccess")
     public static class PreparedNamedParameterJdbcQuery {
+
         private final NamedParameterJdbcQuery unpreparedQuery;
         private final PreparedStatement preparedStatement;
 
@@ -92,7 +93,9 @@ public class NamedParameterJdbcQuery {
         private void setNonNullParameter(Object value,
                                          ParameterMetaData md,
                                          int pidx) throws SQLException {
-            if (Boolean.class.isAssignableFrom(value.getClass()))
+//            if (Boolean.class.isAssignableFrom(value.getClass())) {
+//
+//            }
                 preparedStatement.setObject
                         (
                                 pidx,

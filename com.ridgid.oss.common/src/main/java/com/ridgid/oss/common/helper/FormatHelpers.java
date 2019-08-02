@@ -8,11 +8,16 @@ public final class FormatHelpers {
 
     private FormatHelpers() {}
 
-    public static String formatCurrencyValue(BigDecimal amount, int numberOfDecimalPlaces, Locale locale, String currencyCode) {
+    public static String formatCurrencyValue(BigDecimal amount,
+                                             int numberOfDecimalPlaces,
+                                             Locale locale,
+                                             String currencyCode) {
         return currencyCode + " " + formatDecimalValue(amount, numberOfDecimalPlaces, locale);
     }
 
-    public static String formatDecimalValue(BigDecimal amount, int numberOfDecimalPlaces, Locale locale) {
+    public static String formatDecimalValue(BigDecimal amount,
+                                            int numberOfDecimalPlaces,
+                                            Locale locale) {
         return String.format(locale, "%." + numberOfDecimalPlaces + "f", amount );
     }
 }

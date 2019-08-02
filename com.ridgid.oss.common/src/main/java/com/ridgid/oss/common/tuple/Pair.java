@@ -1,4 +1,4 @@
-package com.ridgid.oss.emerson.common.tuple;
+package com.ridgid.oss.common.tuple;
 
 import java.util.Objects;
 import java.util.function.BiFunction;

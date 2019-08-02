@@ -1,6 +1,5 @@
 package com.ridgid.oss.common.tuple;
 
-import com.ridgid.oss.emerson.common.tuple.Pair;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
