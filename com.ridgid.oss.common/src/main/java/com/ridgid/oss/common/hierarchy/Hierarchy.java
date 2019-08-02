@@ -174,40 +174,44 @@ public class Hierarchy<PARENT_T> {
             childNodes.add(child);
         }
 
+        @SuppressWarnings("unchecked")
         @Override
-        public <CHILD_T> Node<PARENT_T, T> single(Function<T, CHILD_T> selector,
-                                                  Consumer<SingleNode<T, CHILD_T>> childrenSelector) {
+        public <CHILD_T, N extends Node<PARENT_T, T>> N single(Function<T, CHILD_T> selector,
+                                                               Consumer<SingleNode<T, CHILD_T>> childrenSelector) {
             SingleChild<T, CHILD_T> child = new SingleChild<>(selector);
             if (childrenSelector != null) childrenSelector.accept(child);
             addChild(child);
-            return this;
+            return (N) this;
         }
 
+        @SuppressWarnings("unchecked")
         @Override
-        public <CHILD_T> Node<PARENT_T, T> many(Function<T, Stream<CHILD_T>> selector,
-                                                Consumer<MultiNode<T, CHILD_T, Stream<CHILD_T>>> childrenSelector) {
+        public <CHILD_T, N extends Node<PARENT_T, T>> N many(Function<T, Stream<CHILD_T>> selector,
+                                                             Consumer<MultiNode<T, CHILD_T, Stream<CHILD_T>>> childrenSelector) {
             StreamChild<T, CHILD_T> child = new StreamChild<>(selector);
             if (childrenSelector != null) childrenSelector.accept(child);
             addChild(child);
-            return this;
+            return (N) this;
         }
 
+        @SuppressWarnings("unchecked")
         @Override
-        public <CHILD_T> Node<PARENT_T, T> collection(Function<T, Iterable<CHILD_T>> selector,
-                                                      Consumer<MultiNode<T, CHILD_T, Iterable<CHILD_T>>> childrenSelector) {
+        public <CHILD_T, N extends Node<PARENT_T, T>> N collection(Function<T, Iterable<CHILD_T>> selector,
+                                                                   Consumer<MultiNode<T, CHILD_T, Iterable<CHILD_T>>> childrenSelector) {
             IterableChild<T, CHILD_T> child = new IterableChild<>(selector);
             if (childrenSelector != null) childrenSelector.accept(child);
             addChild(child);
-            return this;
+            return (N) this;
         }
 
+        @SuppressWarnings("unchecked")
         @Override
-        public <CHILD_T> Node<PARENT_T, T> array(Function<T, CHILD_T[]> selector,
-                                                 Consumer<MultiNode<T, CHILD_T, CHILD_T[]>> childrenSelector) {
+        public <CHILD_T, N extends Node<PARENT_T, T>> N array(Function<T, CHILD_T[]> selector,
+                                                              Consumer<MultiNode<T, CHILD_T, CHILD_T[]>> childrenSelector) {
             ArrayChild<T, CHILD_T> child = new ArrayChild<>(selector);
             if (childrenSelector != null) childrenSelector.accept(child);
             addChild(child);
-            return this;
+            return (N) this;
         }
 
         @Override
@@ -379,6 +383,26 @@ public class Hierarchy<PARENT_T> {
         }
 
         @Override
+        public <CHILD_T, N extends Node<PARENT_T, T>> N single(Function<T, CHILD_T> selector, Consumer<SingleNode<T, CHILD_T>> childrenSelector) {
+            return super.single(selector, childrenSelector);
+        }
+
+        @Override
+        public <CHILD_T, N extends Node<PARENT_T, T>> N many(Function<T, Stream<CHILD_T>> selector, Consumer<MultiNode<T, CHILD_T, Stream<CHILD_T>>> childrenSelector) {
+            return super.many(selector, childrenSelector);
+        }
+
+        @Override
+        public <CHILD_T, N extends Node<PARENT_T, T>> N collection(Function<T, Iterable<CHILD_T>> selector, Consumer<MultiNode<T, CHILD_T, Iterable<CHILD_T>>> childrenSelector) {
+            return super.collection(selector, childrenSelector);
+        }
+
+        @Override
+        public <CHILD_T, N extends Node<PARENT_T, T>> N array(Function<T, CHILD_T[]> selector, Consumer<MultiNode<T, CHILD_T, CHILD_T[]>> childrenSelector) {
+            return super.array(selector, childrenSelector);
+        }
+
+        @Override
         public VisitStatus visit(UUID key,
                                  PARENT_T parent,
                                  VisitHandler<Object, Object> visitor,
@@ -395,8 +419,9 @@ public class Hierarchy<PARENT_T> {
         }
 
         @Override
-        public void whenVisited(Consumer<NodeVisitorConfiguration<PARENT_T, T>> visitConfigurer) {
+        public Node<PARENT_T, T> whenVisited(Consumer<NodeVisitorConfiguration<PARENT_T, T>> visitConfigurer) {
             visitConfigurer.accept(this);
+            return this;
         }
     }
 
@@ -422,6 +447,26 @@ public class Hierarchy<PARENT_T> {
         }
 
         @Override
+        public <CHILD_T, N extends Node<PARENT_T, T>> N single(Function<T, CHILD_T> selector, Consumer<SingleNode<T, CHILD_T>> childrenSelector) {
+            return super.single(selector, childrenSelector);
+        }
+
+        @Override
+        public <CHILD_T, N extends Node<PARENT_T, T>> N many(Function<T, Stream<CHILD_T>> selector, Consumer<MultiNode<T, CHILD_T, Stream<CHILD_T>>> childrenSelector) {
+            return super.many(selector, childrenSelector);
+        }
+
+        @Override
+        public <CHILD_T, N extends Node<PARENT_T, T>> N collection(Function<T, Iterable<CHILD_T>> selector, Consumer<MultiNode<T, CHILD_T, Iterable<CHILD_T>>> childrenSelector) {
+            return super.collection(selector, childrenSelector);
+        }
+
+        @Override
+        public <CHILD_T, N extends Node<PARENT_T, T>> N array(Function<T, CHILD_T[]> selector, Consumer<MultiNode<T, CHILD_T, CHILD_T[]>> childrenSelector) {
+            return super.array(selector, childrenSelector);
+        }
+
+        @Override
         public MultiNodeVisitorConfiguration<PARENT_T, T, CT> beforeMany(VisitHandler<PARENT_T, CT> handler) {
             if (beforeManyVisitHandlers == null) beforeManyVisitHandlers = new BiHandlerList<>();
             beforeManyVisitHandlers.add(handler);
@@ -436,8 +481,9 @@ public class Hierarchy<PARENT_T> {
         }
 
         @Override
-        public void whenVisited(Consumer<MultiNodeVisitorConfiguration<PARENT_T, T, CT>> visitConfigurer) {
+        public Node<PARENT_T, T> whenVisited(Consumer<MultiNodeVisitorConfiguration<PARENT_T, T, CT>> visitConfigurer) {
             visitConfigurer.accept(this);
+            return this;
         }
 
         @SuppressWarnings("unchecked")

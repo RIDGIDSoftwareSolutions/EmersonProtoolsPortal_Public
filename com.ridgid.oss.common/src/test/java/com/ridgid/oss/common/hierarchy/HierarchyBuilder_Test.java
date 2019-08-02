@@ -10,6 +10,8 @@ import java.util.stream.Stream;
 
 import static com.ridgid.oss.common.hierarchy.Hierarchy.Traversal.BREADTH_FIRST;
 import static com.ridgid.oss.common.hierarchy.Hierarchy.Traversal.DEPTH_FIRST;
+import static com.ridgid.oss.common.hierarchy.VisitStatus.CONTINUE_PROCESSING;
+import static com.ridgid.oss.common.hierarchy.VisitStatus.SKIP_NODE_AND_REMAINING_SIBLING_NODES;
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -79,7 +81,13 @@ class HierarchyBuilder_Test {
                         )
                 )
                 .many(Person::getFriends,
-                        f -> f.single(Person::getSpouse))
+                        friends -> friends.whenVisited
+                                (
+                                        check -> check
+                                                .afterMany((p, ps) -> CONTINUE_PROCESSING)
+                                                .beforeAllChildren((p1, p2) -> SKIP_NODE_AND_REMAINING_SIBLING_NODES)
+                                )
+                                .single(Person::getSpouse))
                 .build();
         assertNotNull(h);
 
@@ -126,7 +134,7 @@ class HierarchyBuilder_Test {
         return (p, c) -> {
             if (c instanceof Name)
                 names.add(((Name) c).getName());
-            return VisitStatus.CONTINUE_PROCESSING;
+            return CONTINUE_PROCESSING;
         };
     }
 
