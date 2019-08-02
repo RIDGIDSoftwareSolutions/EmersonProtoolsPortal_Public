@@ -88,7 +88,7 @@ public class Hierarchy<PARENT_T> {
         }
 
         public <CHILD_T> Builder<T> single(Function<T, CHILD_T> selector,
-                                           Consumer<Node<T, CHILD_T>> childrenSelector) {
+                                           Consumer<SingleNode<T, CHILD_T>> childrenSelector) {
             SingleChild<T, CHILD_T> child = new SingleChild<>(selector);
             if (childrenSelector != null) childrenSelector.accept(child);
             childNodes.add(child);
@@ -100,7 +100,7 @@ public class Hierarchy<PARENT_T> {
         }
 
         public <CHILD_T> Builder<T> many(Function<T, Stream<CHILD_T>> selector,
-                                         Consumer<Node<T, CHILD_T>> childrenSelector) {
+                                         Consumer<MultiNode<T, CHILD_T, Stream<CHILD_T>>> childrenSelector) {
             StreamChild<T, CHILD_T> child = new StreamChild<>(selector);
             if (childrenSelector != null) childrenSelector.accept(child);
             childNodes.add(child);
@@ -112,7 +112,7 @@ public class Hierarchy<PARENT_T> {
         }
 
         public <CHILD_T> Builder<T> collection(Function<T, Iterable<CHILD_T>> selector,
-                                               Consumer<Node<T, CHILD_T>> childrenSelector) {
+                                               Consumer<MultiNode<T, CHILD_T, Iterable<CHILD_T>>> childrenSelector) {
             IterableChild<T, CHILD_T> child = new IterableChild<>(selector);
             if (childrenSelector != null) childrenSelector.accept(child);
             childNodes.add(child);
@@ -124,7 +124,7 @@ public class Hierarchy<PARENT_T> {
         }
 
         public <CHILD_T> Builder<T> array(Function<T, CHILD_T[]> selector,
-                                          Consumer<Node<T, CHILD_T>> childrenSelector) {
+                                          Consumer<MultiNode<T, CHILD_T, CHILD_T[]>> childrenSelector) {
             ArrayChild<T, CHILD_T> child = new ArrayChild<>(selector);
             if (childrenSelector != null) childrenSelector.accept(child);
             childNodes.add(child);

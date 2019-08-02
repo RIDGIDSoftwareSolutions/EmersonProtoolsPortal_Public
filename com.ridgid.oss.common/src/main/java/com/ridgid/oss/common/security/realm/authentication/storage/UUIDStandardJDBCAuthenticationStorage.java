@@ -10,7 +10,7 @@ public class UUIDStandardJDBCAuthenticationStorage extends StandardJDBCAuthentic
     private static final String namedParameterUpsertStatement
             = "merge into Security.UserSesscionAuthentication usa "
             + "using ( "
-            + "    values( :userId, :realmId, :clientNetworkAddress, :authenticationToken, :expires )"
+            + "    values( :userId, :realmId, :clientNetworkAddress, :authenticationToken, :expires ) "
             + ") "
             + "    v ( UserId, RealmId, ClientNetworkAddress, AuthenticationToken, Expires ) "
             + "on "
@@ -25,7 +25,7 @@ public class UUIDStandardJDBCAuthenticationStorage extends StandardJDBCAuthentic
             + "when not matched then insert "
             + "    ( UserId, RealmId, ClientNetworkAddress, AuthenticationToken, Expires ) "
             + "    values "
-            + "    ( v.UserId, v.RealmId, v.ClientNetworkAddress, v.AuthenticationToken, v.Expires )";
+            + "    ( v.UserId, v.RealmId, v.ClientNetworkAddress, v.AuthenticationToken, v.Expires ) ";
 
     private static final String namedParameterSelectStatement
             = "select UserId, RealmId, ClientNetworkAddress, AuthenticationToken, Expires "
