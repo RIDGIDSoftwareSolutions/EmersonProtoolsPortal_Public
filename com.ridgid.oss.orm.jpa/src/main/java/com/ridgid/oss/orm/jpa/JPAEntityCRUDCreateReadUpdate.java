@@ -1,5 +1,6 @@
 package com.ridgid.oss.orm.jpa;
 
+import com.ridgid.oss.common.hierarchy.Hierarchy;
 import com.ridgid.oss.orm.EntityCRUDCreateReadUpdate;
 import com.ridgid.oss.orm.entity.PrimaryKeyedEntity;
 import com.ridgid.oss.orm.exception.EntityCRUDExceptionError;
@@ -13,17 +14,40 @@ import java.util.Optional;
  * @param <ET>  entity type of the entity that the DAO provides persistence methods for
  * @param <PKT> primary key type of the entity type that the DAO provides persistence methods for
  */
-@SuppressWarnings("WeakerAccess")
+@SuppressWarnings({"WeakerAccess", "unused"})
 public abstract class JPAEntityCRUDCreateReadUpdate<ET extends PrimaryKeyedEntity<PKT>, PKT extends Comparable<PKT>>
         extends JPAEntityCRUDCreateRead<ET, PKT>
         implements EntityCRUDCreateReadUpdate<ET, PKT> {
 
-    private final JPAEntityCRUDUpdate<ET, PKT> updateBase;
+    private final JPAEntityCRUDUpdateDelegate<ET, PKT> updateDelegate;
 
-    protected JPAEntityCRUDCreateReadUpdate(Class<ET> classType,
-                                            Class<PKT> pkType) {
-        super(classType, pkType);
-        updateBase = new JPAEntityCRUDUpdate<>(classType);
+    public JPAEntityCRUDCreateReadUpdate(JPAEntityCRUDDelegate<ET, PKT> baseDelegate) {
+        super(baseDelegate);
+        this.updateDelegate = new JPAEntityCRUDUpdateDelegate<>(baseDelegate);
+    }
+
+    public JPAEntityCRUDCreateReadUpdate(Class<ET> classType,
+                                         Class<PKT> pkType) {
+        this(new JPAEntityCRUDDelegate<>(classType, pkType));
+    }
+
+    public JPAEntityCRUDCreateReadUpdate(Class<ET> classType,
+                                         Class<PKT> pkType,
+                                         String pkName) {
+        this(new JPAEntityCRUDDelegate<>(classType, pkType, pkName));
+    }
+
+    public JPAEntityCRUDCreateReadUpdate(Class<ET> classType,
+                                         Class<PKT> pkType,
+                                         short loadBatchSize) {
+        this(new JPAEntityCRUDDelegate<>(classType, pkType, loadBatchSize));
+    }
+
+    public JPAEntityCRUDCreateReadUpdate(Class<ET> classType,
+                                         Class<PKT> pkType,
+                                         String pkName,
+                                         short loadBatchSize) {
+        this(new JPAEntityCRUDDelegate<>(classType, pkType, pkName, loadBatchSize));
     }
 
     /**
@@ -34,7 +58,7 @@ public abstract class JPAEntityCRUDCreateReadUpdate<ET extends PrimaryKeyedEntit
     @Override
     public void setEntityManager(EntityManager entityManager) {
         super.setEntityManager(entityManager);
-        updateBase.setEntityManager(entityManager);
+        updateDelegate.setEntityManager(entityManager);
     }
 
     /**
@@ -45,7 +69,7 @@ public abstract class JPAEntityCRUDCreateReadUpdate<ET extends PrimaryKeyedEntit
      * @throws EntityCRUDExceptionError if there is an issue updating the record (specific "cause" may vary)
      */
     @Override
-    public Optional<ET> optionalUpdate(ET entity) throws EntityCRUDExceptionError {
-        return updateBase.optionalUpdate(entity);
+    public Optional<ET> optionalUpdate(ET entity, Hierarchy<ET> hierarchy) throws EntityCRUDExceptionError {
+        return updateDelegate.optionalUpdate(entity, hierarchy);
     }
 }

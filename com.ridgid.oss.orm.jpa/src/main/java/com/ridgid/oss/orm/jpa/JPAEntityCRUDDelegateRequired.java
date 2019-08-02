@@ -26,6 +26,10 @@ public interface JPAEntityCRUDDelegateRequired<ET extends PrimaryKeyedEntity<PKT
      */
     EntityManager getEntityManager();
 
+    Class<ET> getClassType();
+
+    Class<PKT> getPkType();
+
     @Override
     ET initializeAndDetach(ET entity,
                            Hierarchy<ET> hierarchy);

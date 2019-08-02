@@ -75,6 +75,14 @@ final class JPAEntityCRUDDelegate<ET extends PrimaryKeyedEntity<PKT>, PKT extend
         return entityManager;
     }
 
+    public Class<ET> getClassType() {
+        return classType;
+    }
+
+    public Class<PKT> getPkType() {
+        return pkType;
+    }
+
     @Override
     public final ET initializeAndDetach(ET entity,
                                         Hierarchy<ET> hierarchy) {

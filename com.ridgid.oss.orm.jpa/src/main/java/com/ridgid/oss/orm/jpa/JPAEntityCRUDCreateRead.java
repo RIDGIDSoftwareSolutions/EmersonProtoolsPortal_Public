@@ -1,5 +1,6 @@
 package com.ridgid.oss.orm.jpa;
 
+import com.ridgid.oss.common.hierarchy.Hierarchy;
 import com.ridgid.oss.orm.EntityCRUDCreateRead;
 import com.ridgid.oss.orm.entity.PrimaryKeyedEntity;
 import com.ridgid.oss.orm.exception.EntityCRUDExceptionAlreadyExists;
@@ -13,16 +14,41 @@ import javax.persistence.EntityManager;
  * @param <ET>  entity type of the entity that the DAO provides persistence methods for
  * @param <PKT> primary key type of the entity type that the DAO provides persistence methods for
  */
-@SuppressWarnings("WeakerAccess")
+@SuppressWarnings({"WeakerAccess", "unused"})
 public abstract class JPAEntityCRUDCreateRead<ET extends PrimaryKeyedEntity<PKT>, PKT extends Comparable<PKT>>
         extends JPAEntityCRUDRead<ET, PKT>
-        implements EntityCRUDCreateRead<ET, PKT> {
+        implements
+        EntityCRUDCreateRead<ET, PKT> {
 
-    private final JPAEntityCRUDCreate<ET, PKT> createBase;
+    private final JPAEntityCRUDCreateDelegate<ET, PKT> createDelegate;
 
-    protected JPAEntityCRUDCreateRead(Class<ET> classType, Class<PKT> pkType) {
-        super(classType, pkType);
-        createBase = new JPAEntityCRUDCreate<>(classType);
+    public JPAEntityCRUDCreateRead(JPAEntityCRUDDelegate<ET, PKT> baseDelegate) {
+        super(baseDelegate);
+        this.createDelegate = new JPAEntityCRUDCreateDelegate<>(baseDelegate);
+    }
+
+    public JPAEntityCRUDCreateRead(Class<ET> classType,
+                                   Class<PKT> pkType) {
+        this(new JPAEntityCRUDDelegate<>(classType, pkType));
+    }
+
+    public JPAEntityCRUDCreateRead(Class<ET> classType,
+                                   Class<PKT> pkType,
+                                   String pkName) {
+        this(new JPAEntityCRUDDelegate<>(classType, pkType, pkName));
+    }
+
+    public JPAEntityCRUDCreateRead(Class<ET> classType,
+                                   Class<PKT> pkType,
+                                   short loadBatchSize) {
+        this(new JPAEntityCRUDDelegate<>(classType, pkType, loadBatchSize));
+    }
+
+    public JPAEntityCRUDCreateRead(Class<ET> classType,
+                                   Class<PKT> pkType,
+                                   String pkName,
+                                   short loadBatchSize) {
+        this(new JPAEntityCRUDDelegate<>(classType, pkType, pkName, loadBatchSize));
     }
 
     /**
@@ -33,7 +59,6 @@ public abstract class JPAEntityCRUDCreateRead<ET extends PrimaryKeyedEntity<PKT>
     @Override
     public void setEntityManager(EntityManager entityManager) {
         super.setEntityManager(entityManager);
-        createBase.setEntityManager(entityManager);
     }
 
     /**
@@ -45,7 +70,7 @@ public abstract class JPAEntityCRUDCreateRead<ET extends PrimaryKeyedEntity<PKT>
      * @throws EntityCRUDExceptionAlreadyExists if and entity one the same primary key of the given entity already exists in the persistent storage
      */
     @Override
-    public ET add(ET entity) throws EntityCRUDExceptionError, EntityCRUDExceptionAlreadyExists {
-        return createBase.add(entity);
+    public ET add(ET entity, Hierarchy<ET> hierarchy) throws EntityCRUDExceptionError, EntityCRUDExceptionAlreadyExists {
+        return createDelegate.add(entity, hierarchy);
     }
 }

@@ -4,7 +4,7 @@ import com.ridgid.oss.common.helper.EqualityHelpers;
 import com.ridgid.oss.common.helper.FieldReflectionHelpers;
 import com.ridgid.oss.common.helper.PrimaryKeyAutoGenerationType;
 import com.ridgid.oss.orm.entity.PrimaryKeyedEntity;
-import com.ridgid.oss.orm.jpa.JPAEntityCRUD;
+import com.ridgid.oss.orm.jpa.JPAEntityCRUDDelegateRequired;
 import com.ridgid.oss.orm.jpa.helper.JPAEntityHelpers;
 import com.ridgid.oss.orm.jpa.helper.JPAFieldPopulationHelpers;
 import com.ridgid.oss.orm.jpa.helper.JPANativeQueryHelpers;
@@ -41,7 +41,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(SpringExtension.class)
 @DataJpaTest
 @SuppressWarnings({"unused", "JavaDoc", "SpellCheckingInspection"})
-public abstract class JPADAO_TestBase<DAO extends JPAEntityCRUD<ET, PKT>, ET extends PrimaryKeyedEntity<PKT>, PKT extends Comparable<PKT>> {
+public abstract class JPADAO_TestBase<DAO extends JPAEntityCRUDDelegateRequired<ET, PKT>, ET extends PrimaryKeyedEntity<PKT>, PKT extends Comparable<PKT>> {
 
     private final Map<Class<?>, List<PrimaryKeyedEntity<?>>> TEST_DATA_MAP = new ConcurrentHashMap<>();
 

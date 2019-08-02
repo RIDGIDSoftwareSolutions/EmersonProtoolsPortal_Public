@@ -17,6 +17,7 @@ import java.util.stream.Stream;
 final class JPAEntityCRUDReadDelegate<ET extends PrimaryKeyedEntity<PKT>, PKT extends Comparable<PKT>>
         implements
         JPAEntityCRUDDelegateRequired<ET, PKT>,
+        JPAEntityCRUDReadDelegateRequired<ET, PKT>,
         EntityCRUDRead<ET, PKT> {
 
     private final JPAEntityCRUDDelegate<ET, PKT> baseDelegate;
@@ -29,26 +30,26 @@ final class JPAEntityCRUDReadDelegate<ET extends PrimaryKeyedEntity<PKT>, PKT ex
 
     JPAEntityCRUDReadDelegate(Class<ET> classType,
                               Class<PKT> pkType) {
-        this.baseDelegate = new JPAEntityCRUDDelegate<ET, PKT>(classType, pkType);
+        this.baseDelegate = new JPAEntityCRUDDelegate<>(classType, pkType);
     }
 
     JPAEntityCRUDReadDelegate(Class<ET> classType,
                               Class<PKT> pkType,
                               String pkName) {
-        this.baseDelegate = new JPAEntityCRUDDelegate<ET, PKT>(classType, pkType, pkName);
+        this.baseDelegate = new JPAEntityCRUDDelegate<>(classType, pkType, pkName);
     }
 
     JPAEntityCRUDReadDelegate(Class<ET> classType,
                               Class<PKT> pkType,
                               short loadBatchSize) {
-        this.baseDelegate = new JPAEntityCRUDDelegate<ET, PKT>(classType, pkType, loadBatchSize);
+        this.baseDelegate = new JPAEntityCRUDDelegate<>(classType, pkType, loadBatchSize);
     }
 
     JPAEntityCRUDReadDelegate(Class<ET> classType,
                               Class<PKT> pkType,
                               String pkName,
                               short loadBatchSize) {
-        this.baseDelegate = new JPAEntityCRUDDelegate<ET, PKT>(classType, pkType, pkName, loadBatchSize);
+        this.baseDelegate = new JPAEntityCRUDDelegate<>(classType, pkType, pkName, loadBatchSize);
     }
 
     @Override
@@ -59,6 +60,16 @@ final class JPAEntityCRUDReadDelegate<ET extends PrimaryKeyedEntity<PKT>, PKT ex
     @Override
     public EntityManager getEntityManager() {
         return baseDelegate.getEntityManager();
+    }
+
+    @Override
+    public Class<ET> getClassType() {
+        return baseDelegate.getClassType();
+    }
+
+    @Override
+    public Class<PKT> getPkType() {
+        return baseDelegate.getPkType();
     }
 
     @Override
@@ -91,13 +102,6 @@ final class JPAEntityCRUDReadDelegate<ET extends PrimaryKeyedEntity<PKT>, PKT ex
         return baseDelegate.detach(entity, hierarchy);
     }
 
-    /**
-     * Finds and retrieves the entity ET instance (if it exits) from the persistence layer
-     *
-     * @param pk primary key of the entity ET type to find and retrieve
-     * @return Optional entity instance of type ET if the entity exists under the given primary key, pk, in the persistence store; otherwise, Optional is empty
-     * @throws EntityCRUDExceptionError if there is some error retrieving the value beyond it not existing
-     */
     @Override
     public Optional<ET> optionalFind(PKT pk) throws EntityCRUDExceptionError {
         try {
@@ -116,14 +120,6 @@ final class JPAEntityCRUDReadDelegate<ET extends PrimaryKeyedEntity<PKT>, PKT ex
         }
     }
 
-    /**
-     * Finds and retrieves all available entities of type ET in the persistence store between the offset (inclusive, zero-based) up to offset + limit (exclusive)
-     *
-     * @param offset number of records to skip before beginning to return records
-     * @param limit  number of records to retrieve after skipping offset records (or fewer if fewer are available)
-     * @return list of entities of type ET that are available in the persistence store ranged by the limit and offset given. If none available in the given range, then returns a 0 length list.
-     * @throws EntityCRUDExceptionError if there is an error retrieving from the persistence store
-     */
     @Override
     public final List<ET> findAll(int offset, int limit) throws EntityCRUDExceptionError {
         try {

@@ -1,5 +1,6 @@
 package com.ridgid.oss.orm.jpa;
 
+import com.ridgid.oss.common.hierarchy.Hierarchy;
 import com.ridgid.oss.orm.EntityCRUDCreateReadUpdateDelete;
 import com.ridgid.oss.orm.entity.PrimaryKeyedEntity;
 import com.ridgid.oss.orm.exception.EntityCRUDExceptionError;
@@ -13,15 +14,40 @@ import javax.persistence.EntityManager;
  * @param <ET>  entity type of the entity that the DAO provides persistence methods for
  * @param <PKT> primary key type of the entity type that the DAO provides persistence methods for
  */
+@SuppressWarnings({"WeakerAccess", "unused"})
 public abstract class JPAEntityCRUDCreateReadUpdateDelete<ET extends PrimaryKeyedEntity<PKT>, PKT extends Comparable<PKT>>
         extends JPAEntityCRUDCreateReadUpdate<ET, PKT>
         implements EntityCRUDCreateReadUpdateDelete<ET, PKT> {
 
-    private final JPAEntityCRUDDelete<ET, PKT> deleteBase;
+    private final JPAEntityCRUDDeleteDelegate<ET, PKT> deleteDelegate;
 
-    protected JPAEntityCRUDCreateReadUpdateDelete(Class<ET> classType, Class<PKT> pkType) {
-        super(classType, pkType);
-        deleteBase = new JPAEntityCRUDDelete<>(classType,pkType);
+    public JPAEntityCRUDCreateReadUpdateDelete(JPAEntityCRUDDelegate<ET, PKT> baseDelegate) {
+        super(baseDelegate);
+        this.deleteDelegate = new JPAEntityCRUDDeleteDelegate<>(baseDelegate);
+    }
+
+    public JPAEntityCRUDCreateReadUpdateDelete(Class<ET> classType,
+                                               Class<PKT> pkType) {
+        this(new JPAEntityCRUDDelegate<>(classType, pkType));
+    }
+
+    public JPAEntityCRUDCreateReadUpdateDelete(Class<ET> classType,
+                                               Class<PKT> pkType,
+                                               String pkName) {
+        this(new JPAEntityCRUDDelegate<>(classType, pkType, pkName));
+    }
+
+    public JPAEntityCRUDCreateReadUpdateDelete(Class<ET> classType,
+                                               Class<PKT> pkType,
+                                               short loadBatchSize) {
+        this(new JPAEntityCRUDDelegate<>(classType, pkType, loadBatchSize));
+    }
+
+    public JPAEntityCRUDCreateReadUpdateDelete(Class<ET> classType,
+                                               Class<PKT> pkType,
+                                               String pkName,
+                                               short loadBatchSize) {
+        this(new JPAEntityCRUDDelegate<>(classType, pkType, pkName, loadBatchSize));
     }
 
     /**
@@ -32,7 +58,7 @@ public abstract class JPAEntityCRUDCreateReadUpdateDelete<ET extends PrimaryKeye
     @Override
     public void setEntityManager(EntityManager entityManager) {
         super.setEntityManager(entityManager);
-        deleteBase.setEntityManager(entityManager);
+        deleteDelegate.setEntityManager(entityManager);
     }
 
     /**
@@ -43,7 +69,7 @@ public abstract class JPAEntityCRUDCreateReadUpdateDelete<ET extends PrimaryKeye
      * @throws EntityCRUDExceptionNotFound if there is no entity ET one the primary key PK in the persistence store
      */
     @Override
-    public void delete(PKT pk) throws EntityCRUDExceptionError, EntityCRUDExceptionNotFound {
-        deleteBase.delete(pk);
+    public void delete(PKT pk, Hierarchy<ET> hierarchy) throws EntityCRUDExceptionError, EntityCRUDExceptionNotFound {
+        deleteDelegate.delete(pk, hierarchy);
     }
 }

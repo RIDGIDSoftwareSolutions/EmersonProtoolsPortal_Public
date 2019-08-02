@@ -1,10 +1,13 @@
 package com.ridgid.oss.orm.jpa;
 
-import com.ridgid.oss.orm.EntityCRUDUpdate;
+import com.ridgid.oss.common.hierarchy.Hierarchy;
 import com.ridgid.oss.orm.entity.PrimaryKeyedEntity;
 import com.ridgid.oss.orm.exception.EntityCRUDExceptionError;
 
+import javax.persistence.EntityManager;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 /**
  * Base class for a JPA DAO that provides READ CRUD operations only
@@ -12,52 +15,85 @@ import java.util.Optional;
  * @param <ET>  Entity Type of the Entity that the DAO provides an UPDATE (update) CRUD method for
  * @param <PKT> Type of the Primary Key of the Entity Type ET
  */
-@SuppressWarnings("WeakerAccess")
+@SuppressWarnings({"unused"})
 public class JPAEntityCRUDUpdate<ET extends PrimaryKeyedEntity<PKT>, PKT extends Comparable<PKT>>
-        extends JPAEntityCRUD<ET, PKT>
-        implements EntityCRUDUpdate<ET, PKT> {
+        implements
+        JPAEntityCRUDDelegateRequired<ET, PKT>,
+        JPAEntityCRUDUpdateDelegateRequired<ET, PKT> {
+
+    private final JPAEntityCRUDUpdateDelegate<ET, PKT> baseDelegate;
+
+    public JPAEntityCRUDUpdate(JPAEntityCRUDUpdateDelegate<ET, PKT> baseDelegate) {
+        this.baseDelegate = baseDelegate;
+    }
 
     public JPAEntityCRUDUpdate(Class<ET> classType,
                                Class<PKT> pkType) {
-        super(classType, pkType);
+        this.baseDelegate = new JPAEntityCRUDUpdateDelegate<>(classType, pkType);
     }
 
     public JPAEntityCRUDUpdate(Class<ET> classType, Class<PKT> pkType, String pkName) {
-        super(classType, pkType, pkName);
+        this.baseDelegate = new JPAEntityCRUDUpdateDelegate<>(classType, pkType, pkName);
     }
 
     public JPAEntityCRUDUpdate(Class<ET> classType, Class<PKT> pkType, short loadBatchSize) {
-        super(classType, pkType, loadBatchSize);
+        this.baseDelegate = new JPAEntityCRUDUpdateDelegate<>(classType, pkType, loadBatchSize);
     }
 
     public JPAEntityCRUDUpdate(Class<ET> classType, Class<PKT> pkType, String pkName, short loadBatchSize) {
-        super(classType, pkType, pkName, loadBatchSize);
+        this.baseDelegate = new JPAEntityCRUDUpdateDelegate<>(classType, pkType, pkName, loadBatchSize);
     }
 
-    protected JPAEntityCRUDUpdate(Class<ET> classType) {
-        this.JPAEntityCRUDBaseDelegate.classType = classType;
+    public void setEntityManager(EntityManager entityManager) {
+        baseDelegate.setEntityManager(entityManager);
     }
 
-    /**
-     * Updates the entity in the persistent storage one the same primary key of given entity so that all the persistent field values in the persistent storage for the entity match the values of the given entity.
-     *
-     * @param entity entity to update in the persistent storage
-     * @return the optional entity one any values that were updated by the persistent storage layer upon successful update of the entity in the persistent storage; if the entity does not currently exist in the persistent storage returns an empty optional.
-     * @throws EntityCRUDExceptionError if there is an issue updating the record (specific "cause" may vary)
-     */
+    public EntityManager getEntityManager() {
+        return baseDelegate.getEntityManager();
+    }
+
     @Override
-    public Optional<ET> optionalUpdate(ET entity) throws EntityCRUDExceptionError {
-        try {
-            if (!JPAEntityCRUDDelegate.getEntityManager().contains(entity)) {
-                if (JPAEntityCRUDDelegate.getEntityManager().find(JPAEntityCRUDDelegate.classType, entity.getPk()) == null)
-                    return Optional.empty();
-                JPAEntityCRUDDelegate.getEntityManager().merge(entity);
-            }
-            JPAEntityCRUDDelegate.getEntityManager().flush();
-            JPAEntityCRUDDelegate.getEntityManager().refresh(entity);
-            return Optional.of(entity);
-        } catch (Exception ex) {
-            throw JPAEntityCRUDDelegate.enhanceExceptionWithEntityManagerNullCheck(ex);
-        }
+    public ET initializeAndDetach(ET entity, Hierarchy<ET> hierarchy) {
+        return baseDelegate.initializeAndDetach(entity, hierarchy);
+    }
+
+    @Override
+    public Optional<ET> load(PKT pk) {
+        return baseDelegate.load(pk);
+    }
+
+    @Override
+    public Stream<ET> loadBatch(List<PKT> pkList) {
+        return baseDelegate.loadBatch(pkList);
+    }
+
+    @Override
+    public short getLoadBatchSize() {
+        return baseDelegate.getLoadBatchSize();
+    }
+
+    @Override
+    public ET initialize(ET entity, Hierarchy<ET> hierarchy) {
+        return baseDelegate.initialize(entity, hierarchy);
+    }
+
+    @Override
+    public ET detach(ET entity, Hierarchy<ET> hierarchy) {
+        return baseDelegate.detach(entity, hierarchy);
+    }
+
+    @Override
+    public Class<ET> getClassType() {
+        return baseDelegate.getClassType();
+    }
+
+    @Override
+    public Class<PKT> getPkType() {
+        return baseDelegate.getPkType();
+    }
+
+    @Override
+    public Optional<ET> optionalUpdate(ET entity, Hierarchy<ET> hierarchy) throws EntityCRUDExceptionError {
+        return baseDelegate.optionalUpdate(entity, hierarchy);
     }
 }

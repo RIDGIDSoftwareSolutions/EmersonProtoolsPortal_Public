@@ -1,9 +1,14 @@
 package com.ridgid.oss.orm.jpa;
 
-import com.ridgid.oss.orm.EntityCRUDCreate;
+import com.ridgid.oss.common.hierarchy.Hierarchy;
 import com.ridgid.oss.orm.entity.PrimaryKeyedEntity;
 import com.ridgid.oss.orm.exception.EntityCRUDExceptionAlreadyExists;
 import com.ridgid.oss.orm.exception.EntityCRUDExceptionError;
+
+import javax.persistence.EntityManager;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 /**
  * Base class for a JPA DAO that provides CREATE CRUD operations only
@@ -11,35 +16,94 @@ import com.ridgid.oss.orm.exception.EntityCRUDExceptionError;
  * @param <ET>  entity type of the entity that the DAO provides persistence methods for
  * @param <PKT> primary key type of the entity type that the DAO provides persistence methods for
  */
-@SuppressWarnings({"unused", "WeakerAccess"})
+@SuppressWarnings({"unused"})
 public class JPAEntityCRUDCreate<ET extends PrimaryKeyedEntity<PKT>, PKT extends Comparable<PKT>>
-        extends JPAEntityCRUD<ET, PKT>
-        implements EntityCRUDCreate<ET, PKT> {
+        implements
+        JPAEntityCRUDDelegateRequired<ET, PKT>,
+        JPAEntityCRUDCreateDelegateRequired<ET, PKT> {
 
-    @SuppressWarnings("FieldCanBeLocal")
-    private final Class<ET> classType;
+    private final JPAEntityCRUDCreateDelegate<ET, PKT> baseDelegate;
 
-    protected JPAEntityCRUDCreate(Class<ET> classType) {
-        this.classType = classType;
+    public JPAEntityCRUDCreate(JPAEntityCRUDDelegate<ET, PKT> baseDelegate) {
+        this.baseDelegate = new JPAEntityCRUDCreateDelegate<>(baseDelegate);
     }
 
-    /**
-     * Adds the given entity to the persistence store (insert/create)
-     *
-     * @param entity the valid entity to store in the persistence layer that is not already created/inserted by primary key
-     * @return the entity one any database or persistence layer modifications applied after successful create/insert
-     * @throws EntityCRUDExceptionError         if there is an issue inserting/creating the record (specific "cause" may vary)
-     * @throws EntityCRUDExceptionAlreadyExists if and entity one the same primary key of the given entity already exists in the persistent storage
-     */
+    public JPAEntityCRUDCreate(Class<ET> classType,
+                               Class<PKT> pkType) {
+        this.baseDelegate = new JPAEntityCRUDCreateDelegate<>(classType, pkType);
+    }
+
+    public JPAEntityCRUDCreate(Class<ET> classType,
+                               Class<PKT> pkType,
+                               String pkName) {
+        this.baseDelegate = new JPAEntityCRUDCreateDelegate<>(classType, pkType, pkName);
+    }
+
+    public JPAEntityCRUDCreate(Class<ET> classType,
+                               Class<PKT> pkType,
+                               short loadBatchSize) {
+        this.baseDelegate = new JPAEntityCRUDCreateDelegate<>(classType, pkType, loadBatchSize);
+    }
+
+    public JPAEntityCRUDCreate(Class<ET> classType,
+                               Class<PKT> pkType,
+                               String pkName,
+                               short loadBatchSize) {
+        this.baseDelegate = new JPAEntityCRUDCreateDelegate<>(classType, pkType, pkName, loadBatchSize);
+    }
+
     @Override
-    public ET add(ET entity) throws EntityCRUDExceptionError, EntityCRUDExceptionAlreadyExists {
-        try {
-            JPAEntityCRUDDelegate.getEntityManager().persist(entity);
-            JPAEntityCRUDDelegate.getEntityManager().flush();
-            JPAEntityCRUDDelegate.getEntityManager().refresh(entity);
-            return entity;
-        } catch (RuntimeException e) {
-            throw JPAEntityCRUDDelegate.enhanceExceptionWithEntityManagerNullCheck(e);
-        }
+    public void setEntityManager(EntityManager entityManager) {
+        baseDelegate.setEntityManager(entityManager);
+    }
+
+    @Override
+    public EntityManager getEntityManager() {
+        return baseDelegate.getEntityManager();
+    }
+
+    @Override
+    public Class<ET> getClassType() {
+        return baseDelegate.getClassType();
+    }
+
+    @Override
+    public Class<PKT> getPkType() {
+        return baseDelegate.getPkType();
+    }
+
+    @Override
+    public short getLoadBatchSize() {
+        return baseDelegate.getLoadBatchSize();
+    }
+
+    @Override
+    public Optional<ET> load(PKT pk) {
+        return baseDelegate.load(pk);
+    }
+
+    @Override
+    public Stream<ET> loadBatch(List<PKT> pkList) {
+        return baseDelegate.loadBatch(pkList);
+    }
+
+    @Override
+    public ET initializeAndDetach(ET entity, Hierarchy<ET> hierarchy) {
+        return baseDelegate.initializeAndDetach(entity, hierarchy);
+    }
+
+    @Override
+    public ET initialize(ET entity, Hierarchy<ET> hierarchy) {
+        return baseDelegate.initialize(entity, hierarchy);
+    }
+
+    @Override
+    public ET detach(ET entity, Hierarchy<ET> hierarchy) {
+        return baseDelegate.detach(entity, hierarchy);
+    }
+
+    @Override
+    public ET add(ET entity, Hierarchy<ET> hierarchy) throws EntityCRUDExceptionError, EntityCRUDExceptionAlreadyExists {
+        return baseDelegate.add(entity, hierarchy);
     }
 }
