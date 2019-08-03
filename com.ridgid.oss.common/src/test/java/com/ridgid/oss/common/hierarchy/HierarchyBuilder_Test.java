@@ -54,7 +54,7 @@ class HierarchyBuilder_Test {
     void root_can_create_with_a_singular_child() {
         HierarchyProcessor<Person> h
                 = HierarchyProcessor.from(Person.class)
-                .use(Person::getSpouse)
+                .with(Person::getSpouse)
                 .buildProcessor();
         assertNotNull(h);
     }
@@ -64,7 +64,7 @@ class HierarchyBuilder_Test {
         HierarchyProcessor<Person> h
                 = HierarchyProcessor.from(Person.class)
                 .selectAll(Person::getFriends,
-                        f -> f.use(Person::getSpouse))
+                        f -> f.with(Person::getSpouse))
                 .buildProcessor();
         assertNotNull(h);
     }
@@ -74,20 +74,21 @@ class HierarchyBuilder_Test {
         HierarchyProcessor<Person> h
                 = HierarchyProcessor
                 .from(Person.class)
-                .use(Person::getSpouse,
-                        s -> s.consumeAll(
-                                Person::getPets,
-                                p -> p.accessAll(Pet::getFavoriteFoods)
-                        )
+                .with(Person::getSpouse,
+                        s -> s
+                                .consumeAll(
+                                        Person::getPets,
+                                        p -> p.accessAll(Pet::getFavoriteFoods)
+                                )
                 )
                 .selectAll(Person::getFriends,
-                        friends -> friends.onVisit
-                                (
-                                        check -> check
-                                                .afterVisitingAll((p, ps) -> OK_CONTINUE)
-                                                .beforeVisitingAllChildren((p1, p2) -> SKIP_CURRENT_AND_REMAINING_SIBLINGS)
-                                )
-                                .use(Person::getSpouse))
+                        friends -> friends
+                                .onVisit
+                                        (
+                                                check -> check
+                                                        .afterVisitingAll((p, ps) -> OK_CONTINUE)
+                                        )
+                                .with(Person::getSpouse))
                 .buildProcessor();
         assertNotNull(h);
 
@@ -128,6 +129,44 @@ class HierarchyBuilder_Test {
                         + String.join(",", names)
                         + "\n"
         );
+
+        h = HierarchyProcessor
+                .from(Person.class)
+                .with(Person::getSpouse,
+                        s -> s.consumeAll(
+                                Person::getPets,
+                                p -> p.accessAll(Pet::getFavoriteFoods)
+                        )
+                )
+                .selectAll(Person::getFriends,
+                        friends -> friends.onVisit
+                                (
+                                        check -> check
+                                                .afterVisitingAll((p, ps) -> OK_CONTINUE)
+                                                .beforeVisitingAllChildren((p1, p2) -> SKIP_CURRENT_AND_REMAINING_SIBLINGS)
+                                )
+                                .with(Person::getSpouse))
+                .buildProcessor();
+        assertNotNull(h);
+
+        names.clear();
+        h.visit(samplePerson, addToNamesFound(names), DEPTH_FIRST);
+
+        assertIterableEquals(
+                Arrays.asList(
+                        "John Smith",
+                        "Jane Doe",
+                        "Spot",
+                        "Kibble",
+                        "Milk-Bone",
+                        "Friend 1"
+                ),
+                names,
+                () -> "Depth-First Visited List does not match expected list:\n"
+                        + String.join(",", names)
+                        + "\n"
+        );
+
     }
 
     private GeneralVisitHandler addToNamesFound(List<String> names) {

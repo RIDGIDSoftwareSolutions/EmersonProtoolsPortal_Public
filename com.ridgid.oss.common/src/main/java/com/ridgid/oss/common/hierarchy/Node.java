@@ -7,12 +7,12 @@ import java.util.stream.Stream;
 @SuppressWarnings({"unused", "UnusedReturnValue"})
 public interface Node<PARENT_T, T> {
 
-    default <CHILD_T, N extends Node<PARENT_T, T>> N use(Function<T, CHILD_T> selector) {
-        return use(selector, null);
+    default <CHILD_T, N extends Node<PARENT_T, T>> N with(Function<T, CHILD_T> selector) {
+        return with(selector, null);
     }
 
-    <CHILD_T, N extends Node<PARENT_T, T>> N use(Function<T, CHILD_T> selector,
-                                                 Consumer<SingleNode<T, CHILD_T>> childrenSelector);
+    <CHILD_T, N extends Node<PARENT_T, T>> N with(Function<T, CHILD_T> selector,
+                                                  Consumer<SingleNode<T, CHILD_T>> childrenSelector);
 
     default <CHILD_T, N extends Node<PARENT_T, T>> N selectAll(Function<T, Stream<CHILD_T>> selector) {
         return selectAll(selector, null);

@@ -83,12 +83,12 @@ public class HierarchyProcessor<PARENT_T> {
             this.rootClass = rootClass;
         }
 
-        public <CHILD_T> HierarchyProcessorBuilder<T> use(Function<T, CHILD_T> selector) {
-            return use(selector, null);
+        public <CHILD_T> HierarchyProcessorBuilder<T> with(Function<T, CHILD_T> selector) {
+            return with(selector, null);
         }
 
-        public <CHILD_T> HierarchyProcessorBuilder<T> use(Function<T, CHILD_T> selector,
-                                                          Consumer<SingleNode<T, CHILD_T>> childrenSelector) {
+        public <CHILD_T> HierarchyProcessorBuilder<T> with(Function<T, CHILD_T> selector,
+                                                           Consumer<SingleNode<T, CHILD_T>> childrenSelector) {
             SingleChild<T, CHILD_T> child = new SingleChild<>(selector);
             if (childrenSelector != null) childrenSelector.accept(child);
             childNodes.add(child);
@@ -176,8 +176,8 @@ public class HierarchyProcessor<PARENT_T> {
 
         @SuppressWarnings("unchecked")
         @Override
-        public <CHILD_T, N extends Node<PARENT_T, T>> N use(Function<T, CHILD_T> selector,
-                                                            Consumer<SingleNode<T, CHILD_T>> childrenSelector) {
+        public <CHILD_T, N extends Node<PARENT_T, T>> N with(Function<T, CHILD_T> selector,
+                                                             Consumer<SingleNode<T, CHILD_T>> childrenSelector) {
             SingleChild<T, CHILD_T> child = new SingleChild<>(selector);
             if (childrenSelector != null) childrenSelector.accept(child);
             addChild(child);
@@ -383,8 +383,8 @@ public class HierarchyProcessor<PARENT_T> {
         }
 
         @Override
-        public <CHILD_T, N extends Node<PARENT_T, T>> N use(Function<T, CHILD_T> selector, Consumer<SingleNode<T, CHILD_T>> childrenSelector) {
-            return super.use(selector, childrenSelector);
+        public <CHILD_T, N extends Node<PARENT_T, T>> N with(Function<T, CHILD_T> selector, Consumer<SingleNode<T, CHILD_T>> childrenSelector) {
+            return super.with(selector, childrenSelector);
         }
 
         @Override
@@ -447,8 +447,8 @@ public class HierarchyProcessor<PARENT_T> {
         }
 
         @Override
-        public <CHILD_T, N extends Node<PARENT_T, T>> N use(Function<T, CHILD_T> selector, Consumer<SingleNode<T, CHILD_T>> childrenSelector) {
-            return super.use(selector, childrenSelector);
+        public <CHILD_T, N extends Node<PARENT_T, T>> N with(Function<T, CHILD_T> selector, Consumer<SingleNode<T, CHILD_T>> childrenSelector) {
+            return super.with(selector, childrenSelector);
         }
 
         @Override
