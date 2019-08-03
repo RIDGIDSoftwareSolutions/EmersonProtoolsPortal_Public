@@ -1,6 +1,6 @@
 package com.ridgid.oss.orm.jpa;
 
-import com.ridgid.oss.common.hierarchy.Hierarchy;
+import com.ridgid.oss.common.hierarchy.HierarchyProcessor;
 import com.ridgid.oss.orm.EntityCRUDCreate;
 import com.ridgid.oss.orm.entity.PrimaryKeyedEntity;
 import com.ridgid.oss.orm.exception.EntityCRUDExceptionAlreadyExists;
@@ -11,5 +11,5 @@ public interface JPAEntityCRUDCreateDelegateRequired<ET extends PrimaryKeyedEnti
         extends EntityCRUDCreate<ET, PKT> {
 
     @Override
-    ET add(ET entity, Hierarchy<ET> hierarchy) throws EntityCRUDExceptionError, EntityCRUDExceptionAlreadyExists;
+    ET add(ET entity, HierarchyProcessor<ET> hierarchy) throws EntityCRUDExceptionError, EntityCRUDExceptionAlreadyExists;
 }

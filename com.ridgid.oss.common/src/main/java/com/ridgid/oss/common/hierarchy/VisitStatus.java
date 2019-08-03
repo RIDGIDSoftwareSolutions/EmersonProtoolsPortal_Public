@@ -2,27 +2,27 @@ package com.ridgid.oss.common.hierarchy;
 
 @SuppressWarnings("unused")
 public enum VisitStatus {
-    CONTINUE_PROCESSING(true,
+    OK_CONTINUE(true,
             false,
             false,
             false,
             false),
-    SKIP_NODE(false,
+    SKIP_CURRENT(false,
             true,
             false,
             true,
             false),
-    SKIP_NODE_AND_REMAINING_SIBLING_NODES(false,
+    SKIP_CURRENT_AND_REMAINING_SIBLINGS(false,
             true,
             true,
             true,
             false),
-    SKIP_REMAINING_SAME_HANDLERS_FOR_NODE(false,
+    SKIP_REMAINING_HANDLERS_FOR_CURRENT(false,
             false,
             false,
             true,
             false),
-    SKIP_NODE_AND_ALL_REMAINING_NODES(false,
+    SKIP_CURRENT_AND_ALL_REMAINING_AND_STOP(false,
             true,
             true,
             true,
@@ -51,7 +51,7 @@ public enum VisitStatus {
     }
 
     public boolean isNotOk() {
-        return false;
+        return !isOk();
     }
 
     public boolean isSkipNode() {

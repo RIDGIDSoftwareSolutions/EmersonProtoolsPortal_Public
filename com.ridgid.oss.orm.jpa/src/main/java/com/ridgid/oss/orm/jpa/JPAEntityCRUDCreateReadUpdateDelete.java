@@ -1,6 +1,6 @@
 package com.ridgid.oss.orm.jpa;
 
-import com.ridgid.oss.common.hierarchy.Hierarchy;
+import com.ridgid.oss.common.hierarchy.HierarchyProcessor;
 import com.ridgid.oss.orm.EntityCRUDCreateReadUpdateDelete;
 import com.ridgid.oss.orm.entity.PrimaryKeyedEntity;
 import com.ridgid.oss.orm.exception.EntityCRUDExceptionError;
@@ -69,7 +69,7 @@ public abstract class JPAEntityCRUDCreateReadUpdateDelete<ET extends PrimaryKeye
      * @throws EntityCRUDExceptionNotFound if there is no entity ET one the primary key PK in the persistence store
      */
     @Override
-    public void delete(PKT pk, Hierarchy<ET> hierarchy) throws EntityCRUDExceptionError, EntityCRUDExceptionNotFound {
+    public void delete(PKT pk, HierarchyProcessor<ET> hierarchy) throws EntityCRUDExceptionError, EntityCRUDExceptionNotFound {
         deleteDelegate.delete(pk, hierarchy);
     }
 }

@@ -1,6 +1,6 @@
 package com.ridgid.oss.orm.jpa;
 
-import com.ridgid.oss.common.hierarchy.Hierarchy;
+import com.ridgid.oss.common.hierarchy.HierarchyProcessor;
 import com.ridgid.oss.orm.EntityCRUDUpdate;
 import com.ridgid.oss.orm.entity.PrimaryKeyedEntity;
 import com.ridgid.oss.orm.exception.EntityCRUDExceptionError;
@@ -68,7 +68,7 @@ public class JPAEntityCRUDUpdateDelegate<ET extends PrimaryKeyedEntity<PKT>, PKT
     }
 
     @Override
-    public ET initializeAndDetach(ET entity, Hierarchy<ET> hierarchy) {
+    public ET initializeAndDetach(ET entity, HierarchyProcessor<ET> hierarchy) {
         return baseDelegate.initializeAndDetach(entity, hierarchy);
     }
 
@@ -88,12 +88,12 @@ public class JPAEntityCRUDUpdateDelegate<ET extends PrimaryKeyedEntity<PKT>, PKT
     }
 
     @Override
-    public ET initialize(ET entity, Hierarchy<ET> hierarchy) {
+    public ET initialize(ET entity, HierarchyProcessor<ET> hierarchy) {
         return baseDelegate.initialize(entity, hierarchy);
     }
 
     @Override
-    public ET detach(ET entity, Hierarchy<ET> hierarchy) {
+    public ET detach(ET entity, HierarchyProcessor<ET> hierarchy) {
         return baseDelegate.detach(entity, hierarchy);
     }
 
@@ -105,7 +105,7 @@ public class JPAEntityCRUDUpdateDelegate<ET extends PrimaryKeyedEntity<PKT>, PKT
      * @throws EntityCRUDExceptionError if there is an issue updating the record (specific "cause" may vary)
      */
     @Override
-    public Optional<ET> optionalUpdate(ET entity, Hierarchy<ET> hierarchy) throws EntityCRUDExceptionError {
+    public Optional<ET> optionalUpdate(ET entity, HierarchyProcessor<ET> hierarchy) throws EntityCRUDExceptionError {
         try {
             if (!baseDelegate.getEntityManager().contains(entity)) {
                 if (baseDelegate.getEntityManager().find(baseDelegate.classType, entity.getPk()) == null)

@@ -1,6 +1,6 @@
 package com.ridgid.oss.orm;
 
-import com.ridgid.oss.common.hierarchy.Hierarchy;
+import com.ridgid.oss.common.hierarchy.HierarchyProcessor;
 import com.ridgid.oss.orm.entity.PrimaryKeyedEntity;
 import com.ridgid.oss.orm.exception.EntityCRUDExceptionError;
 import com.ridgid.oss.orm.exception.EntityCRUDExceptionNotFound;
@@ -25,7 +25,7 @@ public interface EntityCRUDDelete<ET extends PrimaryKeyedEntity<PKT>, PKT extend
         delete(pk, null);
     }
 
-    void delete(PKT pk, Hierarchy<ET> hierarchy) throws EntityCRUDExceptionError, EntityCRUDExceptionNotFound;
+    void delete(PKT pk, HierarchyProcessor<ET> hierarchy) throws EntityCRUDExceptionError, EntityCRUDExceptionNotFound;
 
     /**
      * Deletes the entity one the given primary key pk from the persistent storage. If the entity already does not exist one the given PK, it returns normally as if it successfully deleted.
@@ -33,7 +33,7 @@ public interface EntityCRUDDelete<ET extends PrimaryKeyedEntity<PKT>, PKT extend
      * @param pk primary key of the entity to delete from persistent storage
      * @throws EntityCRUDExceptionError if there is an issue deleting/removing the record (specific "cause" may vary)
      */
-    default void optionalDelete(PKT pk, Hierarchy<ET> hierarchy) throws EntityCRUDExceptionError {
+    default void optionalDelete(PKT pk, HierarchyProcessor<ET> hierarchy) throws EntityCRUDExceptionError {
         try {
             delete(pk, hierarchy);
         } catch (EntityCRUDExceptionNotFound ignore) {

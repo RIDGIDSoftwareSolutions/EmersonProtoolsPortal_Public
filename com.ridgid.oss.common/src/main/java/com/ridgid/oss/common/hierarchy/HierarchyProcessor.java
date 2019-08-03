@@ -9,21 +9,21 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static com.ridgid.oss.common.hierarchy.Hierarchy.Traversal.BREADTH_FIRST;
-import static com.ridgid.oss.common.hierarchy.Hierarchy.Traversal.DEPTH_FIRST;
-import static com.ridgid.oss.common.hierarchy.VisitStatus.CONTINUE_PROCESSING;
+import static com.ridgid.oss.common.hierarchy.HierarchyProcessor.Traversal.BREADTH_FIRST;
+import static com.ridgid.oss.common.hierarchy.HierarchyProcessor.Traversal.DEPTH_FIRST;
+import static com.ridgid.oss.common.hierarchy.VisitStatus.OK_CONTINUE;
 
 @SuppressWarnings({"unused", "WeakerAccess"})
-public class Hierarchy<PARENT_T> {
+public class HierarchyProcessor<PARENT_T> {
 
-    private final Builder<PARENT_T> built;
+    private final HierarchyProcessorBuilder<PARENT_T> built;
 
-    private Hierarchy(Builder<PARENT_T> built) {
+    private HierarchyProcessor(HierarchyProcessorBuilder<PARENT_T> built) {
         this.built = built;
     }
 
-    public static <T> Builder<T> root(Class<T> rootClass) {
-        return new Builder<>(rootClass);
+    public static <T> HierarchyProcessorBuilder<T> from(Class<T> rootClass) {
+        return new HierarchyProcessorBuilder<>(rootClass);
     }
 
     public void visit(PARENT_T parent,
@@ -73,66 +73,66 @@ public class Hierarchy<PARENT_T> {
     }
 
     @SuppressWarnings("FieldCanBeLocal")
-    public static class Builder<T> {
+    public static class HierarchyProcessorBuilder<T> {
 
         private final Class<T> rootClass;
 
         private List<VisitableNode> childNodes = new ArrayList<>();
 
-        private Builder(Class<T> rootClass) {
+        private HierarchyProcessorBuilder(Class<T> rootClass) {
             this.rootClass = rootClass;
         }
 
-        public <CHILD_T> Builder<T> single(Function<T, CHILD_T> selector) {
-            return single(selector, null);
+        public <CHILD_T> HierarchyProcessorBuilder<T> use(Function<T, CHILD_T> selector) {
+            return use(selector, null);
         }
 
-        public <CHILD_T> Builder<T> single(Function<T, CHILD_T> selector,
-                                           Consumer<SingleNode<T, CHILD_T>> childrenSelector) {
+        public <CHILD_T> HierarchyProcessorBuilder<T> use(Function<T, CHILD_T> selector,
+                                                          Consumer<SingleNode<T, CHILD_T>> childrenSelector) {
             SingleChild<T, CHILD_T> child = new SingleChild<>(selector);
             if (childrenSelector != null) childrenSelector.accept(child);
             childNodes.add(child);
             return this;
         }
 
-        public <CHILD_T> Builder<T> many(Function<T, Stream<CHILD_T>> selector) {
-            return many(selector, null);
+        public <CHILD_T> HierarchyProcessorBuilder<T> selectAll(Function<T, Stream<CHILD_T>> selector) {
+            return selectAll(selector, null);
         }
 
-        public <CHILD_T> Builder<T> many(Function<T, Stream<CHILD_T>> selector,
-                                         Consumer<MultiNode<T, CHILD_T, Stream<CHILD_T>>> childrenSelector) {
+        public <CHILD_T> HierarchyProcessorBuilder<T> selectAll(Function<T, Stream<CHILD_T>> selector,
+                                                                Consumer<MultiNode<T, CHILD_T, Stream<CHILD_T>>> childrenSelector) {
             StreamChild<T, CHILD_T> child = new StreamChild<>(selector);
             if (childrenSelector != null) childrenSelector.accept(child);
             childNodes.add(child);
             return this;
         }
 
-        public <CHILD_T> Builder<T> collection(Function<T, Iterable<CHILD_T>> selector) {
-            return collection(selector, null);
+        public <CHILD_T> HierarchyProcessorBuilder<T> consumeAll(Function<T, Iterable<CHILD_T>> selector) {
+            return consumeAll(selector, null);
         }
 
-        public <CHILD_T> Builder<T> collection(Function<T, Iterable<CHILD_T>> selector,
-                                               Consumer<MultiNode<T, CHILD_T, Iterable<CHILD_T>>> childrenSelector) {
+        public <CHILD_T> HierarchyProcessorBuilder<T> consumeAll(Function<T, Iterable<CHILD_T>> selector,
+                                                                 Consumer<MultiNode<T, CHILD_T, Iterable<CHILD_T>>> childrenSelector) {
             IterableChild<T, CHILD_T> child = new IterableChild<>(selector);
             if (childrenSelector != null) childrenSelector.accept(child);
             childNodes.add(child);
             return this;
         }
 
-        public <CHILD_T> Builder<T> array(Function<T, CHILD_T[]> selector) {
-            return array(selector, null);
+        public <CHILD_T> HierarchyProcessorBuilder<T> accessAll(Function<T, CHILD_T[]> selector) {
+            return accessAll(selector, null);
         }
 
-        public <CHILD_T> Builder<T> array(Function<T, CHILD_T[]> selector,
-                                          Consumer<MultiNode<T, CHILD_T, CHILD_T[]>> childrenSelector) {
+        public <CHILD_T> HierarchyProcessorBuilder<T> accessAll(Function<T, CHILD_T[]> selector,
+                                                                Consumer<MultiNode<T, CHILD_T, CHILD_T[]>> childrenSelector) {
             ArrayChild<T, CHILD_T> child = new ArrayChild<>(selector);
             if (childrenSelector != null) childrenSelector.accept(child);
             childNodes.add(child);
             return this;
         }
 
-        public Hierarchy<T> build() {
-            return new Hierarchy<>(this);
+        public HierarchyProcessor<T> buildProcessor() {
+            return new HierarchyProcessor<>(this);
         }
 
         @SuppressWarnings({"unchecked", "ResultOfMethodCallIgnored", "OptionalUsedAsFieldOrParameterType"})
@@ -176,8 +176,8 @@ public class Hierarchy<PARENT_T> {
 
         @SuppressWarnings("unchecked")
         @Override
-        public <CHILD_T, N extends Node<PARENT_T, T>> N single(Function<T, CHILD_T> selector,
-                                                               Consumer<SingleNode<T, CHILD_T>> childrenSelector) {
+        public <CHILD_T, N extends Node<PARENT_T, T>> N use(Function<T, CHILD_T> selector,
+                                                            Consumer<SingleNode<T, CHILD_T>> childrenSelector) {
             SingleChild<T, CHILD_T> child = new SingleChild<>(selector);
             if (childrenSelector != null) childrenSelector.accept(child);
             addChild(child);
@@ -186,8 +186,8 @@ public class Hierarchy<PARENT_T> {
 
         @SuppressWarnings("unchecked")
         @Override
-        public <CHILD_T, N extends Node<PARENT_T, T>> N many(Function<T, Stream<CHILD_T>> selector,
-                                                             Consumer<MultiNode<T, CHILD_T, Stream<CHILD_T>>> childrenSelector) {
+        public <CHILD_T, N extends Node<PARENT_T, T>> N selectAll(Function<T, Stream<CHILD_T>> selector,
+                                                                  Consumer<MultiNode<T, CHILD_T, Stream<CHILD_T>>> childrenSelector) {
             StreamChild<T, CHILD_T> child = new StreamChild<>(selector);
             if (childrenSelector != null) childrenSelector.accept(child);
             addChild(child);
@@ -196,7 +196,7 @@ public class Hierarchy<PARENT_T> {
 
         @SuppressWarnings("unchecked")
         @Override
-        public <CHILD_T, N extends Node<PARENT_T, T>> N collection(Function<T, Iterable<CHILD_T>> selector,
+        public <CHILD_T, N extends Node<PARENT_T, T>> N consumeAll(Function<T, Iterable<CHILD_T>> selector,
                                                                    Consumer<MultiNode<T, CHILD_T, Iterable<CHILD_T>>> childrenSelector) {
             IterableChild<T, CHILD_T> child = new IterableChild<>(selector);
             if (childrenSelector != null) childrenSelector.accept(child);
@@ -206,8 +206,8 @@ public class Hierarchy<PARENT_T> {
 
         @SuppressWarnings("unchecked")
         @Override
-        public <CHILD_T, N extends Node<PARENT_T, T>> N array(Function<T, CHILD_T[]> selector,
-                                                              Consumer<MultiNode<T, CHILD_T, CHILD_T[]>> childrenSelector) {
+        public <CHILD_T, N extends Node<PARENT_T, T>> N accessAll(Function<T, CHILD_T[]> selector,
+                                                                  Consumer<MultiNode<T, CHILD_T, CHILD_T[]>> childrenSelector) {
             ArrayChild<T, CHILD_T> child = new ArrayChild<>(selector);
             if (childrenSelector != null) childrenSelector.accept(child);
             addChild(child);
@@ -215,42 +215,42 @@ public class Hierarchy<PARENT_T> {
         }
 
         @Override
-        public NodeVisitorConfiguration<PARENT_T, T> before(VisitHandler<PARENT_T, T> handler) {
+        public NodeVisitorConfiguration<PARENT_T, T> beforeVisitingSelf(VisitHandler<PARENT_T, T> handler) {
             if (beforeVisitHandlers == null) beforeVisitHandlers = new BiHandlerList<>();
             beforeVisitHandlers.add(handler);
             return this;
         }
 
         @Override
-        public NodeVisitorConfiguration<PARENT_T, T> after(VisitHandler<PARENT_T, T> handler) {
+        public NodeVisitorConfiguration<PARENT_T, T> afterVisitingSelf(VisitHandler<PARENT_T, T> handler) {
             if (afterVisitHandlers == null) afterVisitHandlers = new BiHandlerList<>();
             afterVisitHandlers.add(handler);
             return this;
         }
 
         @Override
-        public NodeVisitorConfiguration<PARENT_T, T> beforeEachChild(VisitHandler<PARENT_T, T> handler) {
+        public NodeVisitorConfiguration<PARENT_T, T> beforeVisitingEachChild(VisitHandler<PARENT_T, T> handler) {
             if (beforeEachChildVisitHandlers == null) beforeEachChildVisitHandlers = new BiHandlerList<>();
             beforeEachChildVisitHandlers.add(handler);
             return this;
         }
 
         @Override
-        public NodeVisitorConfiguration<PARENT_T, T> afterEachChild(VisitHandler<PARENT_T, T> handler) {
+        public NodeVisitorConfiguration<PARENT_T, T> afterVisitingEachChild(VisitHandler<PARENT_T, T> handler) {
             if (afterEachChildVisitHandlers == null) afterEachChildVisitHandlers = new BiHandlerList<>();
             afterEachChildVisitHandlers.add(handler);
             return this;
         }
 
         @Override
-        public NodeVisitorConfiguration<PARENT_T, T> beforeAllChildren(VisitHandler<PARENT_T, T> handler) {
+        public NodeVisitorConfiguration<PARENT_T, T> beforeVisitingAllChildren(VisitHandler<PARENT_T, T> handler) {
             if (beforeAllChildrenVisitHandlers == null) beforeAllChildrenVisitHandlers = new BiHandlerList<>();
             beforeAllChildrenVisitHandlers.add(handler);
             return this;
         }
 
         @Override
-        public NodeVisitorConfiguration<PARENT_T, T> afterAllChildren(VisitHandler<PARENT_T, T> handler) {
+        public NodeVisitorConfiguration<PARENT_T, T> afterVisitingAllChildren(VisitHandler<PARENT_T, T> handler) {
             if (afterAllChildrenVisitHandlers == null) afterAllChildrenVisitHandlers = new BiHandlerList<>();
             afterAllChildrenVisitHandlers.add(handler);
             return this;
@@ -260,10 +260,10 @@ public class Hierarchy<PARENT_T> {
                                                 T self,
                                                 BiHandlerList<PARENT_T, T, VisitStatus> visitHandlers) {
             return visitHandlers == null
-                    ? CONTINUE_PROCESSING
+                    ? OK_CONTINUE
                     : visitHandlers
                     .invoke(parent, self, VisitStatus::isNotOk)
-                    .orElse(CONTINUE_PROCESSING);
+                    .orElse(OK_CONTINUE);
         }
 
         @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
@@ -288,7 +288,7 @@ public class Hierarchy<PARENT_T> {
                                                VisitHandler<Object, Object> visitor,
                                                PARENT_T parent,
                                                T self) {
-            if (self == null) return CONTINUE_PROCESSING;
+            if (self == null) return OK_CONTINUE;
             VisitStatus vs = invokeVisitHandlers(parent, self, beforeVisitHandlers);
             if (vs.isSkipNode()) return vs;
             return visitor.handle(parent, self);
@@ -316,7 +316,7 @@ public class Hierarchy<PARENT_T> {
                                            Traversal traversal,
                                            PARENT_T parent,
                                            T self) {
-            if (childNodes == null) return CONTINUE_PROCESSING;
+            if (childNodes == null) return OK_CONTINUE;
 
             HashSet<VisitableNode> includedChildren
                     = (HashSet<VisitableNode>) SAVED_STATE
@@ -353,18 +353,18 @@ public class Hierarchy<PARENT_T> {
                 if (vs.isStop()) return vs;
                 if (vs.isSkipSiblings()) break;
             }
-            return CONTINUE_PROCESSING;
+            return OK_CONTINUE;
         }
 
         private VisitStatus visitEnd(UUID key,
                                      Optional<VisitHandler<Object, Object>> afterChildrenVisitor,
                                      PARENT_T parent,
                                      T self) {
-            if (self == null) return CONTINUE_PROCESSING;
+            if (self == null) return OK_CONTINUE;
             VisitStatus vs
                     = afterChildrenVisitor
                     .map(visitor -> visitor.handle(parent, self))
-                    .orElse(CONTINUE_PROCESSING);
+                    .orElse(OK_CONTINUE);
             if (vs.isSkipNode()) return vs;
             return invokeVisitHandlers(parent, self, afterVisitHandlers);
         }
@@ -383,23 +383,23 @@ public class Hierarchy<PARENT_T> {
         }
 
         @Override
-        public <CHILD_T, N extends Node<PARENT_T, T>> N single(Function<T, CHILD_T> selector, Consumer<SingleNode<T, CHILD_T>> childrenSelector) {
-            return super.single(selector, childrenSelector);
+        public <CHILD_T, N extends Node<PARENT_T, T>> N use(Function<T, CHILD_T> selector, Consumer<SingleNode<T, CHILD_T>> childrenSelector) {
+            return super.use(selector, childrenSelector);
         }
 
         @Override
-        public <CHILD_T, N extends Node<PARENT_T, T>> N many(Function<T, Stream<CHILD_T>> selector, Consumer<MultiNode<T, CHILD_T, Stream<CHILD_T>>> childrenSelector) {
-            return super.many(selector, childrenSelector);
+        public <CHILD_T, N extends Node<PARENT_T, T>> N selectAll(Function<T, Stream<CHILD_T>> selector, Consumer<MultiNode<T, CHILD_T, Stream<CHILD_T>>> childrenSelector) {
+            return super.selectAll(selector, childrenSelector);
         }
 
         @Override
-        public <CHILD_T, N extends Node<PARENT_T, T>> N collection(Function<T, Iterable<CHILD_T>> selector, Consumer<MultiNode<T, CHILD_T, Iterable<CHILD_T>>> childrenSelector) {
-            return super.collection(selector, childrenSelector);
+        public <CHILD_T, N extends Node<PARENT_T, T>> N consumeAll(Function<T, Iterable<CHILD_T>> selector, Consumer<MultiNode<T, CHILD_T, Iterable<CHILD_T>>> childrenSelector) {
+            return super.consumeAll(selector, childrenSelector);
         }
 
         @Override
-        public <CHILD_T, N extends Node<PARENT_T, T>> N array(Function<T, CHILD_T[]> selector, Consumer<MultiNode<T, CHILD_T, CHILD_T[]>> childrenSelector) {
-            return super.array(selector, childrenSelector);
+        public <CHILD_T, N extends Node<PARENT_T, T>> N accessAll(Function<T, CHILD_T[]> selector, Consumer<MultiNode<T, CHILD_T, CHILD_T[]>> childrenSelector) {
+            return super.accessAll(selector, childrenSelector);
         }
 
         @Override
@@ -419,7 +419,7 @@ public class Hierarchy<PARENT_T> {
         }
 
         @Override
-        public Node<PARENT_T, T> whenVisited(Consumer<NodeVisitorConfiguration<PARENT_T, T>> visitConfigurer) {
+        public Node<PARENT_T, T> onVisit(Consumer<NodeVisitorConfiguration<PARENT_T, T>> visitConfigurer) {
             visitConfigurer.accept(this);
             return this;
         }
@@ -440,48 +440,48 @@ public class Hierarchy<PARENT_T> {
                                                   CT collection,
                                                   BiHandlerList<PARENT_T, CT, VisitStatus> visitHandlers) {
             return visitHandlers == null
-                    ? CONTINUE_PROCESSING
+                    ? OK_CONTINUE
                     : visitHandlers
                     .invoke(parent, collection, VisitStatus::isNotOk)
-                    .orElse(CONTINUE_PROCESSING);
+                    .orElse(OK_CONTINUE);
         }
 
         @Override
-        public <CHILD_T, N extends Node<PARENT_T, T>> N single(Function<T, CHILD_T> selector, Consumer<SingleNode<T, CHILD_T>> childrenSelector) {
-            return super.single(selector, childrenSelector);
+        public <CHILD_T, N extends Node<PARENT_T, T>> N use(Function<T, CHILD_T> selector, Consumer<SingleNode<T, CHILD_T>> childrenSelector) {
+            return super.use(selector, childrenSelector);
         }
 
         @Override
-        public <CHILD_T, N extends Node<PARENT_T, T>> N many(Function<T, Stream<CHILD_T>> selector, Consumer<MultiNode<T, CHILD_T, Stream<CHILD_T>>> childrenSelector) {
-            return super.many(selector, childrenSelector);
+        public <CHILD_T, N extends Node<PARENT_T, T>> N selectAll(Function<T, Stream<CHILD_T>> selector, Consumer<MultiNode<T, CHILD_T, Stream<CHILD_T>>> childrenSelector) {
+            return super.selectAll(selector, childrenSelector);
         }
 
         @Override
-        public <CHILD_T, N extends Node<PARENT_T, T>> N collection(Function<T, Iterable<CHILD_T>> selector, Consumer<MultiNode<T, CHILD_T, Iterable<CHILD_T>>> childrenSelector) {
-            return super.collection(selector, childrenSelector);
+        public <CHILD_T, N extends Node<PARENT_T, T>> N consumeAll(Function<T, Iterable<CHILD_T>> selector, Consumer<MultiNode<T, CHILD_T, Iterable<CHILD_T>>> childrenSelector) {
+            return super.consumeAll(selector, childrenSelector);
         }
 
         @Override
-        public <CHILD_T, N extends Node<PARENT_T, T>> N array(Function<T, CHILD_T[]> selector, Consumer<MultiNode<T, CHILD_T, CHILD_T[]>> childrenSelector) {
-            return super.array(selector, childrenSelector);
+        public <CHILD_T, N extends Node<PARENT_T, T>> N accessAll(Function<T, CHILD_T[]> selector, Consumer<MultiNode<T, CHILD_T, CHILD_T[]>> childrenSelector) {
+            return super.accessAll(selector, childrenSelector);
         }
 
         @Override
-        public MultiNodeVisitorConfiguration<PARENT_T, T, CT> beforeMany(VisitHandler<PARENT_T, CT> handler) {
+        public MultiNodeVisitorConfiguration<PARENT_T, T, CT> beforeVisitingAny(VisitHandler<PARENT_T, CT> handler) {
             if (beforeManyVisitHandlers == null) beforeManyVisitHandlers = new BiHandlerList<>();
             beforeManyVisitHandlers.add(handler);
             return this;
         }
 
         @Override
-        public MultiNodeVisitorConfiguration<PARENT_T, T, CT> afterMany(VisitHandler<PARENT_T, CT> handler) {
+        public MultiNodeVisitorConfiguration<PARENT_T, T, CT> afterVisitingAll(VisitHandler<PARENT_T, CT> handler) {
             if (afterManyVisitHandlers == null) afterManyVisitHandlers = new BiHandlerList<>();
             afterManyVisitHandlers.add(handler);
             return this;
         }
 
         @Override
-        public Node<PARENT_T, T> whenVisited(Consumer<MultiNodeVisitorConfiguration<PARENT_T, T, CT>> visitConfigurer) {
+        public Node<PARENT_T, T> onVisit(Consumer<MultiNodeVisitorConfiguration<PARENT_T, T, CT>> visitConfigurer) {
             visitConfigurer.accept(this);
             return this;
         }
@@ -498,7 +498,7 @@ public class Hierarchy<PARENT_T> {
                 VisitStatus vs = visitCollection(key, parent, visitor, collection);
                 if (vs.isStop()) return vs;
                 if (vs.isSkipSiblings()) return vs;
-                if (vs.isSkipNode()) return CONTINUE_PROCESSING;
+                if (vs.isSkipNode()) return OK_CONTINUE;
             }
             HashSet<T> includedEntries
                     = (HashSet<T>) SAVED_STATE
@@ -509,7 +509,7 @@ public class Hierarchy<PARENT_T> {
                 if (traversal.equals(BREADTH_FIRST) && !includedEntries.contains(self)) continue;
                 VisitStatus vs = visit(key, visitor, afterChildrenVisitor, traversal, parent, self);
                 if (vs.isStop()) return vs;
-                if (vs.isSkipSiblings()) return CONTINUE_PROCESSING;
+                if (vs.isSkipSiblings()) return OK_CONTINUE;
             }
             return invokeVisitHandlers(parent, collection, afterManyVisitHandlers);
         }
@@ -523,7 +523,7 @@ public class Hierarchy<PARENT_T> {
             VisitStatus vs = visitCollection(key, parent, visitor, collection);
             if (vs.isStop()) return vs;
             if (vs.isSkipSiblings()) return vs;
-            if (vs.isSkipNode()) return CONTINUE_PROCESSING;
+            if (vs.isSkipNode()) return OK_CONTINUE;
             HashSet<T> includedEntries
                     = (HashSet<T>) SAVED_STATE
                     .computeIfAbsent(key, k -> new ConcurrentHashMap<>())
@@ -537,7 +537,7 @@ public class Hierarchy<PARENT_T> {
                 if (vs.isSkipNode()) continue;
                 includedEntries.add(self);
             }
-            return CONTINUE_PROCESSING;
+            return OK_CONTINUE;
         }
 
         private VisitStatus visitCollection(UUID key,

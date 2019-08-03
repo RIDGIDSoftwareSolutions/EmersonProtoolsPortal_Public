@@ -1,7 +1,7 @@
 package com.ridgid.oss.orm.jpa;
 
 import com.ridgid.oss.common.cache.Cache;
-import com.ridgid.oss.common.hierarchy.Hierarchy;
+import com.ridgid.oss.common.hierarchy.HierarchyProcessor;
 import com.ridgid.oss.orm.EntityCRUDCached;
 import com.ridgid.oss.orm.entity.PrimaryKeyedEntity;
 
@@ -24,7 +24,7 @@ public class JPAEntityCRUDCached<ET extends PrimaryKeyedEntity<PKT>, PKT extends
 
 
     @Override
-    public Hierarchy<ET> standardHierarchy() {
+    public HierarchyProcessor<ET> standardHierarchy() {
         return null;
     }
 
@@ -54,12 +54,12 @@ public class JPAEntityCRUDCached<ET extends PrimaryKeyedEntity<PKT>, PKT extends
     }
 
     @Override
-    public ET initialize(ET entity, Hierarchy<ET> hierarchy) {
+    public ET initialize(ET entity, HierarchyProcessor<ET> hierarchy) {
         return null;
     }
 
     @Override
-    public ET detach(ET entity, Hierarchy<ET> hierarchy) {
+    public ET detach(ET entity, HierarchyProcessor<ET> hierarchy) {
         return null;
     }
 }

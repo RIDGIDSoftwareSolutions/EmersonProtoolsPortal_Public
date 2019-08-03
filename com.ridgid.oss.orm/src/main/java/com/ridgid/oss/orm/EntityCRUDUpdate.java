@@ -1,6 +1,6 @@
 package com.ridgid.oss.orm;
 
-import com.ridgid.oss.common.hierarchy.Hierarchy;
+import com.ridgid.oss.common.hierarchy.HierarchyProcessor;
 import com.ridgid.oss.orm.entity.PrimaryKeyedEntity;
 import com.ridgid.oss.orm.exception.EntityCRUDExceptionError;
 import com.ridgid.oss.orm.exception.EntityCRUDExceptionNotFound;
@@ -28,7 +28,7 @@ public interface EntityCRUDUpdate<ET extends PrimaryKeyedEntity<PKT>, PKT extend
         return optionalUpdate(entity).orElseThrow(EntityCRUDExceptionNotFound::new);
     }
 
-    default ET update(ET entity, Hierarchy<ET> hierarchy) throws EntityCRUDExceptionError, EntityCRUDExceptionNotFound {
+    default ET update(ET entity, HierarchyProcessor<ET> hierarchy) throws EntityCRUDExceptionError, EntityCRUDExceptionNotFound {
         return optionalUpdate(entity, hierarchy).orElseThrow(EntityCRUDExceptionNotFound::new);
     }
 
@@ -43,5 +43,5 @@ public interface EntityCRUDUpdate<ET extends PrimaryKeyedEntity<PKT>, PKT extend
         return optionalUpdate(entity, null);
     }
 
-    Optional<ET> optionalUpdate(ET entity, Hierarchy<ET> hierarchy) throws EntityCRUDExceptionError;
+    Optional<ET> optionalUpdate(ET entity, HierarchyProcessor<ET> hierarchy) throws EntityCRUDExceptionError;
 }

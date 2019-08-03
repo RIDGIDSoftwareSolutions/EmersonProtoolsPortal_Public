@@ -1,6 +1,6 @@
 package com.ridgid.oss.orm;
 
-import com.ridgid.oss.common.hierarchy.Hierarchy;
+import com.ridgid.oss.common.hierarchy.HierarchyProcessor;
 import com.ridgid.oss.orm.entity.PrimaryKeyedEntity;
 import com.ridgid.oss.orm.exception.EntityCRUDExceptionAlreadyExists;
 import com.ridgid.oss.orm.exception.EntityCRUDExceptionError;
@@ -26,5 +26,5 @@ public interface EntityCRUDCreate<ET extends PrimaryKeyedEntity<PKT>, PKT extend
         return add(entity, null);
     }
 
-    ET add(ET entity, Hierarchy<ET> hierarchy) throws EntityCRUDExceptionError, EntityCRUDExceptionAlreadyExists;
+    ET add(ET entity, HierarchyProcessor<ET> hierarchy) throws EntityCRUDExceptionError, EntityCRUDExceptionAlreadyExists;
 }

@@ -1,7 +1,7 @@
 package com.ridgid.oss.orm.jpa;
 
 import com.ridgid.oss.common.hierarchy.GeneralVisitHandler;
-import com.ridgid.oss.common.hierarchy.Hierarchy;
+import com.ridgid.oss.common.hierarchy.HierarchyProcessor;
 import com.ridgid.oss.common.hierarchy.VisitStatus;
 import com.ridgid.oss.orm.EntityCRUD;
 import com.ridgid.oss.orm.entity.PrimaryKeyedEntity;
@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static com.ridgid.oss.common.hierarchy.Hierarchy.Traversal.DEPTH_FIRST;
+import static com.ridgid.oss.common.hierarchy.HierarchyProcessor.Traversal.DEPTH_FIRST;
 
 @SuppressWarnings({"WeakerAccess", "unused"})
 final class JPAEntityCRUDDelegate<ET extends PrimaryKeyedEntity<PKT>, PKT extends Comparable<PKT>>
@@ -85,7 +85,7 @@ final class JPAEntityCRUDDelegate<ET extends PrimaryKeyedEntity<PKT>, PKT extend
 
     @Override
     public final ET initializeAndDetach(ET entity,
-                                        Hierarchy<ET> hierarchy) {
+                                        HierarchyProcessor<ET> hierarchy) {
         visitEntityHierarchy
                 (
                         entity,
@@ -136,7 +136,7 @@ final class JPAEntityCRUDDelegate<ET extends PrimaryKeyedEntity<PKT>, PKT extend
 
     @Override
     public final ET initialize(ET entity,
-                               Hierarchy<ET> hierarchy) {
+                               HierarchyProcessor<ET> hierarchy) {
         visitEntityHierarchy
                 (
                         entity,
@@ -149,7 +149,7 @@ final class JPAEntityCRUDDelegate<ET extends PrimaryKeyedEntity<PKT>, PKT extend
 
     @Override
     public final ET detach(ET entity,
-                           Hierarchy<ET> hierarchy) {
+                           HierarchyProcessor<ET> hierarchy) {
         visitEntityHierarchy
                 (
                         entity,
@@ -168,7 +168,7 @@ final class JPAEntityCRUDDelegate<ET extends PrimaryKeyedEntity<PKT>, PKT extend
     }
 
     private void visitEntityHierarchy(ET entity,
-                                      Hierarchy<ET> hierarchy,
+                                      HierarchyProcessor<ET> hierarchy,
                                       GeneralVisitHandler visitor,
                                       GeneralVisitHandler afterChildrenVisitor) {
         try {
@@ -204,12 +204,12 @@ final class JPAEntityCRUDDelegate<ET extends PrimaryKeyedEntity<PKT>, PKT extend
     @SuppressWarnings("unused")
     private VisitStatus initializeEntityVisitHandler(Object p, Object o) {
         Hibernate.initialize(o);
-        return VisitStatus.CONTINUE_PROCESSING;
+        return VisitStatus.OK_CONTINUE;
     }
 
     @SuppressWarnings("unused")
     private VisitStatus detachEntityVisitHandler(Object p, Object o) {
         if (o instanceof PrimaryKeyedEntity) entityManager.detach(o);
-        return VisitStatus.CONTINUE_PROCESSING;
+        return VisitStatus.OK_CONTINUE;
     }
 }

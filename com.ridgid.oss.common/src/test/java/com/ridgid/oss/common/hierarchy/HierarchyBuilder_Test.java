@@ -8,10 +8,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static com.ridgid.oss.common.hierarchy.Hierarchy.Traversal.BREADTH_FIRST;
-import static com.ridgid.oss.common.hierarchy.Hierarchy.Traversal.DEPTH_FIRST;
-import static com.ridgid.oss.common.hierarchy.VisitStatus.CONTINUE_PROCESSING;
-import static com.ridgid.oss.common.hierarchy.VisitStatus.SKIP_NODE_AND_REMAINING_SIBLING_NODES;
+import static com.ridgid.oss.common.hierarchy.HierarchyProcessor.Traversal.BREADTH_FIRST;
+import static com.ridgid.oss.common.hierarchy.HierarchyProcessor.Traversal.DEPTH_FIRST;
+import static com.ridgid.oss.common.hierarchy.VisitStatus.OK_CONTINUE;
+import static com.ridgid.oss.common.hierarchy.VisitStatus.SKIP_CURRENT_AND_REMAINING_SIBLINGS;
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -44,51 +44,51 @@ class HierarchyBuilder_Test {
 
     @Test
     void root_can_create_with_no_children() {
-        Hierarchy<Person> h
-                = Hierarchy.root(Person.class)
-                .build();
+        HierarchyProcessor<Person> h
+                = HierarchyProcessor.from(Person.class)
+                .buildProcessor();
         assertNotNull(h);
     }
 
     @Test
     void root_can_create_with_a_singular_child() {
-        Hierarchy<Person> h
-                = Hierarchy.root(Person.class)
-                .single(Person::getSpouse)
-                .build();
+        HierarchyProcessor<Person> h
+                = HierarchyProcessor.from(Person.class)
+                .use(Person::getSpouse)
+                .buildProcessor();
         assertNotNull(h);
     }
 
     @Test
     void root_can_create_a_complex_hierarchy() {
-        Hierarchy<Person> h
-                = Hierarchy.root(Person.class)
-                .many(Person::getFriends,
-                        f -> f.single(Person::getSpouse))
-                .build();
+        HierarchyProcessor<Person> h
+                = HierarchyProcessor.from(Person.class)
+                .selectAll(Person::getFriends,
+                        f -> f.use(Person::getSpouse))
+                .buildProcessor();
         assertNotNull(h);
     }
 
     @Test
     void can_traverse_a_complex_hierarchy() {
-        Hierarchy<Person> h
-                = Hierarchy
-                .root(Person.class)
-                .single(Person::getSpouse,
-                        s -> s.collection(
+        HierarchyProcessor<Person> h
+                = HierarchyProcessor
+                .from(Person.class)
+                .use(Person::getSpouse,
+                        s -> s.consumeAll(
                                 Person::getPets,
-                                p -> p.array(Pet::getFavoriteFoods)
+                                p -> p.accessAll(Pet::getFavoriteFoods)
                         )
                 )
-                .many(Person::getFriends,
-                        friends -> friends.whenVisited
+                .selectAll(Person::getFriends,
+                        friends -> friends.onVisit
                                 (
                                         check -> check
-                                                .afterMany((p, ps) -> CONTINUE_PROCESSING)
-                                                .beforeAllChildren((p1, p2) -> SKIP_NODE_AND_REMAINING_SIBLING_NODES)
+                                                .afterVisitingAll((p, ps) -> OK_CONTINUE)
+                                                .beforeVisitingAllChildren((p1, p2) -> SKIP_CURRENT_AND_REMAINING_SIBLINGS)
                                 )
-                                .single(Person::getSpouse))
-                .build();
+                                .use(Person::getSpouse))
+                .buildProcessor();
         assertNotNull(h);
 
         List<String> names = new ArrayList<>();
@@ -134,7 +134,7 @@ class HierarchyBuilder_Test {
         return (p, c) -> {
             if (c instanceof Name)
                 names.add(((Name) c).getName());
-            return CONTINUE_PROCESSING;
+            return OK_CONTINUE;
         };
     }
 

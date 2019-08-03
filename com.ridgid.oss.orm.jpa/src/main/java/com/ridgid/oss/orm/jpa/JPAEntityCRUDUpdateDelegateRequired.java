@@ -1,6 +1,6 @@
 package com.ridgid.oss.orm.jpa;
 
-import com.ridgid.oss.common.hierarchy.Hierarchy;
+import com.ridgid.oss.common.hierarchy.HierarchyProcessor;
 import com.ridgid.oss.orm.EntityCRUDUpdate;
 import com.ridgid.oss.orm.entity.PrimaryKeyedEntity;
 import com.ridgid.oss.orm.exception.EntityCRUDExceptionError;
@@ -12,5 +12,5 @@ public interface JPAEntityCRUDUpdateDelegateRequired<ET extends PrimaryKeyedEnti
         extends EntityCRUDUpdate<ET, PKT> {
 
     @Override
-    Optional<ET> optionalUpdate(ET entity, Hierarchy<ET> hierarchy) throws EntityCRUDExceptionError;
+    Optional<ET> optionalUpdate(ET entity, HierarchyProcessor<ET> hierarchy) throws EntityCRUDExceptionError;
 }

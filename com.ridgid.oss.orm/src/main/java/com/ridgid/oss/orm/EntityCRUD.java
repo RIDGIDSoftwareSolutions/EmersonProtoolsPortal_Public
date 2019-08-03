@@ -2,7 +2,7 @@ package com.ridgid.oss.orm;
 
 import com.ridgid.oss.common.helper.StreamHelpers;
 import com.ridgid.oss.common.hierarchy.GeneralVisitHandler;
-import com.ridgid.oss.common.hierarchy.Hierarchy;
+import com.ridgid.oss.common.hierarchy.HierarchyProcessor;
 import com.ridgid.oss.common.hierarchy.VisitStatus;
 import com.ridgid.oss.orm.entity.PrimaryKeyedEntity;
 
@@ -22,7 +22,7 @@ import static java.util.stream.Collectors.toList;
 @SuppressWarnings("unused")
 public interface EntityCRUD<ET extends PrimaryKeyedEntity<PKT>, PKT extends Comparable<PKT>> {
 
-    GeneralVisitHandler NO_OP_VISIT_HANDLER = (p, o) -> VisitStatus.CONTINUE_PROCESSING;
+    GeneralVisitHandler NO_OP_VISIT_HANDLER = (p, o) -> VisitStatus.OK_CONTINUE;
 
     /**
      * Load and initialize Lazily-Loaded fields and dependencies of the given entity, then, detach the enity graph
@@ -32,7 +32,7 @@ public interface EntityCRUD<ET extends PrimaryKeyedEntity<PKT>, PKT extends Comp
      * @param hierarchy hierarchy with the given entity as the root to load
      * @return detached entity graphy rooted at the given entity with all lazy-loaded fields and dependencies named in the graph initalized
      */
-    default ET initializeAndDetach(ET entity, Hierarchy<ET> hierarchy) {
+    default ET initializeAndDetach(ET entity, HierarchyProcessor<ET> hierarchy) {
         return detach(initialize(entity, hierarchy), hierarchy);
     }
 
@@ -40,7 +40,7 @@ public interface EntityCRUD<ET extends PrimaryKeyedEntity<PKT>, PKT extends Comp
         return initializeAndDetach(entity, null);
     }
 
-    default List<ET> initializeAndDetach(Stream<ET> entityStream, Hierarchy<ET> hierarchy) {
+    default List<ET> initializeAndDetach(Stream<ET> entityStream, HierarchyProcessor<ET> hierarchy) {
         return entityStream.map(e -> initializeAndDetach(e, hierarchy)).collect(toList());
     }
 
@@ -48,7 +48,7 @@ public interface EntityCRUD<ET extends PrimaryKeyedEntity<PKT>, PKT extends Comp
         return entityStream.map(this::initializeAndDetach).collect(toList());
     }
 
-    default List<ET> loadInitializeAndDetach(Stream<PKT> pktStream, Hierarchy<ET> hierarchy) {
+    default List<ET> loadInitializeAndDetach(Stream<PKT> pktStream, HierarchyProcessor<ET> hierarchy) {
         return initializeAndDetach(load(pktStream), hierarchy);
     }
 
@@ -56,7 +56,7 @@ public interface EntityCRUD<ET extends PrimaryKeyedEntity<PKT>, PKT extends Comp
         return initializeAndDetach(load(pktStream));
     }
 
-    default Stream<ET> loadAndInitialize(Stream<PKT> pktStream, Hierarchy<ET> hierarchy) {
+    default Stream<ET> loadAndInitialize(Stream<PKT> pktStream, HierarchyProcessor<ET> hierarchy) {
         return load(pktStream).map(e -> initialize(e, hierarchy));
     }
 
@@ -74,7 +74,7 @@ public interface EntityCRUD<ET extends PrimaryKeyedEntity<PKT>, PKT extends Comp
                             )
                     .flatMap
                             (
-                                    StreamHelpers.<PKT>group
+                                    StreamHelpers.group
                                             (
                                                     getLoadBatchSize(),
                                                     (PKT) null
@@ -110,13 +110,13 @@ public interface EntityCRUD<ET extends PrimaryKeyedEntity<PKT>, PKT extends Comp
 
     short getLoadBatchSize();
 
-    ET initialize(ET entity, Hierarchy<ET> hierarchy);
+    ET initialize(ET entity, HierarchyProcessor<ET> hierarchy);
 
     default ET initialize(ET entity) {
         return initialize(entity, null);
     }
 
-    ET detach(ET entity, Hierarchy<ET> hierarchy);
+    ET detach(ET entity, HierarchyProcessor<ET> hierarchy);
 
     default ET detach(ET entity) {
         return detach(entity, null);

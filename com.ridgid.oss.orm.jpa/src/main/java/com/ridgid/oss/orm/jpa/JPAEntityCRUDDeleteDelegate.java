@@ -1,6 +1,6 @@
 package com.ridgid.oss.orm.jpa;
 
-import com.ridgid.oss.common.hierarchy.Hierarchy;
+import com.ridgid.oss.common.hierarchy.HierarchyProcessor;
 import com.ridgid.oss.orm.EntityCRUDDelete;
 import com.ridgid.oss.orm.entity.PrimaryKeyedEntity;
 import com.ridgid.oss.orm.exception.EntityCRUDExceptionError;
@@ -74,17 +74,17 @@ final class JPAEntityCRUDDeleteDelegate<ET extends PrimaryKeyedEntity<PKT>, PKT 
     }
 
     @Override
-    public ET initializeAndDetach(ET entity, Hierarchy<ET> hierarchy) {
+    public ET initializeAndDetach(ET entity, HierarchyProcessor<ET> hierarchy) {
         return baseDelegate.initializeAndDetach(entity, hierarchy);
     }
 
     @Override
-    public ET initialize(ET entity, Hierarchy<ET> hierarchy) {
+    public ET initialize(ET entity, HierarchyProcessor<ET> hierarchy) {
         return baseDelegate.initialize(entity, hierarchy);
     }
 
     @Override
-    public ET detach(ET entity, Hierarchy<ET> hierarchy) {
+    public ET detach(ET entity, HierarchyProcessor<ET> hierarchy) {
         return baseDelegate.detach(entity, hierarchy);
     }
 
@@ -106,7 +106,7 @@ final class JPAEntityCRUDDeleteDelegate<ET extends PrimaryKeyedEntity<PKT>, PKT 
      * @throws EntityCRUDExceptionNotFound if there is no entity ET one the primary key PK in the persistence store
      */
     @Override
-    public void delete(PKT pk, Hierarchy<ET> hierarchy) throws EntityCRUDExceptionError, EntityCRUDExceptionNotFound {
+    public void delete(PKT pk, HierarchyProcessor<ET> hierarchy) throws EntityCRUDExceptionError, EntityCRUDExceptionNotFound {
         try {
             ET entity = baseDelegate.getEntityManager().find(baseDelegate.getClassType(), pk);
             if (entity == null) throw new EntityCRUDExceptionNotFound();

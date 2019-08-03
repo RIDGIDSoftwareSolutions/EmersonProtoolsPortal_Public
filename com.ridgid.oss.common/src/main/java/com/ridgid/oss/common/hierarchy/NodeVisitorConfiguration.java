@@ -3,16 +3,16 @@ package com.ridgid.oss.common.hierarchy;
 @SuppressWarnings({"unused", "UnusedReturnValue"})
 public interface NodeVisitorConfiguration<PARENT_T, T> {
 
-    NodeVisitorConfiguration<PARENT_T, T> before(VisitHandler<PARENT_T, T> handler);
+    NodeVisitorConfiguration<PARENT_T, T> beforeVisitingSelf(VisitHandler<PARENT_T, T> handler);
 
-    NodeVisitorConfiguration<PARENT_T, T> beforeAllChildren(VisitHandler<PARENT_T, T> handler);
+    NodeVisitorConfiguration<PARENT_T, T> beforeVisitingAllChildren(VisitHandler<PARENT_T, T> handler);
 
-    NodeVisitorConfiguration<PARENT_T, T> beforeEachChild(VisitHandler<PARENT_T, T> handler);
+    NodeVisitorConfiguration<PARENT_T, T> beforeVisitingEachChild(VisitHandler<PARENT_T, T> handler);
 
-    NodeVisitorConfiguration<PARENT_T, T> afterEachChild(VisitHandler<PARENT_T, T> handler);
+    NodeVisitorConfiguration<PARENT_T, T> afterVisitingEachChild(VisitHandler<PARENT_T, T> handler);
 
-    NodeVisitorConfiguration<PARENT_T, T> afterAllChildren(VisitHandler<PARENT_T, T> handler);
+    NodeVisitorConfiguration<PARENT_T, T> afterVisitingAllChildren(VisitHandler<PARENT_T, T> handler);
 
-    NodeVisitorConfiguration<PARENT_T, T> after(VisitHandler<PARENT_T, T> handler);
+    NodeVisitorConfiguration<PARENT_T, T> afterVisitingSelf(VisitHandler<PARENT_T, T> handler);
 
 }

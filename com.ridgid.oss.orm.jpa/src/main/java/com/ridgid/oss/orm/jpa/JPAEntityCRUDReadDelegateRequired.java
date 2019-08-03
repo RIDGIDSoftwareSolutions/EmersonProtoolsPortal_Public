@@ -1,6 +1,6 @@
 package com.ridgid.oss.orm.jpa;
 
-import com.ridgid.oss.common.hierarchy.Hierarchy;
+import com.ridgid.oss.common.hierarchy.HierarchyProcessor;
 import com.ridgid.oss.orm.EntityCRUDRead;
 import com.ridgid.oss.orm.entity.PrimaryKeyedEntity;
 import com.ridgid.oss.orm.exception.EntityCRUDExceptionError;
@@ -18,7 +18,7 @@ public interface JPAEntityCRUDReadDelegateRequired<ET extends PrimaryKeyedEntity
      * @return Optional entity instance of type ET if the entity exists under the given primary key, pk, in the persistence store; otherwise, Optional is empty
      * @throws EntityCRUDExceptionError if there is some error retrieving the value beyond it not existing
      */
-    Optional<ET> optionalFind(PKT pk, Hierarchy<ET> hierarchy) throws EntityCRUDExceptionError;
+    Optional<ET> optionalFind(PKT pk, HierarchyProcessor<ET> hierarchy) throws EntityCRUDExceptionError;
 
     /**
      * Finds and retrieves all available entities of type ET in the persistence store between the offset (inclusive, zero-based) up to offset + limit (exclusive)
@@ -28,5 +28,5 @@ public interface JPAEntityCRUDReadDelegateRequired<ET extends PrimaryKeyedEntity
      * @return list of entities of type ET that are available in the persistence store ranged by the limit and offset given. If none available in the given range, then returns a 0 length list.
      * @throws EntityCRUDExceptionError if there is an error retrieving from the persistence store
      */
-    List<ET> findAll(int offset, int limit, Hierarchy<ET> hierarchy) throws EntityCRUDExceptionError;
+    List<ET> findAll(int offset, int limit, HierarchyProcessor<ET> hierarchy) throws EntityCRUDExceptionError;
 }

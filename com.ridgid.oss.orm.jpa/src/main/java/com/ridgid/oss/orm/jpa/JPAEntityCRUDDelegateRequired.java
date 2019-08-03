@@ -1,6 +1,6 @@
 package com.ridgid.oss.orm.jpa;
 
-import com.ridgid.oss.common.hierarchy.Hierarchy;
+import com.ridgid.oss.common.hierarchy.HierarchyProcessor;
 import com.ridgid.oss.orm.EntityCRUD;
 import com.ridgid.oss.orm.entity.PrimaryKeyedEntity;
 
@@ -32,7 +32,7 @@ public interface JPAEntityCRUDDelegateRequired<ET extends PrimaryKeyedEntity<PKT
 
     @Override
     ET initializeAndDetach(ET entity,
-                           Hierarchy<ET> hierarchy);
+                           HierarchyProcessor<ET> hierarchy);
 
     @Override
     Optional<ET> load(PKT pk);
@@ -45,9 +45,9 @@ public interface JPAEntityCRUDDelegateRequired<ET extends PrimaryKeyedEntity<PKT
 
     @Override
     ET initialize(ET entity,
-                  Hierarchy<ET> hierarchy);
+                  HierarchyProcessor<ET> hierarchy);
 
     @Override
     ET detach(ET entity,
-              Hierarchy<ET> hierarchy);
+              HierarchyProcessor<ET> hierarchy);
 }
