@@ -1,7 +1,8 @@
-package com.ridgid.oss.orm;
+package com.ridgid.oss.orm.cache;
 
 import com.ridgid.oss.common.cache.Cache;
 import com.ridgid.oss.common.hierarchy.HierarchyProcessor;
+import com.ridgid.oss.orm.EntityCRUD;
 import com.ridgid.oss.orm.entity.PrimaryKeyedEntity;
 
 import java.util.Optional;
@@ -26,7 +27,8 @@ public interface EntityCRUDCached<ET extends PrimaryKeyedEntity<PKT>, PKT extend
      * @param hierarchy hierarchy with the given entity as the root to load
      * @return detached entity graphy rooted at the given entity with all lazy-loaded fields and dependencies named in the graph initalized
      */
-    default ET initializeDetachAndCache(ET entity, HierarchyProcessor<ET> hierarchy) {
+    default ET initializeDetachAndCache(ET entity,
+                                        HierarchyProcessor<ET> hierarchy) {
         return cache().put
                 (
                         entity.getPk(),
@@ -46,7 +48,8 @@ public interface EntityCRUDCached<ET extends PrimaryKeyedEntity<PKT>, PKT extend
                 );
     }
 
-    default Stream<ET> initializeDetachAndCache(Stream<ET> entityStream, HierarchyProcessor<ET> hierarchy) {
+    default Stream<ET> initializeDetachAndCache(Stream<ET> entityStream,
+                                                HierarchyProcessor<ET> hierarchy) {
         return initializeAndDetach
                 (
                         entityStream,
@@ -64,7 +67,8 @@ public interface EntityCRUDCached<ET extends PrimaryKeyedEntity<PKT>, PKT extend
                 );
     }
 
-    default Stream<ET> loadInitializeAndDetachThroughCache(Stream<PKT> pktStream, HierarchyProcessor<ET> hierarchy) {
+    default Stream<ET> loadInitializeAndDetachThroughCache(Stream<PKT> pktStream,
+                                                           HierarchyProcessor<ET> hierarchy) {
         return loadInitializeAndDetach
                 (
                         pktStream,

@@ -1,5 +1,6 @@
-package com.ridgid.oss.orm;
+package com.ridgid.oss.orm.cache;
 
+import com.ridgid.oss.orm.EntityCRUDUpdate;
 import com.ridgid.oss.orm.entity.PrimaryKeyedEntity;
 
 /**
@@ -8,6 +9,7 @@ import com.ridgid.oss.orm.entity.PrimaryKeyedEntity;
  * @param <ET>  Entity Type of the Entity that the DAO provides an UPDATE (update) CRUD method for
  * @param <PKT> Type of the Primary Key of the Entity Type ET
  */
+@SuppressWarnings("WeakerAccess")
 public interface EntityCRUDCachedUpdate<ET extends PrimaryKeyedEntity<PKT>, PKT extends Comparable<PKT>>
         extends
         EntityCRUDCached<ET, PKT>,

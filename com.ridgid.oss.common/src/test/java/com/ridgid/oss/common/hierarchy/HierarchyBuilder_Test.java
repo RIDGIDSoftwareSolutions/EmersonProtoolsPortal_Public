@@ -10,6 +10,8 @@ import java.util.stream.Stream;
 
 import static com.ridgid.oss.common.hierarchy.HierarchyProcessor.Traversal.BREADTH_FIRST;
 import static com.ridgid.oss.common.hierarchy.HierarchyProcessor.Traversal.DEPTH_FIRST;
+import static com.ridgid.oss.common.hierarchy.HierarchyProcessor.from;
+import static com.ridgid.oss.common.hierarchy.Node.*;
 import static com.ridgid.oss.common.hierarchy.VisitStatus.OK_CONTINUE;
 import static com.ridgid.oss.common.hierarchy.VisitStatus.SKIP_CURRENT_AND_REMAINING_SIBLINGS;
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
@@ -38,14 +40,17 @@ class HierarchyBuilder_Test {
                                 ),
                         null,
                         new Person("Friend 1"),
-                        new Person("Friend 2")
+                        new Person
+                                ("Friend 2",
+                                        new Person("Spouse of Friend 2")
+                                )
                 );
     }
 
     @Test
     void root_can_create_with_no_children() {
         HierarchyProcessor<Person> h
-                = HierarchyProcessor.from(Person.class)
+                = from(Person.class)
                 .buildProcessor();
         assertNotNull(h);
     }
@@ -53,27 +58,28 @@ class HierarchyBuilder_Test {
     @Test
     void root_can_create_with_a_singular_child() {
         HierarchyProcessor<Person> h
-                = HierarchyProcessor.from(Person.class)
+                = from(Person.class)
                 .with(Person::getSpouse)
                 .buildProcessor();
         assertNotNull(h);
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     void root_can_create_a_complex_hierarchy() {
         HierarchyProcessor<Person> h
-                = HierarchyProcessor.from(Person.class)
+                = from(Person.class)
                 .selectAll(Person::getFriends,
                         f -> f.with(Person::getSpouse))
                 .buildProcessor();
         assertNotNull(h);
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     void can_traverse_a_complex_hierarchy() {
         HierarchyProcessor<Person> h
-                = HierarchyProcessor
-                .from(Person.class)
+                = from(Person.class)
                 .with(Person::getSpouse,
                         s -> s
                                 .consumeAll(
@@ -86,7 +92,7 @@ class HierarchyBuilder_Test {
                                 .onVisit
                                         (
                                                 check -> check
-                                                        .afterVisitingAll((p, ps) -> OK_CONTINUE)
+                                                        .afterAll((p, ps) -> OK_CONTINUE)
                                         )
                                 .with(Person::getSpouse))
                 .buildProcessor();
@@ -103,7 +109,8 @@ class HierarchyBuilder_Test {
                         "Kibble",
                         "Milk-Bone",
                         "Friend 1",
-                        "Friend 2"
+                        "Friend 2",
+                        "Spouse of Friend 2"
                 ),
                 names,
                 () -> "Depth-First Visited List does not match expected list:\n"
@@ -130,22 +137,27 @@ class HierarchyBuilder_Test {
                         + "\n"
         );
 
-        h = HierarchyProcessor
-                .from(Person.class)
+        h = from(Person.class)
                 .with(Person::getSpouse,
-                        s -> s.consumeAll(
-                                Person::getPets,
-                                p -> p.accessAll(Pet::getFavoriteFoods)
-                        )
+                        s -> s
+                                .consumeAll(
+                                        Person::getPets,
+                                        p -> p
+                                                .accessAll(
+                                                        Pet::getFavoriteFoods,
+                                                        viewAs(Name.class)
+                                                )
+                                )
                 )
                 .selectAll(Person::getFriends,
                         friends -> friends.onVisit
                                 (
                                         check -> check
-                                                .afterVisitingAll((p, ps) -> OK_CONTINUE)
-                                                .beforeVisitingAllChildren((p1, p2) -> SKIP_CURRENT_AND_REMAINING_SIBLINGS)
+                                                .afterAll((p, ps) -> OK_CONTINUE)
+                                                .beforeAllChildren((p1, p2) -> SKIP_CURRENT_AND_REMAINING_SIBLINGS)
                                 )
-                                .with(Person::getSpouse))
+                                .with(Person::getSpouse,
+                                        viewAs(Name.class)))
                 .buildProcessor();
         assertNotNull(h);
 
@@ -160,6 +172,64 @@ class HierarchyBuilder_Test {
                         "Kibble",
                         "Milk-Bone",
                         "Friend 1"
+                ),
+                names,
+                () -> "Depth-First Visited List does not match expected list:\n"
+                        + String.join(",", names)
+                        + "\n"
+        );
+
+    }
+
+    @Test
+    void can_traverse_a_complex_hierarchy_using_including_and_friends() {
+        HierarchyProcessor<Person> h
+                = from(Person.class)
+                .with(Person::getSpouse, include(
+                        their_Associated(
+                                individual(Person::getSpouse,
+                                        withVisitConfiguredAs(
+                                                singularVisitConfiguration()
+                                                        .beforeSelf((p, t) -> OK_CONTINUE)
+                                                        .applyConfiguration(),
+                                                include(
+                                                        their_Associated(
+                                                                individual(Person::getPets)
+                                                        )
+                                                )
+                                        ))),
+                        their_Contained(
+                                collection_Of(Person::getPets, include(
+                                        its_Contained(array_Of(
+                                                Pet::getFavoriteFoods)))))))
+                .selectAll(Person::getFriends,
+                        withCollectionVisitsConfiguredAs(
+                                multiVisitConfiguration()
+                                        .beforeAll((p, t) -> OK_CONTINUE)
+                                        .afterAll((p, t) -> OK_CONTINUE)
+                                        .afterSelf((p, t) -> OK_CONTINUE)
+                                        .applyConfiguration(),
+                                include(
+                                        their_Associated(
+                                                individual(
+                                                        Person::getSpouse)))))
+                .buildProcessor();
+        assertNotNull(h);
+
+        List<String> names = new ArrayList<>();
+        h.visit(samplePerson, addToNamesFound(names), DEPTH_FIRST);
+
+        assertIterableEquals(
+                Arrays.asList(
+                        "John Smith",
+                        "Jane Doe",
+                        "John Smith",
+                        "Spot",
+                        "Kibble",
+                        "Milk-Bone",
+                        "Friend 1",
+                        "Friend 2",
+                        "Spouse of Friend 2"
                 ),
                 names,
                 () -> "Depth-First Visited List does not match expected list:\n"
@@ -191,6 +261,11 @@ class HierarchyBuilder_Test {
 
         public Person(String name) {
             this.name = name;
+        }
+
+        public Person(String name, Person spouse) {
+            this.name = name;
+            this.spouse = spouse;
         }
 
         public Person(String name,

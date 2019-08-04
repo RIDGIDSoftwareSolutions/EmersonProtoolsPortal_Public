@@ -1,9 +1,19 @@
 package com.ridgid.oss.common.hierarchy;
 
-@SuppressWarnings({"unused"})
-public interface MultiNodeVisitorConfiguration<PARENT_T, T, CT>
-        extends NodeVisitorConfiguration<PARENT_T, T> {
-    MultiNodeVisitorConfiguration<PARENT_T, T, CT> beforeVisitingAny(VisitHandler<PARENT_T, CT> handler);
+import java.util.function.Consumer;
 
-    MultiNodeVisitorConfiguration<PARENT_T, T, CT> afterVisitingAll(VisitHandler<PARENT_T, CT> handler);
+@SuppressWarnings({"unused", "WeakerAccess"})
+public interface MultiNodeVisitorConfiguration<PARENT_T, T, CT, NC extends Consumer<Node<PARENT_T, T>>>
+        extends MultiNodeBeforeCollectionVisitorConfiguration<PARENT_T, T, CT, NC> {
+}
+
+interface MultiNodeBeforeCollectionVisitorConfiguration<PARENT_T, T, CT, NC extends Consumer<Node<PARENT_T, T>>>
+        extends MultiNodeAfterCollectionVisitorConfiguration<PARENT_T, T, CT, NC> {
+    @SuppressWarnings("unused")
+    MultiNodeAfterCollectionVisitorConfiguration<PARENT_T, T, CT, NC> beforeAll(VisitHandler<PARENT_T, CT> handler);
+}
+
+interface MultiNodeAfterCollectionVisitorConfiguration<PARENT_T, T, CT, NC extends Consumer<Node<PARENT_T, T>>>
+        extends NodeVisitorConfiguration<PARENT_T, T, NC> {
+    NodeVisitorConfiguration<PARENT_T, T, NC> afterAll(VisitHandler<PARENT_T, CT> handler);
 }

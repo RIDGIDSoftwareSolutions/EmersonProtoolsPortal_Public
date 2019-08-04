@@ -2,7 +2,7 @@ package com.ridgid.oss.orm.jpa;
 
 import com.ridgid.oss.common.cache.Cache;
 import com.ridgid.oss.common.hierarchy.HierarchyProcessor;
-import com.ridgid.oss.orm.EntityCRUDCached;
+import com.ridgid.oss.orm.cache.EntityCRUDCached;
 import com.ridgid.oss.orm.entity.PrimaryKeyedEntity;
 
 import java.util.List;

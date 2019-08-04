@@ -1,4 +1,4 @@
-package com.ridgid.oss.orm;
+package com.ridgid.oss.orm.cache;
 
 import com.ridgid.oss.orm.entity.PrimaryKeyedEntity;
 

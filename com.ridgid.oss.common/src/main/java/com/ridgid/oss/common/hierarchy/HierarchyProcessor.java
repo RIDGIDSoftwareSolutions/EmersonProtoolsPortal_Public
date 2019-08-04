@@ -13,7 +13,7 @@ import static com.ridgid.oss.common.hierarchy.HierarchyProcessor.Traversal.BREAD
 import static com.ridgid.oss.common.hierarchy.HierarchyProcessor.Traversal.DEPTH_FIRST;
 import static com.ridgid.oss.common.hierarchy.VisitStatus.OK_CONTINUE;
 
-@SuppressWarnings({"unused", "WeakerAccess"})
+@SuppressWarnings({"unused", "WeakerAccess", "DeprecatedStillUsed"})
 public class HierarchyProcessor<PARENT_T> {
 
     private final HierarchyProcessorBuilder<PARENT_T> built;
@@ -87,51 +87,58 @@ public class HierarchyProcessor<PARENT_T> {
             return with(selector, null);
         }
 
-        public <CHILD_T> HierarchyProcessorBuilder<T> with(Function<T, CHILD_T> selector,
-                                                           Consumer<SingleNode<T, CHILD_T>> childrenSelector) {
-            SingleChild<T, CHILD_T> child = new SingleChild<>(selector);
+        public <CHILD_T, NC extends Consumer<Node<T, CHILD_T>>>
+        HierarchyProcessorBuilder<T> with(Function<T, CHILD_T> selector,
+                                          Consumer<SingleNode<T, CHILD_T, NC>> childrenSelector) {
+            HierarchyProcessor.SingleChild<T, CHILD_T, NC> child = new HierarchyProcessor.SingleChild<>(selector);
             if (childrenSelector != null) childrenSelector.accept(child);
             childNodes.add(child);
             return this;
         }
 
-        public <CHILD_T> HierarchyProcessorBuilder<T> selectAll(Function<T, Stream<CHILD_T>> selector) {
+        public <CHILD_T, NC extends Consumer<Node<T, CHILD_T>>>
+        HierarchyProcessorBuilder<T> selectAll(Function<T, Stream<CHILD_T>> selector) {
             return selectAll(selector, null);
         }
 
-        public <CHILD_T> HierarchyProcessorBuilder<T> selectAll(Function<T, Stream<CHILD_T>> selector,
-                                                                Consumer<MultiNode<T, CHILD_T, Stream<CHILD_T>>> childrenSelector) {
-            StreamChild<T, CHILD_T> child = new StreamChild<>(selector);
+        public <CHILD_T, NC extends Consumer<Node<T, CHILD_T>>>
+        HierarchyProcessorBuilder<T> selectAll(Function<T, Stream<CHILD_T>> selector,
+                                               Consumer<MultiNode<T, CHILD_T, Stream<CHILD_T>, NC>> childrenSelector) {
+            StreamChild<T, CHILD_T, NC> child = new StreamChild<>(selector);
             if (childrenSelector != null) childrenSelector.accept(child);
             childNodes.add(child);
             return this;
         }
 
-        public <CHILD_T> HierarchyProcessorBuilder<T> consumeAll(Function<T, Iterable<CHILD_T>> selector) {
+        public <CHILD_T, NC extends Consumer<Node<T, CHILD_T>>>
+        HierarchyProcessorBuilder<T> consumeAll(Function<T, Iterable<CHILD_T>> selector) {
             return consumeAll(selector, null);
         }
 
-        public <CHILD_T> HierarchyProcessorBuilder<T> consumeAll(Function<T, Iterable<CHILD_T>> selector,
-                                                                 Consumer<MultiNode<T, CHILD_T, Iterable<CHILD_T>>> childrenSelector) {
-            IterableChild<T, CHILD_T> child = new IterableChild<>(selector);
+        public <CHILD_T, NC extends Consumer<Node<T, CHILD_T>>>
+        HierarchyProcessorBuilder<T> consumeAll(Function<T, Iterable<CHILD_T>> selector,
+                                                Consumer<MultiNode<T, CHILD_T, Iterable<CHILD_T>, NC>> childrenSelector) {
+            IterableChild<T, CHILD_T, NC> child = new IterableChild<>(selector);
             if (childrenSelector != null) childrenSelector.accept(child);
             childNodes.add(child);
             return this;
         }
 
-        public <CHILD_T> HierarchyProcessorBuilder<T> accessAll(Function<T, CHILD_T[]> selector) {
+        public <CHILD_T, NC extends Consumer<Node<T, CHILD_T>>>
+        HierarchyProcessorBuilder<T> accessAll(Function<T, CHILD_T[]> selector) {
             return accessAll(selector, null);
         }
 
-        public <CHILD_T> HierarchyProcessorBuilder<T> accessAll(Function<T, CHILD_T[]> selector,
-                                                                Consumer<MultiNode<T, CHILD_T, CHILD_T[]>> childrenSelector) {
-            ArrayChild<T, CHILD_T> child = new ArrayChild<>(selector);
+        public <CHILD_T, NC extends Consumer<Node<T, CHILD_T>>>
+        HierarchyProcessorBuilder<T> accessAll(Function<T, CHILD_T[]> selector,
+                                               Consumer<MultiNode<T, CHILD_T, CHILD_T[], NC>> childrenSelector) {
+            ArrayChild<T, CHILD_T, NC> child = new ArrayChild<>(selector);
             if (childrenSelector != null) childrenSelector.accept(child);
             childNodes.add(child);
             return this;
         }
 
-        public HierarchyProcessor<T> buildProcessor() {
+        public <NC extends Consumer<Node<?, ?>>> HierarchyProcessor<T> buildProcessor() {
             return new HierarchyProcessor<>(this);
         }
 
@@ -155,11 +162,11 @@ public class HierarchyProcessor<PARENT_T> {
         }
     }
 
-    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    private static abstract class BaseNode<PARENT_T, T>
+    @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "RedundantSuppression"})
+    private static abstract class BaseNode<PARENT_T, T, NC extends Consumer<Node<PARENT_T, T>>>
             implements
             VisitableNode<PARENT_T, T>,
-            NodeVisitorConfiguration<PARENT_T, T> {
+            NodeVisitorConfiguration<PARENT_T, T, NC> {
 
         protected List<VisitableNode> childNodes;
         protected BiHandlerList<PARENT_T, T, VisitStatus> beforeVisitHandlers;
@@ -174,87 +181,92 @@ public class HierarchyProcessor<PARENT_T> {
             childNodes.add(child);
         }
 
-        @SuppressWarnings("unchecked")
+        @SuppressWarnings({"unchecked", "deprecation"})
         @Override
-        public <CHILD_T, N extends Node<PARENT_T, T>> N with(Function<T, CHILD_T> selector,
-                                                             Consumer<SingleNode<T, CHILD_T>> childrenSelector) {
-            SingleChild<T, CHILD_T> child = new SingleChild<>(selector);
+        public <CHILD_T, N extends Node<PARENT_T, T>, INC extends Consumer<Node<T, CHILD_T>>>
+        N with(Function<T, CHILD_T> selector,
+               Consumer<SingleNode<T, CHILD_T, INC>> childrenSelector) {
+            HierarchyProcessor.SingleChild<T, CHILD_T, INC> child = new HierarchyProcessor.SingleChild<>(selector);
             if (childrenSelector != null) childrenSelector.accept(child);
             addChild(child);
             return (N) this;
         }
 
-        @SuppressWarnings("unchecked")
+        @SuppressWarnings({"unchecked", "deprecation"})
         @Override
-        public <CHILD_T, N extends Node<PARENT_T, T>> N selectAll(Function<T, Stream<CHILD_T>> selector,
-                                                                  Consumer<MultiNode<T, CHILD_T, Stream<CHILD_T>>> childrenSelector) {
-            StreamChild<T, CHILD_T> child = new StreamChild<>(selector);
+        public <CHILD_T, N extends Node<PARENT_T, T>, INC extends Consumer<Node<T, CHILD_T>>>
+        N selectAll(Function<T, Stream<CHILD_T>> selector,
+                    Consumer<MultiNode<T, CHILD_T, Stream<CHILD_T>, INC>> childrenSelector) {
+            StreamChild<T, CHILD_T, INC> child = new StreamChild<>(selector);
             if (childrenSelector != null) childrenSelector.accept(child);
             addChild(child);
             return (N) this;
         }
 
-        @SuppressWarnings("unchecked")
+        @SuppressWarnings({"unchecked", "deprecation"})
         @Override
-        public <CHILD_T, N extends Node<PARENT_T, T>> N consumeAll(Function<T, Iterable<CHILD_T>> selector,
-                                                                   Consumer<MultiNode<T, CHILD_T, Iterable<CHILD_T>>> childrenSelector) {
-            IterableChild<T, CHILD_T> child = new IterableChild<>(selector);
+        public <CHILD_T, N extends Node<PARENT_T, T>, INC extends Consumer<Node<T, CHILD_T>>>
+        N consumeAll(Function<T, Iterable<CHILD_T>> selector,
+                     Consumer<MultiNode<T, CHILD_T, Iterable<CHILD_T>, INC>> childrenSelector) {
+            IterableChild<T, CHILD_T, INC> child = new IterableChild<>(selector);
             if (childrenSelector != null) childrenSelector.accept(child);
             addChild(child);
             return (N) this;
         }
 
-        @SuppressWarnings("unchecked")
+        @SuppressWarnings({"unchecked", "deprecation"})
         @Override
-        public <CHILD_T, N extends Node<PARENT_T, T>> N accessAll(Function<T, CHILD_T[]> selector,
-                                                                  Consumer<MultiNode<T, CHILD_T, CHILD_T[]>> childrenSelector) {
-            ArrayChild<T, CHILD_T> child = new ArrayChild<>(selector);
+        public <CHILD_T, N extends Node<PARENT_T, T>, INC extends Consumer<Node<T, CHILD_T>>>
+        N accessAll(Function<T, CHILD_T[]> selector,
+                    Consumer<MultiNode<T, CHILD_T, CHILD_T[], INC>> childrenSelector) {
+            ArrayChild<T, CHILD_T, INC> child = new ArrayChild<>(selector);
             if (childrenSelector != null) childrenSelector.accept(child);
             addChild(child);
             return (N) this;
         }
 
         @Override
-        public NodeVisitorConfiguration<PARENT_T, T> beforeVisitingSelf(VisitHandler<PARENT_T, T> handler) {
+        public NodeVisitorBeforeAllChildrenConfiguration<PARENT_T, T, NC> beforeSelf(VisitHandler<PARENT_T, T> handler) {
             if (beforeVisitHandlers == null) beforeVisitHandlers = new BiHandlerList<>();
             beforeVisitHandlers.add(handler);
             return this;
         }
 
         @Override
-        public NodeVisitorConfiguration<PARENT_T, T> afterVisitingSelf(VisitHandler<PARENT_T, T> handler) {
-            if (afterVisitHandlers == null) afterVisitHandlers = new BiHandlerList<>();
-            afterVisitHandlers.add(handler);
-            return this;
-        }
-
-        @Override
-        public NodeVisitorConfiguration<PARENT_T, T> beforeVisitingEachChild(VisitHandler<PARENT_T, T> handler) {
-            if (beforeEachChildVisitHandlers == null) beforeEachChildVisitHandlers = new BiHandlerList<>();
-            beforeEachChildVisitHandlers.add(handler);
-            return this;
-        }
-
-        @Override
-        public NodeVisitorConfiguration<PARENT_T, T> afterVisitingEachChild(VisitHandler<PARENT_T, T> handler) {
-            if (afterEachChildVisitHandlers == null) afterEachChildVisitHandlers = new BiHandlerList<>();
-            afterEachChildVisitHandlers.add(handler);
-            return this;
-        }
-
-        @Override
-        public NodeVisitorConfiguration<PARENT_T, T> beforeVisitingAllChildren(VisitHandler<PARENT_T, T> handler) {
+        public NodeVisitorBeforeEachChildConfiguration<PARENT_T, T, NC> beforeAllChildren(VisitHandler<PARENT_T, T> handler) {
             if (beforeAllChildrenVisitHandlers == null) beforeAllChildrenVisitHandlers = new BiHandlerList<>();
             beforeAllChildrenVisitHandlers.add(handler);
             return this;
         }
 
         @Override
-        public NodeVisitorConfiguration<PARENT_T, T> afterVisitingAllChildren(VisitHandler<PARENT_T, T> handler) {
+        public NodeVisitorAfterEachChildConfiguration<PARENT_T, T, NC> beforeEachChild(VisitHandler<PARENT_T, T> handler) {
+            if (beforeEachChildVisitHandlers == null) beforeEachChildVisitHandlers = new BiHandlerList<>();
+            beforeEachChildVisitHandlers.add(handler);
+            return this;
+        }
+
+        @Override
+        public NodeVisitorAfterAllChildrenConfiguration<PARENT_T, T, NC> afterEachChild(VisitHandler<PARENT_T, T> handler) {
+            if (afterEachChildVisitHandlers == null) afterEachChildVisitHandlers = new BiHandlerList<>();
+            afterEachChildVisitHandlers.add(handler);
+            return this;
+        }
+
+        @Override
+        public NodeVisitorAfterSelfConfiguration<PARENT_T, T, NC> afterAllChildren(VisitHandler<PARENT_T, T> handler) {
             if (afterAllChildrenVisitHandlers == null) afterAllChildrenVisitHandlers = new BiHandlerList<>();
             afterAllChildrenVisitHandlers.add(handler);
             return this;
         }
+
+        @Override
+        public NodeVisitorConfigurationFinalizer<PARENT_T, T, NC> afterSelf(VisitHandler<PARENT_T, T> handler) {
+            if (afterVisitHandlers == null) afterVisitHandlers = new BiHandlerList<>();
+            afterVisitHandlers.add(handler);
+            return this;
+        }
+
 
         private VisitStatus invokeVisitHandlers(PARENT_T parent,
                                                 T self,
@@ -371,10 +383,11 @@ public class HierarchyProcessor<PARENT_T> {
 
     }
 
-    private static class SingleChild<PARENT_T, T>
+    private static class SingleChild<PARENT_T, T, NC extends Consumer<Node<PARENT_T, T>>>
             extends
-            BaseNode<PARENT_T, T>
-            implements SingleNode<PARENT_T, T> {
+            BaseNode<PARENT_T, T, NC>
+            implements
+            SingleNode<PARENT_T, T, NC> {
 
         private final Function<PARENT_T, T> childSelector;
 
@@ -383,22 +396,30 @@ public class HierarchyProcessor<PARENT_T> {
         }
 
         @Override
-        public <CHILD_T, N extends Node<PARENT_T, T>> N with(Function<T, CHILD_T> selector, Consumer<SingleNode<T, CHILD_T>> childrenSelector) {
+        public <CHILD_T, N extends Node<PARENT_T, T>, INC extends Consumer<Node<T, CHILD_T>>>
+        N with(Function<T, CHILD_T> selector,
+               Consumer<SingleNode<T, CHILD_T, INC>> childrenSelector) {
             return super.with(selector, childrenSelector);
         }
 
         @Override
-        public <CHILD_T, N extends Node<PARENT_T, T>> N selectAll(Function<T, Stream<CHILD_T>> selector, Consumer<MultiNode<T, CHILD_T, Stream<CHILD_T>>> childrenSelector) {
+        public <CHILD_T, N extends Node<PARENT_T, T>, INC extends Consumer<Node<T, CHILD_T>>>
+        N selectAll(Function<T, Stream<CHILD_T>> selector,
+                    Consumer<MultiNode<T, CHILD_T, Stream<CHILD_T>, INC>> childrenSelector) {
             return super.selectAll(selector, childrenSelector);
         }
 
         @Override
-        public <CHILD_T, N extends Node<PARENT_T, T>> N consumeAll(Function<T, Iterable<CHILD_T>> selector, Consumer<MultiNode<T, CHILD_T, Iterable<CHILD_T>>> childrenSelector) {
+        public <CHILD_T, N extends Node<PARENT_T, T>, INC extends Consumer<Node<T, CHILD_T>>>
+        N consumeAll(Function<T, Iterable<CHILD_T>> selector,
+                     Consumer<MultiNode<T, CHILD_T, Iterable<CHILD_T>, INC>> childrenSelector) {
             return super.consumeAll(selector, childrenSelector);
         }
 
         @Override
-        public <CHILD_T, N extends Node<PARENT_T, T>> N accessAll(Function<T, CHILD_T[]> selector, Consumer<MultiNode<T, CHILD_T, CHILD_T[]>> childrenSelector) {
+        public <CHILD_T, N extends Node<PARENT_T, T>, INC extends Consumer<Node<T, CHILD_T>>>
+        N accessAll(Function<T, CHILD_T[]> selector,
+                    Consumer<MultiNode<T, CHILD_T, CHILD_T[], INC>> childrenSelector) {
             return super.accessAll(selector, childrenSelector);
         }
 
@@ -418,20 +439,21 @@ public class HierarchyProcessor<PARENT_T> {
             return visitStart(key, visitor, parent, self);
         }
 
+        @SuppressWarnings({"deprecation", "RedundantSuppression"})
         @Override
-        public Node<PARENT_T, T> onVisit(Consumer<NodeVisitorConfiguration<PARENT_T, T>> visitConfigurer) {
+        public Node<PARENT_T, T> onVisit(Consumer<NodeVisitorConfiguration<PARENT_T, T, NC>> visitConfigurer) {
             visitConfigurer.accept(this);
             return this;
         }
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    private static abstract class ManyBaseNode<PARENT_T, T, CT>
+    private static abstract class ManyBaseNode<PARENT_T, T, CT, NC extends Consumer<Node<PARENT_T, T>>>
             extends
-            BaseNode<PARENT_T, T>
+            BaseNode<PARENT_T, T, NC>
             implements
-            MultiNode<PARENT_T, T, CT>,
-            MultiNodeVisitorConfiguration<PARENT_T, T, CT> {
+            MultiNode<PARENT_T, T, CT, NC>,
+            MultiNodeVisitorConfiguration<PARENT_T, T, CT, NC> {
 
         protected BiHandlerList<PARENT_T, CT, VisitStatus> beforeManyVisitHandlers;
         protected BiHandlerList<PARENT_T, CT, VisitStatus> afterManyVisitHandlers;
@@ -447,41 +469,52 @@ public class HierarchyProcessor<PARENT_T> {
         }
 
         @Override
-        public <CHILD_T, N extends Node<PARENT_T, T>> N with(Function<T, CHILD_T> selector, Consumer<SingleNode<T, CHILD_T>> childrenSelector) {
+        public <CHILD_T, N extends Node<PARENT_T, T>, INC extends Consumer<Node<T, CHILD_T>>>
+        N with(Function<T, CHILD_T> selector,
+               Consumer<SingleNode<T, CHILD_T, INC>> childrenSelector) {
             return super.with(selector, childrenSelector);
         }
 
         @Override
-        public <CHILD_T, N extends Node<PARENT_T, T>> N selectAll(Function<T, Stream<CHILD_T>> selector, Consumer<MultiNode<T, CHILD_T, Stream<CHILD_T>>> childrenSelector) {
+        public <CHILD_T, N extends Node<PARENT_T, T>, INC extends Consumer<Node<T, CHILD_T>>>
+        N selectAll(Function<T, Stream<CHILD_T>> selector,
+                    Consumer<MultiNode<T, CHILD_T, Stream<CHILD_T>, INC>> childrenSelector) {
             return super.selectAll(selector, childrenSelector);
         }
 
         @Override
-        public <CHILD_T, N extends Node<PARENT_T, T>> N consumeAll(Function<T, Iterable<CHILD_T>> selector, Consumer<MultiNode<T, CHILD_T, Iterable<CHILD_T>>> childrenSelector) {
+        public <CHILD_T, N extends Node<PARENT_T, T>, INC extends Consumer<Node<T, CHILD_T>>>
+        N consumeAll(Function<T, Iterable<CHILD_T>> selector,
+                     Consumer<MultiNode<T, CHILD_T, Iterable<CHILD_T>, INC>> childrenSelector) {
             return super.consumeAll(selector, childrenSelector);
         }
 
         @Override
-        public <CHILD_T, N extends Node<PARENT_T, T>> N accessAll(Function<T, CHILD_T[]> selector, Consumer<MultiNode<T, CHILD_T, CHILD_T[]>> childrenSelector) {
+        public <CHILD_T, N extends Node<PARENT_T, T>, INC extends Consumer<Node<T, CHILD_T>>>
+        N accessAll(Function<T, CHILD_T[]> selector,
+                    Consumer<MultiNode<T, CHILD_T, CHILD_T[], INC>> childrenSelector) {
             return super.accessAll(selector, childrenSelector);
         }
 
         @Override
-        public MultiNodeVisitorConfiguration<PARENT_T, T, CT> beforeVisitingAny(VisitHandler<PARENT_T, CT> handler) {
+        public MultiNodeAfterCollectionVisitorConfiguration<PARENT_T, T, CT, NC>
+        beforeAll(VisitHandler<PARENT_T, CT> handler) {
             if (beforeManyVisitHandlers == null) beforeManyVisitHandlers = new BiHandlerList<>();
             beforeManyVisitHandlers.add(handler);
             return this;
         }
 
         @Override
-        public MultiNodeVisitorConfiguration<PARENT_T, T, CT> afterVisitingAll(VisitHandler<PARENT_T, CT> handler) {
+        public NodeVisitorConfiguration<PARENT_T, T, NC>
+        afterAll(VisitHandler<PARENT_T, CT> handler) {
             if (afterManyVisitHandlers == null) afterManyVisitHandlers = new BiHandlerList<>();
             afterManyVisitHandlers.add(handler);
             return this;
         }
 
         @Override
-        public Node<PARENT_T, T> onVisit(Consumer<MultiNodeVisitorConfiguration<PARENT_T, T, CT>> visitConfigurer) {
+        @SuppressWarnings({"deprecation", "RedundantSuppression"})
+        public Node<PARENT_T, T> onVisit(Consumer<MultiNodeVisitorConfiguration<PARENT_T, T, CT, NC>> visitConfigurer) {
             visitConfigurer.accept(this);
             return this;
         }
@@ -550,8 +583,8 @@ public class HierarchyProcessor<PARENT_T> {
         }
     }
 
-    private static class StreamChild<PARENT_T, T>
-            extends ManyBaseNode<PARENT_T, T, Stream<T>> {
+    private static class StreamChild<PARENT_T, T, NC extends Consumer<Node<PARENT_T, T>>>
+            extends ManyBaseNode<PARENT_T, T, Stream<T>, NC> {
 
         private final Function<PARENT_T, Stream<T>> childSelector;
 
@@ -592,8 +625,8 @@ public class HierarchyProcessor<PARENT_T> {
         }
     }
 
-    private static class IterableChild<PARENT_T, T>
-            extends ManyBaseNode<PARENT_T, T, Iterable<T>> {
+    private static class IterableChild<PARENT_T, T, NC extends Consumer<Node<PARENT_T, T>>>
+            extends ManyBaseNode<PARENT_T, T, Iterable<T>, NC> {
 
         private final Function<PARENT_T, Iterable<T>> childSelector;
 
@@ -632,8 +665,8 @@ public class HierarchyProcessor<PARENT_T> {
         }
     }
 
-    private static class ArrayChild<PARENT_T, T>
-            extends ManyBaseNode<PARENT_T, T, T[]> {
+    private static class ArrayChild<PARENT_T, T, NC extends Consumer<Node<PARENT_T, T>>>
+            extends ManyBaseNode<PARENT_T, T, T[], NC> {
 
         private final Function<PARENT_T, T[]> childSelector;
 
