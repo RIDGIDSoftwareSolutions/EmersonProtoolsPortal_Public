@@ -24,6 +24,14 @@ public interface EntityCRUD<ET extends PrimaryKeyedEntity<PKT>, PKT extends Comp
 
     GeneralVisitHandler NO_OP_VISIT_HANDLER = (p, o) -> VisitStatus.OK_CONTINUE;
 
+    default List<ET> initialize(Stream<ET> entityStream, HierarchyProcessor<ET> hierarchy) {
+        return entityStream.map(e -> initialize(e, hierarchy)).collect(toList());
+    }
+
+    default List<ET> initialize(Stream<ET> entityStream) {
+        return entityStream.map(this::initialize).collect(toList());
+    }
+
     /**
      * Load and initialize Lazily-Loaded fields and dependencies of the given entity, then, detach the enity graph
      * from the Persistence Context and return it
@@ -47,6 +55,7 @@ public interface EntityCRUD<ET extends PrimaryKeyedEntity<PKT>, PKT extends Comp
     default List<ET> initializeAndDetach(Stream<ET> entityStream) {
         return entityStream.map(this::initializeAndDetach).collect(toList());
     }
+
 
     default List<ET> loadInitializeAndDetach(Stream<PKT> pktStream, HierarchyProcessor<ET> hierarchy) {
         return initializeAndDetach(load(pktStream), hierarchy);

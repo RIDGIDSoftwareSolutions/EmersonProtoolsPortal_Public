@@ -150,7 +150,7 @@ final class JPAEntityCRUDReadDelegate<ET extends PrimaryKeyedEntity<PKT>, PKT ex
     @Override
     public List<ET> findAll(int offset, int limit, HierarchyProcessor<ET> hierarchy) throws EntityCRUDExceptionError {
         try {
-            return initializeAndDetach
+            return initialize
                     (
                             getFindAllByLimitQuery()
                                     .setFirstResult(offset)
