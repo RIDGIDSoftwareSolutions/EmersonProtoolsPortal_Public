@@ -58,7 +58,7 @@ public abstract class JPAEntityCRUDCreateReadUpdate<ET extends PrimaryKeyedEntit
     @Override
     public void setEntityManager(EntityManager entityManager) {
         super.setEntityManager(entityManager);
-        updateDelegate.setEntityManager(entityManager);
+        //updateDelegate.setEntityManager(entityManager);
     }
 
     /**

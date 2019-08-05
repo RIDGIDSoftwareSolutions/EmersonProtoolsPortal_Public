@@ -58,7 +58,7 @@ public abstract class JPAEntityCRUDCreateReadUpdateDelete<ET extends PrimaryKeye
     @Override
     public void setEntityManager(EntityManager entityManager) {
         super.setEntityManager(entityManager);
-        deleteDelegate.setEntityManager(entityManager);
+        //deleteDelegate.setEntityManager(entityManager);
     }
 
     /**
