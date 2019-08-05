@@ -141,7 +141,7 @@ public final class JPAEntityHelpers {
     }
 
     public static void unproxy(Object obj,
-                               Set<Class<? super Exception>> ignoredExeptions) {
+                               Set<Class<? extends Exception>> ignoredExeptions) {
         FieldReflectionHelpers
                 .applyToFieldsRecursively
                         (
@@ -156,7 +156,7 @@ public final class JPAEntityHelpers {
     }
 
     private static Object unproxyProxiedValue(Object o,
-                                              Set<Class<? super Exception>> ignoreExceptions) {
+                                              Set<Class<? extends Exception>> ignoreExceptions) {
         try {
             if (o instanceof HibernateProxy)
                 return Hibernate.unproxy(o);

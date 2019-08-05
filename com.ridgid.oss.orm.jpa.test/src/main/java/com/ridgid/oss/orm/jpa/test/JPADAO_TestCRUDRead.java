@@ -26,9 +26,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public abstract class JPADAO_TestCRUDRead<DAO extends JPAEntityCRUDRead<ET, PKT>, ET extends PrimaryKeyedEntity<PKT>, PKT extends Comparable<PKT>>
         extends JPADAO_TestBase<DAO, ET, PKT> {
 
-    @SuppressWarnings({"SpellCheckingInspection", "unchecked"})
-    private static final Set<Class<? super Exception>> INGORED_EXCEPTIONS_FOR_STANDARD_UNPROXY
-            = Stream.of(LazyInitializationException.class).map(i -> (Class) i).collect(toSet());
+    @SuppressWarnings({"SpellCheckingInspection"})
+    private static final Set<Class<? extends Exception>> INGORED_EXCEPTIONS_FOR_STANDARD_UNPROXY
+            = Stream.of(LazyInitializationException.class).map(i -> (Class<? extends Exception>) i).collect(toSet());
 
     /**
      * @param entityClass
