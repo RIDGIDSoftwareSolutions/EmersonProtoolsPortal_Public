@@ -4,6 +4,7 @@ import com.ridgid.oss.common.helper.PrimaryKeyAutoGenerationType;
 import com.ridgid.oss.orm.entity.PrimaryKeyedEntity;
 import com.ridgid.oss.orm.jpa.JPAEntityCRUDRead;
 import com.ridgid.oss.orm.jpa.helper.JPAEntityHelpers;
+import org.hibernate.LazyInitializationException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -12,9 +13,11 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import javax.persistence.Query;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SuppressWarnings({"JavaDoc", "unused"})
@@ -22,6 +25,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @DataJpaTest
 public abstract class JPADAO_TestCRUDRead<DAO extends JPAEntityCRUDRead<ET, PKT>, ET extends PrimaryKeyedEntity<PKT>, PKT extends Comparable<PKT>>
         extends JPADAO_TestBase<DAO, ET, PKT> {
+
+    @SuppressWarnings({"SpellCheckingInspection", "unchecked"})
+    private static final Set<Class<? super Exception>> INGORED_EXCEPTIONS_FOR_STANDARD_UNPROXY
+            = Stream.of(LazyInitializationException.class).map(i -> (Class) i).collect(toSet());
 
     /**
      * @param entityClass
@@ -197,7 +204,7 @@ public abstract class JPADAO_TestCRUDRead<DAO extends JPAEntityCRUDRead<ET, PKT>
         List<ET> actual
                 = getDao()
                 .findAll(0, Integer.MAX_VALUE);
-        actual.forEach(JPAEntityHelpers::unproxy);
+        actual.forEach(obj -> JPAEntityHelpers.unproxy(obj, INGORED_EXCEPTIONS_FOR_STANDARD_UNPROXY));
 
         // Assert that everything is equal
         validateExpectedAndActualEntitiesAreAllEqual
@@ -225,7 +232,7 @@ public abstract class JPADAO_TestCRUDRead<DAO extends JPAEntityCRUDRead<ET, PKT>
      */
     protected final void findAndCompareAllWithoutSetup(boolean validateChildCollections) {
         List<ET> actual = getDao().findAll(0, Integer.MAX_VALUE).stream().sorted(comparing(ET::getPk)).collect(toList());
-        actual.forEach(JPAEntityHelpers::unproxy);
+        actual.forEach(obj -> JPAEntityHelpers.unproxy(obj, INGORED_EXCEPTIONS_FOR_STANDARD_UNPROXY));
         List<ET> expected = getAllEntitiesFromTestSet(getEntityClass()).stream().sorted(comparing(ET::getPk)).collect(toList());
         validateExpectedAndActualEntitiesAreAllEqual(actual, expected, validateChildCollections);
     }

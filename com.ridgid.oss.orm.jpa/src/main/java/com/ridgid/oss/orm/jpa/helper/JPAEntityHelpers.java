@@ -8,9 +8,11 @@ import org.hibernate.proxy.HibernateProxy;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 
+import static java.util.Collections.EMPTY_SET;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -129,13 +131,38 @@ public final class JPAEntityHelpers {
     }
 
     public static void unproxy(Object obj) {
-        FieldReflectionHelpers.applyToFieldsRecursively(obj, JPAEntityHelpers::unproxyProxiedValue);
+        //noinspection unchecked
+        FieldReflectionHelpers
+                .applyToFieldsRecursively
+                        (
+                                obj,
+                                o -> JPAEntityHelpers.unproxyProxiedValue(o, EMPTY_SET)
+                        );
+    }
 
+    public static void unproxy(Object obj,
+                               Set<Class<? super Exception>> ignoredExeptions) {
+        FieldReflectionHelpers
+                .applyToFieldsRecursively
+                        (
+                                obj,
+                                o -> JPAEntityHelpers.unproxyProxiedValue(o, ignoredExeptions)
+                        );
     }
 
     private static Object unproxyProxiedValue(Object o) {
-        if (o instanceof HibernateProxy)
-            return Hibernate.unproxy(o);
+        //noinspection unchecked
+        return unproxyProxiedValue(o, EMPTY_SET);
+    }
+
+    private static Object unproxyProxiedValue(Object o,
+                                              Set<Class<? super Exception>> ignoreExceptions) {
+        try {
+            if (o instanceof HibernateProxy)
+                return Hibernate.unproxy(o);
+        } catch (Exception ex) {
+            if (!ignoreExceptions.contains(ex.getClass())) throw new RuntimeException(ex);
+        }
         return null;
     }
 }
