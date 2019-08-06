@@ -59,7 +59,7 @@ class HierarchyBuilder_Test {
     void root_can_create_with_a_singular_child() {
         HierarchyProcessor<Person> h
                 = from(Person.class)
-                .with(Person::getSpouse)
+                .individual(Person::getSpouse)
                 .buildProcessor();
         assertNotNull(h);
     }
@@ -68,8 +68,8 @@ class HierarchyBuilder_Test {
     void root_can_create_a_complex_hierarchy() {
         HierarchyProcessor<Person> h
                 = from(Person.class)
-                .selectAll(Person::getFriends,
-                        f -> f.with(Person::getSpouse))
+                .stream(Person::getFriends,
+                        f -> f.individual(Person::getSpouse))
                 .buildProcessor();
         assertNotNull(h);
     }
@@ -78,21 +78,21 @@ class HierarchyBuilder_Test {
     void can_traverse_a_complex_hierarchy() {
         HierarchyProcessor<Person> h
                 = from(Person.class)
-                .with(Person::getSpouse,
+                .individual(Person::getSpouse,
                         s -> s
-                                .consumeAll(
+                                .collection(
                                         Person::getPets,
-                                        p -> p.accessAll(Pet::getFavoriteFoods)
+                                        p -> p.array(Pet::getFavoriteFoods)
                                 )
                 )
-                .selectAll(Person::getFriends,
+                .stream(Person::getFriends,
                         friends -> friends
                                 .onVisit
                                         (
                                                 check -> check
                                                         .afterAll((p, ps) -> OK_CONTINUE)
                                         )
-                                .with(Person::getSpouse))
+                                .individual(Person::getSpouse))
                 .buildProcessor();
         assertNotNull(h);
 
@@ -136,25 +136,25 @@ class HierarchyBuilder_Test {
         );
 
         h = from(Person.class)
-                .with(Person::getSpouse,
+                .individual(Person::getSpouse,
                         s -> s
-                                .consumeAll(
+                                .collection(
                                         Person::getPets,
                                         p -> p
-                                                .accessAll(
+                                                .array(
                                                         Pet::getFavoriteFoods,
                                                         viewAs(Name.class)
                                                 )
                                 )
                 )
-                .selectAll(Person::getFriends,
+                .stream(Person::getFriends,
                         friends -> friends.onVisit
                                 (
                                         check -> check
                                                 .afterAll((p, ps) -> OK_CONTINUE)
                                                 .beforeAllChildren((p1, p2) -> SKIP_CURRENT_AND_REMAINING_SIBLINGS)
                                 )
-                                .with(Person::getSpouse,
+                                .individual(Person::getSpouse,
                                         viewAs(Name.class)))
                 .buildProcessor();
         assertNotNull(h);

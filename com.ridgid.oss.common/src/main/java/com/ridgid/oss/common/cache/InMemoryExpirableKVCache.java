@@ -4,7 +4,9 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.*;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 @SuppressWarnings({"WeakerAccess", "FieldCanBeLocal", "unused", "SpellCheckingInspection"})
@@ -99,6 +101,11 @@ public class InMemoryExpirableKVCache<K, V extends Expirable> implements Expirab
     }
 
     @Override
+    public void clear() {
+        cache.clear();
+    }
+
+    @Override
     public int size() {
         return cache.size();
     }
@@ -106,6 +113,16 @@ public class InMemoryExpirableKVCache<K, V extends Expirable> implements Expirab
     @Override
     public boolean isEmpty() {
         return cache.isEmpty();
+    }
+
+    @Override
+    public boolean containsKey(K key) {
+        return cache.containsKey(key);
+    }
+
+    @Override
+    public void replaceAll(BiFunction<? super K, ? super V, ? extends V> function) {
+        cache.replaceAll(function);
     }
 
     @Override
@@ -118,11 +135,6 @@ public class InMemoryExpirableKVCache<K, V extends Expirable> implements Expirab
     public void putAll(Map<? extends K, ? extends V> m) {
         cache.putAll(m);
         checkCapacity();
-    }
-
-    @Override
-    public void clear() {
-        cache.clear();
     }
 
     @Override
@@ -182,53 +194,4 @@ public class InMemoryExpirableKVCache<K, V extends Expirable> implements Expirab
         return cache.merge(key, value, remappingFunction);
     }
 
-    @Override
-    public void forEach(long parallelismThreshold, BiConsumer<? super K, ? super V> action) {
-        cache.forEach(parallelismThreshold, action);
-    }
-
-    @Override
-    public <U> void forEach(long parallelismThreshold, BiFunction<? super K, ? super V, ? extends U> transformer, Consumer<? super U> action) {
-        cache.forEach(parallelismThreshold, transformer, action);
-    }
-
-    @Override
-    public <U> U search(long parallelismThreshold, BiFunction<? super K, ? super V, ? extends U> searchFunction) {
-        return cache.search(parallelismThreshold, searchFunction);
-    }
-
-    @Override
-    public <U> U reduce(long parallelismThreshold, BiFunction<? super K, ? super V, ? extends U> transformer, BiFunction<? super U, ? super U, ? extends U> reducer) {
-        return cache.reduce(parallelismThreshold, transformer, reducer);
-    }
-
-    @Override
-    public double reduceToDouble(long parallelismThreshold, ToDoubleBiFunction<? super K, ? super V> transformer, double basis, DoubleBinaryOperator reducer) {
-        return cache.reduceToDouble(parallelismThreshold, transformer, basis, reducer);
-    }
-
-    @Override
-    public long reduceToLong(long parallelismThreshold, ToLongBiFunction<? super K, ? super V> transformer, long basis, LongBinaryOperator reducer) {
-        return cache.reduceToLong(parallelismThreshold, transformer, basis, reducer);
-    }
-
-    @Override
-    public int reduceToInt(long parallelismThreshold, ToIntBiFunction<? super K, ? super V> transformer, int basis, IntBinaryOperator reducer) {
-        return cache.reduceToInt(parallelismThreshold, transformer, basis, reducer);
-    }
-
-    @Override
-    public void forEachKey(long parallelismThreshold, Consumer<? super K> action) {
-        cache.forEachKey(parallelismThreshold, action);
-    }
-
-    @Override
-    public <U> void forEachKey(long parallelismThreshold, Function<? super K, ? extends U> transformer, Consumer<? super U> action) {
-        cache.forEachKey(parallelismThreshold, transformer, action);
-    }
-
-    @Override
-    public <U> U searchKeys(long parallelismThreshold, Function<? super K, ? extends U> searchFunction) {
-        return cache.searchKeys(parallelismThreshold, searchFunction);
-    }
 }

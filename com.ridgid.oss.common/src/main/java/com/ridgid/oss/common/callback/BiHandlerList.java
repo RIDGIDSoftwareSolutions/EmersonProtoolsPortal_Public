@@ -14,7 +14,19 @@ public class BiHandlerList<T1, T2, R> implements List<BiHandler<T1, T2, R>> {
     public Optional<R> invoke(T1 t1, T2 t2, Predicate<R> returnIf) {
         for (BiHandler<T1, T2, R> handler : handlers) {
             R r = handler.handle(t1, t2);
-            if (returnIf.test(r)) return Optional.ofNullable(r);
+            try {
+                if (returnIf.test(r)) return Optional.ofNullable(r);
+            } catch (Exception ex) {
+                throw new RuntimeException(
+                        "Predicate Test through Exception for: "
+                                + t1 + ", " + t2
+                                + " and mapped value from visit handler "
+                                + handler.getClass().getEnclosingClass()
+                                + "::" + handler.getClass().getEnclosingMethod()
+                                + " value = "
+                                + (r == null ? "(nul)" : r),
+                        ex);
+            }
         }
         return Optional.empty();
     }

@@ -2,6 +2,7 @@ package com.ridgid.oss.common.cache;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -105,6 +106,28 @@ public final class InMemoryKVExpirableLRUCache<K, V extends Expirable>
     public V getOrDefault(K key, V defaultValue) {
         updateLastUsed(key);
         return super.getOrDefault(key, defaultValue);
+    }
+
+    @Override
+    public boolean containsKey(K key) {
+        updateLastUsed(key);
+        return super.containsKey(key);
+    }
+
+    @Override
+    public void replaceAll(BiFunction<? super K, ? super V, ? extends V> function) {
+        super.replaceAll((k, v) -> {
+            updateLastUsed(k);
+            return function.apply(k, v);
+        });
+    }
+
+    @Override
+    public void forEach(BiConsumer<? super K, ? super V> action) {
+        super.forEach((k, v) -> {
+            updateLastUsed(k);
+            action.accept(k, v);
+        });
     }
 
     @Override

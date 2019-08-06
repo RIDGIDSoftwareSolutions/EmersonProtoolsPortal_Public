@@ -83,13 +83,13 @@ public class HierarchyProcessor<PARENT_T> {
             this.rootClass = rootClass;
         }
 
-        public <CHILD_T> HierarchyProcessorBuilder<T> with(Function<T, CHILD_T> selector) {
-            return with(selector, null);
+        public <CHILD_T> HierarchyProcessorBuilder<T> individual(Function<T, CHILD_T> selector) {
+            return individual(selector, null);
         }
 
         public <CHILD_T, NC extends Consumer<Node<T, CHILD_T>>>
-        HierarchyProcessorBuilder<T> with(Function<T, CHILD_T> selector,
-                                          Consumer<SingleNode<T, CHILD_T, NC>> childrenSelector) {
+        HierarchyProcessorBuilder<T> individual(Function<T, CHILD_T> selector,
+                                                Consumer<SingleNode<T, CHILD_T, NC>> childrenSelector) {
             HierarchyProcessor.SingleChild<T, CHILD_T, NC> child = new HierarchyProcessor.SingleChild<>(selector);
             if (childrenSelector != null) childrenSelector.accept(child);
             childNodes.add(child);
@@ -97,13 +97,13 @@ public class HierarchyProcessor<PARENT_T> {
         }
 
         public <CHILD_T, NC extends Consumer<Node<T, CHILD_T>>>
-        HierarchyProcessorBuilder<T> selectAll(Function<T, Stream<CHILD_T>> selector) {
-            return selectAll(selector, null);
+        HierarchyProcessorBuilder<T> stream(Function<T, Stream<CHILD_T>> selector) {
+            return stream(selector, null);
         }
 
         public <CHILD_T, NC extends Consumer<Node<T, CHILD_T>>>
-        HierarchyProcessorBuilder<T> selectAll(Function<T, Stream<CHILD_T>> selector,
-                                               Consumer<MultiNode<T, CHILD_T, Stream<CHILD_T>, NC>> childrenSelector) {
+        HierarchyProcessorBuilder<T> stream(Function<T, Stream<CHILD_T>> selector,
+                                            Consumer<MultiNode<T, CHILD_T, Stream<CHILD_T>, NC>> childrenSelector) {
             StreamChild<T, CHILD_T, NC> child = new StreamChild<>(selector);
             if (childrenSelector != null) childrenSelector.accept(child);
             childNodes.add(child);
@@ -111,12 +111,12 @@ public class HierarchyProcessor<PARENT_T> {
         }
 
         public <CHILD_T, NC extends Consumer<Node<T, CHILD_T>>>
-        HierarchyProcessorBuilder<T> consumeAll(Function<T, Iterable<CHILD_T>> selector) {
-            return consumeAll(selector, null);
+        HierarchyProcessorBuilder<T> collection(Function<T, Iterable<CHILD_T>> selector) {
+            return collection(selector, null);
         }
 
         public <CHILD_T, NC extends Consumer<Node<T, CHILD_T>>>
-        HierarchyProcessorBuilder<T> consumeAll(Function<T, Iterable<CHILD_T>> selector,
+        HierarchyProcessorBuilder<T> collection(Function<T, Iterable<CHILD_T>> selector,
                                                 Consumer<MultiNode<T, CHILD_T, Iterable<CHILD_T>, NC>> childrenSelector) {
             IterableChild<T, CHILD_T, NC> child = new IterableChild<>(selector);
             if (childrenSelector != null) childrenSelector.accept(child);
@@ -125,13 +125,13 @@ public class HierarchyProcessor<PARENT_T> {
         }
 
         public <CHILD_T, NC extends Consumer<Node<T, CHILD_T>>>
-        HierarchyProcessorBuilder<T> accessAll(Function<T, CHILD_T[]> selector) {
-            return accessAll(selector, null);
+        HierarchyProcessorBuilder<T> array(Function<T, CHILD_T[]> selector) {
+            return array(selector, null);
         }
 
         public <CHILD_T, NC extends Consumer<Node<T, CHILD_T>>>
-        HierarchyProcessorBuilder<T> accessAll(Function<T, CHILD_T[]> selector,
-                                               Consumer<MultiNode<T, CHILD_T, CHILD_T[], NC>> childrenSelector) {
+        HierarchyProcessorBuilder<T> array(Function<T, CHILD_T[]> selector,
+                                           Consumer<MultiNode<T, CHILD_T, CHILD_T[], NC>> childrenSelector) {
             ArrayChild<T, CHILD_T, NC> child = new ArrayChild<>(selector);
             if (childrenSelector != null) childrenSelector.accept(child);
             childNodes.add(child);
@@ -184,8 +184,8 @@ public class HierarchyProcessor<PARENT_T> {
         @SuppressWarnings({"unchecked", "deprecation"})
         @Override
         public <CHILD_T, N extends Node<PARENT_T, T>, INC extends Consumer<Node<T, CHILD_T>>>
-        N with(Function<T, CHILD_T> selector,
-               Consumer<SingleNode<T, CHILD_T, INC>> childrenSelector) {
+        N individual(Function<T, CHILD_T> selector,
+                     Consumer<SingleNode<T, CHILD_T, INC>> childrenSelector) {
             HierarchyProcessor.SingleChild<T, CHILD_T, INC> child = new HierarchyProcessor.SingleChild<>(selector);
             if (childrenSelector != null) childrenSelector.accept(child);
             addChild(child);
@@ -195,8 +195,8 @@ public class HierarchyProcessor<PARENT_T> {
         @SuppressWarnings({"unchecked", "deprecation"})
         @Override
         public <CHILD_T, N extends Node<PARENT_T, T>, INC extends Consumer<Node<T, CHILD_T>>>
-        N selectAll(Function<T, Stream<CHILD_T>> selector,
-                    Consumer<MultiNode<T, CHILD_T, Stream<CHILD_T>, INC>> childrenSelector) {
+        N stream(Function<T, Stream<CHILD_T>> selector,
+                 Consumer<MultiNode<T, CHILD_T, Stream<CHILD_T>, INC>> childrenSelector) {
             StreamChild<T, CHILD_T, INC> child = new StreamChild<>(selector);
             if (childrenSelector != null) childrenSelector.accept(child);
             addChild(child);
@@ -206,7 +206,7 @@ public class HierarchyProcessor<PARENT_T> {
         @SuppressWarnings({"unchecked", "deprecation"})
         @Override
         public <CHILD_T, N extends Node<PARENT_T, T>, INC extends Consumer<Node<T, CHILD_T>>>
-        N consumeAll(Function<T, Iterable<CHILD_T>> selector,
+        N collection(Function<T, Iterable<CHILD_T>> selector,
                      Consumer<MultiNode<T, CHILD_T, Iterable<CHILD_T>, INC>> childrenSelector) {
             IterableChild<T, CHILD_T, INC> child = new IterableChild<>(selector);
             if (childrenSelector != null) childrenSelector.accept(child);
@@ -217,8 +217,8 @@ public class HierarchyProcessor<PARENT_T> {
         @SuppressWarnings({"unchecked", "deprecation"})
         @Override
         public <CHILD_T, N extends Node<PARENT_T, T>, INC extends Consumer<Node<T, CHILD_T>>>
-        N accessAll(Function<T, CHILD_T[]> selector,
-                    Consumer<MultiNode<T, CHILD_T, CHILD_T[], INC>> childrenSelector) {
+        N array(Function<T, CHILD_T[]> selector,
+                Consumer<MultiNode<T, CHILD_T, CHILD_T[], INC>> childrenSelector) {
             ArrayChild<T, CHILD_T, INC> child = new ArrayChild<>(selector);
             if (childrenSelector != null) childrenSelector.accept(child);
             addChild(child);
@@ -397,30 +397,30 @@ public class HierarchyProcessor<PARENT_T> {
 
         @Override
         public <CHILD_T, N extends Node<PARENT_T, T>, INC extends Consumer<Node<T, CHILD_T>>>
-        N with(Function<T, CHILD_T> selector,
-               Consumer<SingleNode<T, CHILD_T, INC>> childrenSelector) {
-            return super.with(selector, childrenSelector);
+        N individual(Function<T, CHILD_T> selector,
+                     Consumer<SingleNode<T, CHILD_T, INC>> childrenSelector) {
+            return super.individual(selector, childrenSelector);
         }
 
         @Override
         public <CHILD_T, N extends Node<PARENT_T, T>, INC extends Consumer<Node<T, CHILD_T>>>
-        N selectAll(Function<T, Stream<CHILD_T>> selector,
-                    Consumer<MultiNode<T, CHILD_T, Stream<CHILD_T>, INC>> childrenSelector) {
-            return super.selectAll(selector, childrenSelector);
+        N stream(Function<T, Stream<CHILD_T>> selector,
+                 Consumer<MultiNode<T, CHILD_T, Stream<CHILD_T>, INC>> childrenSelector) {
+            return super.stream(selector, childrenSelector);
         }
 
         @Override
         public <CHILD_T, N extends Node<PARENT_T, T>, INC extends Consumer<Node<T, CHILD_T>>>
-        N consumeAll(Function<T, Iterable<CHILD_T>> selector,
+        N collection(Function<T, Iterable<CHILD_T>> selector,
                      Consumer<MultiNode<T, CHILD_T, Iterable<CHILD_T>, INC>> childrenSelector) {
-            return super.consumeAll(selector, childrenSelector);
+            return super.collection(selector, childrenSelector);
         }
 
         @Override
         public <CHILD_T, N extends Node<PARENT_T, T>, INC extends Consumer<Node<T, CHILD_T>>>
-        N accessAll(Function<T, CHILD_T[]> selector,
-                    Consumer<MultiNode<T, CHILD_T, CHILD_T[], INC>> childrenSelector) {
-            return super.accessAll(selector, childrenSelector);
+        N array(Function<T, CHILD_T[]> selector,
+                Consumer<MultiNode<T, CHILD_T, CHILD_T[], INC>> childrenSelector) {
+            return super.array(selector, childrenSelector);
         }
 
         @Override
@@ -470,30 +470,30 @@ public class HierarchyProcessor<PARENT_T> {
 
         @Override
         public <CHILD_T, N extends Node<PARENT_T, T>, INC extends Consumer<Node<T, CHILD_T>>>
-        N with(Function<T, CHILD_T> selector,
-               Consumer<SingleNode<T, CHILD_T, INC>> childrenSelector) {
-            return super.with(selector, childrenSelector);
+        N individual(Function<T, CHILD_T> selector,
+                     Consumer<SingleNode<T, CHILD_T, INC>> childrenSelector) {
+            return super.individual(selector, childrenSelector);
         }
 
         @Override
         public <CHILD_T, N extends Node<PARENT_T, T>, INC extends Consumer<Node<T, CHILD_T>>>
-        N selectAll(Function<T, Stream<CHILD_T>> selector,
-                    Consumer<MultiNode<T, CHILD_T, Stream<CHILD_T>, INC>> childrenSelector) {
-            return super.selectAll(selector, childrenSelector);
+        N stream(Function<T, Stream<CHILD_T>> selector,
+                 Consumer<MultiNode<T, CHILD_T, Stream<CHILD_T>, INC>> childrenSelector) {
+            return super.stream(selector, childrenSelector);
         }
 
         @Override
         public <CHILD_T, N extends Node<PARENT_T, T>, INC extends Consumer<Node<T, CHILD_T>>>
-        N consumeAll(Function<T, Iterable<CHILD_T>> selector,
+        N collection(Function<T, Iterable<CHILD_T>> selector,
                      Consumer<MultiNode<T, CHILD_T, Iterable<CHILD_T>, INC>> childrenSelector) {
-            return super.consumeAll(selector, childrenSelector);
+            return super.collection(selector, childrenSelector);
         }
 
         @Override
         public <CHILD_T, N extends Node<PARENT_T, T>, INC extends Consumer<Node<T, CHILD_T>>>
-        N accessAll(Function<T, CHILD_T[]> selector,
-                    Consumer<MultiNode<T, CHILD_T, CHILD_T[], INC>> childrenSelector) {
-            return super.accessAll(selector, childrenSelector);
+        N array(Function<T, CHILD_T[]> selector,
+                Consumer<MultiNode<T, CHILD_T, CHILD_T[], INC>> childrenSelector) {
+            return super.array(selector, childrenSelector);
         }
 
         @Override
