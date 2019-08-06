@@ -26,9 +26,9 @@ public interface Node<PARENT_T, T> {
     }
 
     default <CHILD_T extends CHILD_T_VIEW, CHILD_T_VIEW, N extends Node<PARENT_T, T>, NC extends Consumer<Node<T, CHILD_T_VIEW>>>
-    N individual(Function<T, CHILD_T> selector,
-                 View<CHILD_T, CHILD_T_VIEW> view) {
-        return individual
+    N include(Function<T, CHILD_T> selector,
+              View<CHILD_T, CHILD_T_VIEW> view) {
+        return include
                 (
                         selector,
                         view,
@@ -37,8 +37,8 @@ public interface Node<PARENT_T, T> {
     }
 
     default <CHILD_T, N extends Node<PARENT_T, T>, NC extends Consumer<Node<T, CHILD_T>>>
-    N individual(Function<T, CHILD_T> selector) {
-        return individual
+    N include(Function<T, CHILD_T> selector) {
+        return include
                 (
                         selector,
                         (Consumer<SingleNode<T, CHILD_T, NC>>) null
@@ -46,10 +46,10 @@ public interface Node<PARENT_T, T> {
     }
 
     default <CHILD_T extends CHILD_T_VIEW, CHILD_T_VIEW, N extends Node<PARENT_T, T>, NC extends Consumer<Node<T, CHILD_T_VIEW>>>
-    N individual(Function<T, CHILD_T> selector,
-                 View<CHILD_T, CHILD_T_VIEW> view,
-                 Consumer<SingleNode<T, CHILD_T_VIEW, NC>> childrenSelector) {
-        return individual
+    N include(Function<T, CHILD_T> selector,
+              View<CHILD_T, CHILD_T_VIEW> view,
+              Consumer<SingleNode<T, CHILD_T_VIEW, NC>> childrenSelector) {
+        return include
                 (
                         (T t) -> view.apply(selector.apply(t)),
                         childrenSelector
@@ -57,14 +57,14 @@ public interface Node<PARENT_T, T> {
     }
 
     <CHILD_T, N extends Node<PARENT_T, T>, NC extends Consumer<Node<T, CHILD_T>>>
-    N individual(Function<T, CHILD_T> selector,
-                 Consumer<SingleNode<T, CHILD_T, NC>> childrenSelector);
+    N include(Function<T, CHILD_T> selector,
+              Consumer<SingleNode<T, CHILD_T, NC>> childrenSelector);
 
 
     default <CHILD_T extends CHILD_T_VIEW, CHILD_T_VIEW, N extends Node<PARENT_T, T>, NC extends Consumer<Node<T, CHILD_T_VIEW>>>
-    N stream(Function<T, Stream<CHILD_T>> selector,
-             View<CHILD_T, CHILD_T_VIEW> view) {
-        return stream
+    N includeStream(Function<T, Stream<CHILD_T>> selector,
+                    View<CHILD_T, CHILD_T_VIEW> view) {
+        return includeStream
                 (
                         selector,
                         view,
@@ -73,8 +73,8 @@ public interface Node<PARENT_T, T> {
     }
 
     default <CHILD_T, N extends Node<PARENT_T, T>, NC extends Consumer<Node<T, CHILD_T>>>
-    N stream(Function<T, Stream<CHILD_T>> selector) {
-        return stream
+    N includeStream(Function<T, Stream<CHILD_T>> selector) {
+        return includeStream
                 (
                         selector,
                         (Consumer<MultiNode<T, CHILD_T, Stream<CHILD_T>, NC>>) null
@@ -82,10 +82,10 @@ public interface Node<PARENT_T, T> {
     }
 
     default <CHILD_T extends CHILD_T_VIEW, CHILD_T_VIEW, N extends Node<PARENT_T, T>, NC extends Consumer<Node<T, CHILD_T_VIEW>>>
-    N stream(Function<T, Stream<CHILD_T>> selector,
-             View<CHILD_T, CHILD_T_VIEW> view,
-             Consumer<MultiNode<T, CHILD_T_VIEW, Stream<CHILD_T_VIEW>, NC>> childrenSelector) {
-        return stream
+    N includeStream(Function<T, Stream<CHILD_T>> selector,
+                    View<CHILD_T, CHILD_T_VIEW> view,
+                    Consumer<MultiNode<T, CHILD_T_VIEW, Stream<CHILD_T_VIEW>, NC>> childrenSelector) {
+        return includeStream
                 (
                         (T t) -> selector.apply(t).map(view),
                         childrenSelector
@@ -93,14 +93,14 @@ public interface Node<PARENT_T, T> {
     }
 
     <CHILD_T, N extends Node<PARENT_T, T>, NC extends Consumer<Node<T, CHILD_T>>>
-    N stream(Function<T, Stream<CHILD_T>> selector,
-             Consumer<MultiNode<T, CHILD_T, Stream<CHILD_T>, NC>> childrenSelector);
+    N includeStream(Function<T, Stream<CHILD_T>> selector,
+                    Consumer<MultiNode<T, CHILD_T, Stream<CHILD_T>, NC>> childrenSelector);
 
 
     default <CHILD_T extends CHILD_T_VIEW, CHILD_T_VIEW, N extends Node<PARENT_T, T>, NC extends Consumer<Node<T, CHILD_T_VIEW>>>
-    N collection(Function<T, Iterable<CHILD_T>> selector,
-                 View<CHILD_T, CHILD_T_VIEW> view) {
-        return collection
+    N includeCollection(Function<T, Iterable<CHILD_T>> selector,
+                        View<CHILD_T, CHILD_T_VIEW> view) {
+        return includeCollection
                 (
                         selector,
                         view,
@@ -109,8 +109,8 @@ public interface Node<PARENT_T, T> {
     }
 
     default <CHILD_T, N extends Node<PARENT_T, T>, NC extends Consumer<Node<T, CHILD_T>>>
-    N collection(Function<T, Iterable<CHILD_T>> selector) {
-        return collection
+    N includeCollection(Function<T, Iterable<CHILD_T>> selector) {
+        return includeCollection
                 (
                         selector,
                         (Consumer<MultiNode<T, CHILD_T, Iterable<CHILD_T>, NC>>) null
@@ -118,10 +118,10 @@ public interface Node<PARENT_T, T> {
     }
 
     default <CHILD_T extends CHILD_T_VIEW, CHILD_T_VIEW, N extends Node<PARENT_T, T>, NC extends Consumer<Node<T, CHILD_T_VIEW>>>
-    N collection(Function<T, Iterable<CHILD_T>> selector,
-                 View<CHILD_T, CHILD_T_VIEW> view,
-                 Consumer<MultiNode<T, CHILD_T_VIEW, Iterable<CHILD_T_VIEW>, NC>> childrenSelector) {
-        return collection
+    N includeCollection(Function<T, Iterable<CHILD_T>> selector,
+                        View<CHILD_T, CHILD_T_VIEW> view,
+                        Consumer<MultiNode<T, CHILD_T_VIEW, Iterable<CHILD_T_VIEW>, NC>> childrenSelector) {
+        return includeCollection
                 (
                         (T t) -> adapt(selector.apply(t)),
                         childrenSelector
@@ -129,14 +129,14 @@ public interface Node<PARENT_T, T> {
     }
 
     <CHILD_T, N extends Node<PARENT_T, T>, NC extends Consumer<Node<T, CHILD_T>>>
-    N collection(Function<T, Iterable<CHILD_T>> selector,
-                 Consumer<MultiNode<T, CHILD_T, Iterable<CHILD_T>, NC>> childrenSelector);
+    N includeCollection(Function<T, Iterable<CHILD_T>> selector,
+                        Consumer<MultiNode<T, CHILD_T, Iterable<CHILD_T>, NC>> childrenSelector);
 
 
     default <CHILD_T extends CHILD_T_VIEW, CHILD_T_VIEW, N extends Node<PARENT_T, T>, NC extends Consumer<Node<T, CHILD_T_VIEW>>>
-    N array(Function<T, CHILD_T[]> selector,
-            View<CHILD_T, CHILD_T_VIEW> view) {
-        return array
+    N includeArray(Function<T, CHILD_T[]> selector,
+                   View<CHILD_T, CHILD_T_VIEW> view) {
+        return includeArray
                 (
                         selector,
                         view,
@@ -145,8 +145,8 @@ public interface Node<PARENT_T, T> {
     }
 
     default <CHILD_T, N extends Node<PARENT_T, T>, NC extends Consumer<Node<T, CHILD_T>>>
-    N array(Function<T, CHILD_T[]> selector) {
-        return array
+    N includeArray(Function<T, CHILD_T[]> selector) {
+        return includeArray
                 (
                         selector,
                         (Consumer<MultiNode<T, CHILD_T, CHILD_T[], NC>>) null
@@ -154,10 +154,10 @@ public interface Node<PARENT_T, T> {
     }
 
     default <CHILD_T extends CHILD_T_VIEW, CHILD_T_VIEW, N extends Node<PARENT_T, T>, NC extends Consumer<Node<T, CHILD_T_VIEW>>>
-    N array(Function<T, CHILD_T[]> selector,
-            View<CHILD_T, CHILD_T_VIEW> view,
-            Consumer<MultiNode<T, CHILD_T_VIEW, CHILD_T_VIEW[], NC>> childrenSelector) {
-        return array
+    N includeArray(Function<T, CHILD_T[]> selector,
+                   View<CHILD_T, CHILD_T_VIEW> view,
+                   Consumer<MultiNode<T, CHILD_T_VIEW, CHILD_T_VIEW[], NC>> childrenSelector) {
+        return includeArray
                 (
                         selector::apply,
                         childrenSelector
@@ -165,6 +165,6 @@ public interface Node<PARENT_T, T> {
     }
 
     <CHILD_T, N extends Node<PARENT_T, T>, NC extends Consumer<Node<T, CHILD_T>>>
-    N array(Function<T, CHILD_T[]> selector,
-            Consumer<MultiNode<T, CHILD_T, CHILD_T[], NC>> childrenSelector);
+    N includeArray(Function<T, CHILD_T[]> selector,
+                   Consumer<MultiNode<T, CHILD_T, CHILD_T[], NC>> childrenSelector);
 }
