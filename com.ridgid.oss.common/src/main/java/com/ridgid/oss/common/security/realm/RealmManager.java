@@ -46,7 +46,7 @@ public class RealmManager<RIDT, IDT, ST, ATT> {
     private final RealmLogger<RIDT, IDT> logger;
     private final short maxCacheSize;
 
-    private RealmManager(RealmListener<RIDT, IDT, ST, ATT> listener,
+    protected RealmManager(RealmListener<RIDT, IDT, ST, ATT> listener,
                          RealmNotifier<RIDT, IDT, ST, ATT> notifier,
                          SecretValidator<RIDT, IDT, ST, ATT> secretValidator,
                          AuthenticationStorage<RIDT, IDT, ATT> storage,
