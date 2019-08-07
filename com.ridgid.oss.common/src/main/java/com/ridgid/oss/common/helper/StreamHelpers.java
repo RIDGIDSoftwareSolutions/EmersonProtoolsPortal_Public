@@ -3,6 +3,7 @@ package com.ridgid.oss.common.helper;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -25,7 +26,7 @@ public final class StreamHelpers {
             public Stream<C> apply(T t) {
                 R r = mapping.apply(t);
                 combiner.apply(group, r);
-                if (r.equals(endOfStreamSentinel) || group.size() >= groupSize) {
+                if (Objects.equals(r, endOfStreamSentinel) || group.size() >= groupSize) {
                     C rv = group;
                     group = collectionSupplier.get();
                     return Stream.of(rv);
