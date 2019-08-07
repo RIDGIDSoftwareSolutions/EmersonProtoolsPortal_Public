@@ -1,6 +1,7 @@
 package com.ridgid.oss.common.cache;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -19,6 +20,10 @@ public interface Cache<K, V> {
     boolean containsKey(K key);
 
     void forEach(BiConsumer<? super K, ? super V> action);
+
+    default Optional<V> get(K key) {
+        return Optional.ofNullable(getOrDefault(key, null));
+    }
 
     V getOrDefault(K key, V defaultValue);
 
