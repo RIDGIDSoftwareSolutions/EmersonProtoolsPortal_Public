@@ -98,6 +98,16 @@ final class JPAEntityCRUDDeleteDelegate<ET extends PrimaryKeyedEntity<PKT>, PKT 
         return baseDelegate.getPkType();
     }
 
+    @Override
+    public void flushContext() {
+        baseDelegate.flushContext();
+    }
+
+    @Override
+    public void clearContext() {
+        baseDelegate.clearContext();
+    }
+
     /**
      * Deletes the entity one the given primary key pk from the persistent storage
      *

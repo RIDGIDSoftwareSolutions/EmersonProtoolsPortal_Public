@@ -97,6 +97,16 @@ public class JPAEntityCRUDUpdateDelegate<ET extends PrimaryKeyedEntity<PKT>, PKT
         return baseDelegate.detach(entity, hierarchy);
     }
 
+    @Override
+    public void flushContext() {
+        baseDelegate.flushContext();
+    }
+
+    @Override
+    public void clearContext() {
+        baseDelegate.clearContext();
+    }
+
     /**
      * Updates the entity in the persistent storage one the same primary key of given entity so that all the persistent field values in the persistent storage for the entity match the values of the given entity.
      *

@@ -98,6 +98,16 @@ final class JPAEntityCRUDCreateDelegate<ET extends PrimaryKeyedEntity<PKT>, PKT 
         return baseDelegate.detach(entity, hierarchy);
     }
 
+    @Override
+    public void flushContext() {
+        baseDelegate.flushContext();
+    }
+
+    @Override
+    public void clearContext() {
+        baseDelegate.clearContext();
+    }
+
     /**
      * Adds the given entity to the persistence store (insert/create)
      *

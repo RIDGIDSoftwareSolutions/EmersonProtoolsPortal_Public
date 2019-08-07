@@ -160,6 +160,16 @@ final class JPAEntityCRUDDelegate<ET extends PrimaryKeyedEntity<PKT>, PKT extend
         return entity;
     }
 
+    @Override
+    public void flushContext() {
+        entityManager.flush();
+    }
+
+    @Override
+    public void clearContext() {
+        entityManager.clear();
+    }
+
     final RuntimeException enhanceExceptionWithEntityManagerNullCheck(Exception e) {
         if (entityManager == null)
             return new EntityManagerNullException(e);

@@ -83,6 +83,16 @@ public class JPAEntityCRUDUpdate<ET extends PrimaryKeyedEntity<PKT>, PKT extends
     }
 
     @Override
+    public void flushContext() {
+        baseDelegate.flushContext();
+    }
+
+    @Override
+    public void clearContext() {
+        baseDelegate.clearContext();
+    }
+
+    @Override
     public Class<ET> getClassType() {
         return baseDelegate.getClassType();
     }

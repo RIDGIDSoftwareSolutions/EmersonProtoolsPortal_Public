@@ -103,6 +103,16 @@ final class JPAEntityCRUDReadDelegate<ET extends PrimaryKeyedEntity<PKT>, PKT ex
     }
 
     @Override
+    public void flushContext() {
+        baseDelegate.flushContext();
+    }
+
+    @Override
+    public void clearContext() {
+        baseDelegate.clearContext();
+    }
+
+    @Override
     public Optional<ET> optionalFind(PKT pk) throws EntityCRUDExceptionError {
         try {
             return Optional.ofNullable(baseDelegate.getEntityManager().find(baseDelegate.classType, pk, LockModeType.NONE));
