@@ -103,6 +103,16 @@ public class JPAEntityCRUDCreate<ET extends PrimaryKeyedEntity<PKT>, PKT extends
     }
 
     @Override
+    public void flushContext() {
+        getEntityManager().flush();
+    }
+
+    @Override
+    public void clearContext() {
+        getEntityManager().clear();
+    }
+
+    @Override
     public ET add(ET entity, HierarchyProcessor<ET> hierarchy) throws EntityCRUDExceptionError, EntityCRUDExceptionAlreadyExists {
         return baseDelegate.add(entity, hierarchy);
     }

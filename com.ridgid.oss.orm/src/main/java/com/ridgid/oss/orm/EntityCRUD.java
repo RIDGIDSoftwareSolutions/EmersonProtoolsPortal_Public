@@ -131,41 +131,7 @@ public interface EntityCRUD<ET extends PrimaryKeyedEntity<PKT>, PKT extends Comp
         return detach(entity, null);
     }
 
-//
-//    Optional<HierarchyProcessor<ET>> autoCacheHierarchy();
-//
-//    Optional<Cache<PKT, ET>> cache();
-//
-//    <ST extends PrimaryKeyedEntity<SPKT>, SPKT extends Comparable<SPKT>>
-//    Optional<Cache<SPKT, ST>> cache(Class<ST> entityClass);
-//
-//
-//    default List<ET> loadThroughCacheInitializeAndDetach(Stream<PKT> pktStream, HierarchyProcessor<ET> hierarchy) {
-//        return initializeAndDetach(load(pktStream), hierarchy);
-//    }
-//
-//    default List<ET> loadThroughCacheInitializeAndDetach(Stream<PKT> pktStream) {
-//        return loadThroughCacheInitializeAndDetach(pktStream, autoCacheHierarchy().orElse(null));
-//    }
-//
-//    default Stream<ET> loadThroughCacheAndInitialize(Stream<PKT> pktStream, HierarchyProcessor<ET> hierarchy) {
-//        return load(pktStream).map(e -> initialize(e, hierarchy));
-//    }
-//
-//    default Stream<ET> loadThroughCacheAndInitialize(Stream<PKT> pktStream) {
-//        return loadThroughCacheAndInitialize(pktStream, null);
-//    }
-//
-//    default Stream<ET> loadThroughCache(Stream<PKT> pktStream) {
-//        return pktStream.map(this::loadThroughCache, autoCacheHierarchy().orElse(null));
-//    }
-//
-//    default ET loadThroughCache(PKT pk) {
-//        return loadThroughCache(pk, autoCacheHierarchy().orElse(null));
-//    }
-//
-//    default ET loadThroughCache(PKT pk, HierarchyProcessor<ET> cacheHierarchy) {
-//
-//    }
+    void flushContext();
 
+    void clearContext();
 }
