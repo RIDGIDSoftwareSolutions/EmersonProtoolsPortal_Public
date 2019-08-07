@@ -63,12 +63,4 @@ public final class StreamHelpers {
         return group(groupSize, T -> T, null);
     }
 
-/*
-    public static <T, R> Stream<Stream<R>> group(Stream<T> stream,
-                                                 Function<T, R> mapping,
-                                                 int groupSize) {
-        return
-    }
-*/
-
 }
