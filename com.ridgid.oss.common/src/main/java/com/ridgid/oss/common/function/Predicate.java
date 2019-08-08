@@ -10,4 +10,5 @@ public final class Predicate {
     public static <T, FT> java.util.function.Predicate<T> whereEquals(Function<T, FT> valueSelector, FT compareToValue) {
         return t -> valueSelector.apply(t).equals(compareToValue);
     }
+
 }

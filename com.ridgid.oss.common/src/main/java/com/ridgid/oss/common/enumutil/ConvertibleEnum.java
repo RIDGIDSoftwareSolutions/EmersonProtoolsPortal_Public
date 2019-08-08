@@ -1,17 +1,15 @@
-package com.ridgid.oss.orm.entity;
+package com.ridgid.oss.common.enumutil;
 
-
-import com.ridgid.oss.common.enumutil.ConvertibleEnum;
 
 /**
- * Implement this method for an Enum @code{EnumType} that needs to be serialized to the Database as a particular value type @code{DBColumnType}.
+ * Implement this method for an Enum @code{EnumType} that needs to be serialized to the Database (or similar) as a particular value type @code{DBColumnType}.
  * The enum must have a static public method named "from" that takes a one parameter of type @code{DBColumnType} and returns the corresponding enum type value @code{EnumType}
  * <p>
  * Example of usage:
  *
  * <pre>
  * {@code
- *     public enum FooEnum implements DBConvertibleEnum<FooEnum,String> {
+ *     public enum FooEnum implements ConvertibleEnum<FooEnum,String> {
  *
  *          FOO_VALUE1("SerializedValue1"),
  *          FOO_VALUE2("SerializedValue2"),
@@ -33,7 +31,7 @@ import com.ridgid.oss.common.enumutil.ConvertibleEnum;
  *              }
  *          }
  *
- *          public String toDbValue() {
+ *          public String into() {
  *              return this.value;
  *          }
  *     }
@@ -44,21 +42,16 @@ import com.ridgid.oss.common.enumutil.ConvertibleEnum;
  * specific to the database through a General Enum Attribute converter. @code{com.ridgid.oss.orm.convert.EnumConverter} class
  * provides a Generic converter implementation that works one this interface.
  *
- * @param <EnumType>     type of the Enum that is implementing this interface
- * @param <DBColumnType> type of the serialized value in the DB for a particular Enum value
+ * @param <EnumType> type of the Enum that is implementing this interface
+ * @param <ToType>   type of the serialized value in the DB for a particular Enum value
  */
 @SuppressWarnings("unused")
-public interface DBConvertibleEnum<EnumType extends Enum, DBColumnType> extends ConvertibleEnum<EnumType, DBColumnType> {
+public interface ConvertibleEnum<EnumType extends Enum, ToType> {
 
     /**
      * Converts this enum value to the database column value type
      *
      * @return database column value type DBColumnType
      */
-    DBColumnType toDbValue();
-
-    @Override
-    default DBColumnType into() {
-        return toDbValue();
-    }
+    ToType into();
 }

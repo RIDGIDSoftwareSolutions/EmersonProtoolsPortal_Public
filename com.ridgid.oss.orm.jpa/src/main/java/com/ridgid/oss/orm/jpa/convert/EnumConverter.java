@@ -1,13 +1,13 @@
 package com.ridgid.oss.orm.jpa.convert;
 
-import com.ridgid.oss.orm.entity.DBConvertibleEnum;
+import com.ridgid.oss.common.enumutil.ConvertibleEnum;
 
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
 
 @SuppressWarnings({"unused", "SpellCheckingInspection"})
 @Converter
-public class EnumConverter<ET extends DBConvertibleEnum<? extends Enum, DBCT>, DBCT>
+public class EnumConverter<ET extends ConvertibleEnum<? extends Enum, DBCT>, DBCT>
         extends com.ridgid.oss.orm.convert.EnumConverter<ET, DBCT>
         implements AttributeConverter<ET, DBCT> {
 
