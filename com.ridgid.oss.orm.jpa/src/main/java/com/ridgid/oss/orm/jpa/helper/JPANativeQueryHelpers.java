@@ -13,6 +13,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.ridgid.oss.common.function.Function.replaceWith;
 import static com.ridgid.oss.common.function.Predicate.whereGreaterThan;
 import static com.ridgid.oss.common.helper.FieldReflectionHelpers.getFieldValueOrThrowRuntimeException;
 import static com.ridgid.oss.common.helper.PrimaryKeyAutoGenerationType.IDENTITY;
@@ -282,7 +283,7 @@ public final class JPANativeQueryHelpers {
                         () -> Optional.ofNullable(f.getAnnotation(Column.class))
                                 .map(Column::precision)
                                 .filter(whereGreaterThan(0))
-                                .map(precision -> ORDINAL)
+                                .map(replaceWith(ORDINAL))
                                 .orElse(STRING)
                 );
         q.setParameter
