@@ -4,10 +4,7 @@ import com.ridgid.oss.common.helper.FieldReflectionHelpers;
 import com.ridgid.oss.common.helper.PrimaryKeyAutoGenerationType;
 import com.ridgid.oss.orm.entity.CreateModifyTracking;
 
-import javax.persistence.AttributeConverter;
-import javax.persistence.Convert;
-import javax.persistence.Query;
-import javax.persistence.TemporalType;
+import javax.persistence.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDate;
@@ -16,8 +13,11 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.ridgid.oss.common.function.Predicate.whereGreaterThan;
 import static com.ridgid.oss.common.helper.FieldReflectionHelpers.getFieldValueOrThrowRuntimeException;
 import static com.ridgid.oss.common.helper.PrimaryKeyAutoGenerationType.IDENTITY;
+import static javax.persistence.EnumType.ORDINAL;
+import static javax.persistence.EnumType.STRING;
 
 /**
  *
@@ -213,6 +213,8 @@ public final class JPANativeQueryHelpers {
             setCalendarParameterValue(q, obj, i + offset + 1, f);
         else if (ft == Date.class)
             setDateParameterValue(q, obj, i + offset + 1, f);
+        else if (ft.isEnum())
+            setEnumParameterValue(q, (Enum) obj, i + offset + 1, f);
         else
             q.setParameter(i + offset + 1, getFieldValueOrThrowRuntimeException(obj, f));
     }
@@ -262,6 +264,34 @@ public final class JPANativeQueryHelpers {
                                                  Field field) {
         TemporalType tt = JPAFieldReflectionHelpers.getJPATemporalTypeForAmbiguousTemporalField(field);
         query.setParameter(idx, (Calendar) getFieldValueOrThrowRuntimeException(obj, field), tt);
+    }
+
+    /**
+     * @param q
+     * @param obj
+     * @param f
+     */
+    private static void setEnumParameterValue(Query q,
+                                              Enum obj,
+                                              int idx,
+                                              Field f) {
+        EnumType enumType
+                = Optional.ofNullable(f.getAnnotation(Enumerated.class))
+                .map(Enumerated::value)
+                .orElseGet(
+                        () -> Optional.ofNullable(f.getAnnotation(Column.class))
+                                .map(Column::precision)
+                                .filter(whereGreaterThan(0))
+                                .map(precision -> ORDINAL)
+                                .orElse(STRING)
+                );
+        q.setParameter
+                (
+                        idx,
+                        enumType.equals(ORDINAL)
+                                ? ((Enum) getFieldValueOrThrowRuntimeException(obj, f)).ordinal()
+                                : ((Enum) getFieldValueOrThrowRuntimeException(obj, f)).name()
+                );
     }
 
     /**
