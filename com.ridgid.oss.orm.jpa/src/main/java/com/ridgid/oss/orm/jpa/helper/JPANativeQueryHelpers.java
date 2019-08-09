@@ -215,7 +215,7 @@ public final class JPANativeQueryHelpers {
         else if (ft == Date.class)
             setDateParameterValue(q, obj, i + offset + 1, f);
         else if (ft.isEnum())
-            setEnumParameterValue(q, (Enum) obj, i + offset + 1, f);
+            setEnumParameterValue(q, obj, i + offset + 1, f);
         else
             q.setParameter(i + offset + 1, getFieldValueOrThrowRuntimeException(obj, f));
     }
@@ -273,7 +273,7 @@ public final class JPANativeQueryHelpers {
      * @param f
      */
     private static void setEnumParameterValue(Query q,
-                                              Enum obj,
+                                              Object obj,
                                               int idx,
                                               Field f) {
         EnumType enumType
