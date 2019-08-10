@@ -65,19 +65,21 @@ public final class StreamHelpers {
         return group(groupSize, T -> T, null);
     }
 
-    @SuppressWarnings("unchecked")
+    @SafeVarargs
     public static <T> Function<T, Stream<T>> distinctBy(Function<T, ?>... fieldSelectors) {
         ConcurrentMap keysSeen = new ConcurrentHashMap<>();
         return t -> {
             ConcurrentMap keyMap = keysSeen;
             for (int i = 0; i < fieldSelectors.length - 1; i++) {
                 Function<T, ?> selector = fieldSelectors[i];
+                //noinspection unchecked
                 keyMap = (ConcurrentMap) keyMap.computeIfAbsent
                         (
                                 selector.apply(t),
                                 k -> new ConcurrentHashMap()
                         );
             }
+            @SuppressWarnings("unchecked")
             boolean seen = (boolean) keyMap.compute
                     (
                             fieldSelectors[fieldSelectors.length - 1].apply(t),

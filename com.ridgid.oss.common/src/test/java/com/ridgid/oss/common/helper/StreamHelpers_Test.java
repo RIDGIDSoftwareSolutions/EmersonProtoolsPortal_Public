@@ -49,7 +49,6 @@ class StreamHelpers_Test {
                 .collect(toList());
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     void when_distinctBy_is_used_in_a_flatmap_of_a_stream_it_passed_only_distinct_elements_of_the_stream_according_to_the_selected_keys() {
         assertEquals(
