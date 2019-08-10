@@ -1,5 +1,5 @@
 package com.ridgid.oss.common.cache;
 
-@SuppressWarnings("unused")
-public interface ExpirableCache<K, V extends Expirable> extends Cache<K, V> {
+@SuppressWarnings({"unused", "SpellCheckingInspection", "WeakerAccess"})
+public interface ExpirableCache<K, V extends Expirable> extends ManagedCache<K, V> {
 }

@@ -2,7 +2,7 @@ package com.ridgid.oss.common.security.realm;
 
 import com.ridgid.oss.common.cache.Cache;
 import com.ridgid.oss.common.cache.Expirable;
-import com.ridgid.oss.common.cache.InMemoryKVExpirableLRUCache;
+import com.ridgid.oss.common.cache.InMemoryExpirableLRUCache;
 import com.ridgid.oss.common.security.realm.authentication.AuthenticationStorage;
 import com.ridgid.oss.common.security.realm.authentication.RealmAuthentication;
 import com.ridgid.oss.common.security.realm.authentication.RealmAuthenticationException;
@@ -34,7 +34,7 @@ public class RealmManager<RIDT, IDT, ST, ATT> {
     private final ConcurrentMap<RIDT, Cache<IDT, RealmAuthentication<RIDT, IDT, ATT>>> authenticationCache
             = new ConcurrentHashMap<>();
     private final Cache<InetAddress, RequestCount> requestCounts
-            = new InMemoryKVExpirableLRUCache<>
+            = new InMemoryExpirableLRUCache<>
             (
                     (short) 300,
                     (short) 100,
@@ -345,15 +345,15 @@ public class RealmManager<RIDT, IDT, ST, ATT> {
         }
     }
 
-    private InMemoryKVExpirableLRUCache<IDT, RealmAuthentication<RIDT, IDT, ATT>> makeAuthenticationCache() {
+    private InMemoryExpirableLRUCache<IDT, RealmAuthentication<RIDT, IDT, ATT>> makeAuthenticationCache() {
         return makeAuthenticationCache(DEFAULT_MIN_CACHE_SIZE, maxCacheSize);
     }
 
     @SuppressWarnings("SameParameterValue")
-    private InMemoryKVExpirableLRUCache<IDT, RealmAuthentication<RIDT, IDT, ATT>>
+    private InMemoryExpirableLRUCache<IDT, RealmAuthentication<RIDT, IDT, ATT>>
     makeAuthenticationCache(short minCacheSize,
                             short maxCacheSize) {
-        return new InMemoryKVExpirableLRUCache<>
+        return new InMemoryExpirableLRUCache<>
                 (
                         CACHE_TIMEOUT_CHECK_INTERVAL_SECONDS,
                         minCacheSize,

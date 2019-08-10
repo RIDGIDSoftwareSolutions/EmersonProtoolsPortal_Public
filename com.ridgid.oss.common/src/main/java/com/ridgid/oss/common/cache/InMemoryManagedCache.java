@@ -3,32 +3,46 @@ package com.ridgid.oss.common.cache;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-@SuppressWarnings({"WeakerAccess", "FieldCanBeLocal", "unused", "SpellCheckingInspection"})
-public class InMemoryExpirableKVCache<K, V extends Expirable> implements ExpirableCache<K, V> {
+@SuppressWarnings({"WeakerAccess", "FieldCanBeLocal", "unused"})
+public class InMemoryManagedCache<K, V>
+        extends InMemoryUnmanagedCache<K, V>
+        implements ManagedCache<K, V> {
 
-    private final ConcurrentHashMap<K, V> cache;
     private final Timer cleanupTimer;
     private final short maxCapacity;
     private final short evictToCapacity;
+    private final boolean hasRegularCleanupPolicy;
+
     private Thread cleanupThread;
 
-    public InMemoryExpirableKVCache(short timeoutCheckIntervalSeconds,
-                                    short initialCapacity,
-                                    short maxCapacity,
-                                    short evictToCapacity) {
-        this.cache = new ConcurrentHashMap<>(initialCapacity);
+    public InMemoryManagedCache(short initialCapacity,
+                                short maxCapacity,
+                                short evictToCapacity) {
+        this
+                (
+                        (short) 0,
+                        initialCapacity,
+                        maxCapacity,
+                        evictToCapacity
+                );
+    }
+
+    public InMemoryManagedCache(short timeoutCheckIntervalSeconds,
+                                short initialCapacity,
+                                short maxCapacity,
+                                short evictToCapacity) {
+        super(initialCapacity);
         this.maxCapacity = maxCapacity;
         this.evictToCapacity = evictToCapacity;
         this.cleanupTimer = makeCleanupTimer
                 (
                         timeoutCheckIntervalSeconds
                 );
+        this.hasRegularCleanupPolicy = timeoutCheckIntervalSeconds > 0;
     }
 
     public final void forceCleanup() {
@@ -46,12 +60,13 @@ public class InMemoryExpirableKVCache<K, V extends Expirable> implements Expirab
 
     private Timer makeCleanupTimer(short timeoutCheckIntervalSeconds) {
         Timer timer = new Timer(true);
-        timer.schedule
-                (
-                        makeCleanupTask(),
-                        timeoutCheckIntervalSeconds * 1000,
-                        timeoutCheckIntervalSeconds * 1000
-                );
+        if (timeoutCheckIntervalSeconds > 0)
+            timer.schedule
+                    (
+                            makeCleanupTask(),
+                            timeoutCheckIntervalSeconds * 1000,
+                            timeoutCheckIntervalSeconds * 1000
+                    );
         return timer;
     }
 
@@ -80,10 +95,11 @@ public class InMemoryExpirableKVCache<K, V extends Expirable> implements Expirab
     }
 
     private void performCleanup() {
-        cache.entrySet()
-                .stream()
-                .filter(this::normalEvictionApplies)
-                .forEach(e -> this.remove(e.getKey()));
+        if (hasRegularCleanupPolicy)
+            cache.entrySet()
+                    .stream()
+                    .filter(this::normalEvictionApplies)
+                    .forEach(e -> this.remove(e.getKey()));
         if (cache.size() > maxCapacity)
             overCapacityEvictionSelector(cache.size(), evictToCapacity, cache.entrySet().stream())
                     .filter(entry -> cache.size() > evictToCapacity)
@@ -98,51 +114,6 @@ public class InMemoryExpirableKVCache<K, V extends Expirable> implements Expirab
                                                                    int targetEntryCount,
                                                                    Stream<Map.Entry<K, V>> entries) {
         return entries;
-    }
-
-    @Override
-    public void clear() {
-        cache.clear();
-    }
-
-    @Override
-    public int size() {
-        return cache.size();
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return cache.isEmpty();
-    }
-
-    @Override
-    public boolean containsKey(K key) {
-        return cache.containsKey(key);
-    }
-
-    @Override
-    public void forEach(BiConsumer<? super K, ? super V> action) {
-        cache.forEach(action);
-    }
-
-    @Override
-    public Stream<Map.Entry<K, V>> stream() {
-        return cache.entrySet().stream();
-    }
-
-    @Override
-    public Stream<K> streamKeys() {
-        return cache.keySet().stream();
-    }
-
-    @Override
-    public Stream<V> streamValues() {
-        return cache.values().stream();
-    }
-
-    @Override
-    public void replaceAll(BiFunction<? super K, ? super V, ? extends V> function) {
-        cache.replaceAll(function);
     }
 
     @Override
@@ -164,11 +135,6 @@ public class InMemoryExpirableKVCache<K, V extends Expirable> implements Expirab
     }
 
     @Override
-    public V remove(K key) {
-        return cache.remove(key);
-    }
-
-    @Override
     public boolean replace(K key, V oldValue, V newValue) {
         checkCapacity();
         return cache.replace(key, oldValue, newValue);
@@ -178,11 +144,6 @@ public class InMemoryExpirableKVCache<K, V extends Expirable> implements Expirab
     public V replace(K key, V value) {
         checkCapacity();
         return cache.replace(key, value);
-    }
-
-    @Override
-    public V getOrDefault(K key, V defaultValue) {
-        return cache.getOrDefault(key, defaultValue);
     }
 
     @Override

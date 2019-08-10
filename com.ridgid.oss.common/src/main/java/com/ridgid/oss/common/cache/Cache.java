@@ -10,14 +10,13 @@ import java.util.stream.Stream;
 @SuppressWarnings("unused")
 public interface Cache<K, V> {
 
-    void forceCleanup();
-
     int size();
 
     void clear();
 
     boolean isEmpty();
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     boolean containsKey(K key);
 
     void forEach(BiConsumer<? super K, ? super V> action);
@@ -48,6 +47,7 @@ public interface Cache<K, V> {
 
     V remove(K key);
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     boolean replace(K key, V oldValue, V newValue);
 
     void replaceAll(BiFunction<? super K, ? super V, ? extends V> function);

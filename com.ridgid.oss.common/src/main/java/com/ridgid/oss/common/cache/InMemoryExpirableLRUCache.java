@@ -8,27 +8,21 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 @SuppressWarnings({"unused", "SpellCheckingInspection"})
-public final class InMemoryKVExpirableLRUCache<K, V extends Expirable>
-        extends InMemoryExpirableKVCache<K, V>
+public final class InMemoryExpirableLRUCache<K, V extends Expirable>
+        extends InMemoryExpirableCache<K, V>
         implements ExpirableLRUCache<K, V> {
 
     private final ConcurrentHashMap<K, Long> lastUsed = new ConcurrentHashMap<>();
     private long removeBeforeTime;
 
-    public InMemoryKVExpirableLRUCache(short timeoutCheckIntervalSeconds,
-                                       short initialCapacity,
-                                       short maxCapacity,
-                                       short evictToCapacity) {
+    public InMemoryExpirableLRUCache(short timeoutCheckIntervalSeconds,
+                                     short initialCapacity,
+                                     short maxCapacity,
+                                     short evictToCapacity) {
         super(timeoutCheckIntervalSeconds,
                 initialCapacity,
                 maxCapacity,
                 evictToCapacity);
-
-    }
-
-    @Override
-    protected boolean normalEvictionApplies(Map.Entry<K, V> entry) {
-        return entry.getValue().isExpired();
     }
 
     @Override
