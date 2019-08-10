@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -61,6 +63,28 @@ public final class StreamHelpers {
 
     public static <T> Function<T, Stream<List<T>>> group(int groupSize) {
         return group(groupSize, T -> T, null);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> Function<T, Stream<T>> distinctBy(Function<T, ?>... fieldSelectors) {
+        ConcurrentMap keysSeen = new ConcurrentHashMap<>();
+        return t -> {
+            ConcurrentMap keyMap = keysSeen;
+            for (int i = 0; i < fieldSelectors.length - 1; i++) {
+                Function<T, ?> selector = fieldSelectors[i];
+                keyMap = (ConcurrentMap) keyMap.computeIfAbsent
+                        (
+                                selector.apply(t),
+                                k -> new ConcurrentHashMap()
+                        );
+            }
+            boolean seen = (boolean) keyMap.compute
+                    (
+                            fieldSelectors[fieldSelectors.length - 1].apply(t),
+                            (k, v) -> v != null
+                    );
+            return seen ? null : Stream.of(t);
+        };
     }
 
 }
