@@ -121,6 +121,26 @@ public class InMemoryExpirableKVCache<K, V extends Expirable> implements Expirab
     }
 
     @Override
+    public void forEach(BiConsumer<? super K, ? super V> action) {
+        cache.forEach(action);
+    }
+
+    @Override
+    public Stream<Map.Entry<K, V>> stream() {
+        return cache.entrySet().stream();
+    }
+
+    @Override
+    public Stream<K> streamKeys() {
+        return cache.keySet().stream();
+    }
+
+    @Override
+    public Stream<V> streamValues() {
+        return cache.values().stream();
+    }
+
+    @Override
     public void replaceAll(BiFunction<? super K, ? super V, ? extends V> function) {
         cache.replaceAll(function);
     }
@@ -163,11 +183,6 @@ public class InMemoryExpirableKVCache<K, V extends Expirable> implements Expirab
     @Override
     public V getOrDefault(K key, V defaultValue) {
         return cache.getOrDefault(key, defaultValue);
-    }
-
-    @Override
-    public void forEach(BiConsumer<? super K, ? super V> action) {
-        cache.forEach(action);
     }
 
     @Override

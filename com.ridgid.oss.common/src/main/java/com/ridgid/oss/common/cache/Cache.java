@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 @SuppressWarnings("unused")
 public interface Cache<K, V> {
@@ -20,6 +21,12 @@ public interface Cache<K, V> {
     boolean containsKey(K key);
 
     void forEach(BiConsumer<? super K, ? super V> action);
+
+    Stream<Map.Entry<K, V>> stream();
+
+    Stream<K> streamKeys();
+
+    Stream<V> streamValues();
 
     default Optional<V> get(K key) {
         return Optional.ofNullable(getOrDefault(key, null));

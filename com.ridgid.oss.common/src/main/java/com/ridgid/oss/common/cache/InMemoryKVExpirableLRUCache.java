@@ -131,6 +131,21 @@ public final class InMemoryKVExpirableLRUCache<K, V extends Expirable>
     }
 
     @Override
+    public Stream<Map.Entry<K, V>> stream() {
+        return super.stream().peek(e -> updateLastUsed(e.getKey()));
+    }
+
+    @Override
+    public Stream<K> streamKeys() {
+        return super.streamKeys().peek(this::updateLastUsed);
+    }
+
+    @Override
+    public Stream<V> streamValues() {
+        return super.streamValues();
+    }
+
+    @Override
     public V computeIfAbsent(K key, Function<? super K, ? extends V> mappingFunction) {
         updateLastUsed(key);
         return super.computeIfAbsent(key, mappingFunction);
