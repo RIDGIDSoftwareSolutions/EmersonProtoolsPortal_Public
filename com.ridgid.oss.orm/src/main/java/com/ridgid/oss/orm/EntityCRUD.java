@@ -49,11 +49,21 @@ public interface EntityCRUD<ET extends PrimaryKeyedEntity<PKT>, PKT extends Comp
     }
 
     default List<ET> initializeAndDetach(Stream<ET> entityStream, HierarchyProcessor<ET> hierarchy) {
-        return entityStream.map(e -> initializeAndDetach(e, hierarchy)).collect(toList());
+        return entityStream
+                .map(e -> initialize(e, hierarchy))
+                .collect(toList())
+                .stream()
+                .map(e -> initializeAndDetach(e, hierarchy))
+                .collect(toList());
     }
 
     default List<ET> initializeAndDetach(Stream<ET> entityStream) {
-        return entityStream.map(this::initializeAndDetach).collect(toList());
+        return entityStream
+                .map(this::initialize)
+                .collect(toList())
+                .stream()
+                .map(this::detach)
+                .collect(toList());
     }
 
 
