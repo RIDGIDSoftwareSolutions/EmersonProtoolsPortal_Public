@@ -53,7 +53,7 @@ public interface EntityCRUD<ET extends PrimaryKeyedEntity<PKT>, PKT extends Comp
                 .map(e -> initialize(e, hierarchy))
                 .collect(toList())
                 .stream()
-                .map(e -> initializeAndDetach(e, hierarchy))
+                .map(e -> detach(e, hierarchy))
                 .collect(toList());
     }
 
