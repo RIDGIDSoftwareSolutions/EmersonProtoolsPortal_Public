@@ -124,7 +124,7 @@ final class JPAEntityCRUDReadDelegate<ET extends PrimaryKeyedEntity<PKT>, PKT ex
     @Override
     public Optional<ET> optionalFind(PKT pk, HierarchyProcessor<ET> hierarchy) throws EntityCRUDExceptionError {
         try {
-            return optionalFind(pk).map(this::initializeAndDetach);
+            return optionalFind(pk);
         } catch (Exception ex) {
             throw new EntityCRUDExceptionError(ex);
         }

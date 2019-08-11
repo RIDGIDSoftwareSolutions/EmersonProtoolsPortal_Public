@@ -124,7 +124,7 @@ public class JPAEntityCRUDUpdateDelegate<ET extends PrimaryKeyedEntity<PKT>, PKT
             }
             baseDelegate.getEntityManager().flush();
             baseDelegate.getEntityManager().refresh(entity);
-            return Optional.of(entity).map(this::initializeAndDetach);
+            return Optional.of(entity);
         } catch (Exception ex) {
             throw baseDelegate.enhanceExceptionWithEntityManagerNullCheck(ex);
         }
