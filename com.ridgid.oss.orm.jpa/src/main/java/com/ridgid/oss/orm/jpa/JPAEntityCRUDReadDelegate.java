@@ -15,40 +15,43 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 final class JPAEntityCRUDReadDelegate<ET extends PrimaryKeyedEntity<PKT>, PKT extends Comparable<PKT>>
-        implements
-        JPAEntityCRUDDelegateRequired<ET, PKT>,
-        JPAEntityCRUDReadDelegateRequired<ET, PKT>,
-        EntityCRUDRead<ET, PKT> {
+    implements
+    JPAEntityCRUDDelegateRequired<ET, PKT>,
+    JPAEntityCRUDReadDelegateRequired<ET, PKT>,
+    EntityCRUDRead<ET, PKT>
+{
 
     private final JPAEntityCRUDDelegate<ET, PKT> baseDelegate;
-
-    private TypedQuery<ET> findAllByLimitQuery;
 
     JPAEntityCRUDReadDelegate(JPAEntityCRUDDelegate<ET, PKT> baseDelegate) {
         this.baseDelegate = baseDelegate;
     }
 
     JPAEntityCRUDReadDelegate(Class<ET> classType,
-                              Class<PKT> pkType) {
+                              Class<PKT> pkType)
+    {
         this.baseDelegate = new JPAEntityCRUDDelegate<>(classType, pkType);
     }
 
     JPAEntityCRUDReadDelegate(Class<ET> classType,
                               Class<PKT> pkType,
-                              String pkName) {
+                              String pkName)
+    {
         this.baseDelegate = new JPAEntityCRUDDelegate<>(classType, pkType, pkName);
     }
 
     JPAEntityCRUDReadDelegate(Class<ET> classType,
                               Class<PKT> pkType,
-                              short loadBatchSize) {
+                              short loadBatchSize)
+    {
         this.baseDelegate = new JPAEntityCRUDDelegate<>(classType, pkType, loadBatchSize);
     }
 
     JPAEntityCRUDReadDelegate(Class<ET> classType,
                               Class<PKT> pkType,
                               String pkName,
-                              short loadBatchSize) {
+                              short loadBatchSize)
+    {
         this.baseDelegate = new JPAEntityCRUDDelegate<>(classType, pkType, pkName, loadBatchSize);
     }
 
@@ -115,8 +118,9 @@ final class JPAEntityCRUDReadDelegate<ET extends PrimaryKeyedEntity<PKT>, PKT ex
     @Override
     public Optional<ET> optionalFind(PKT pk) throws EntityCRUDExceptionError {
         try {
-            return Optional.ofNullable(baseDelegate.getEntityManager().find(baseDelegate.classType, pk, LockModeType.NONE));
-        } catch (Exception ex) {
+            return Optional.ofNullable(
+                baseDelegate.getEntityManager().find(baseDelegate.classType, pk, LockModeType.NONE));
+        } catch ( Exception ex ) {
             throw new EntityCRUDExceptionError(ex);
         }
     }
@@ -125,7 +129,7 @@ final class JPAEntityCRUDReadDelegate<ET extends PrimaryKeyedEntity<PKT>, PKT ex
     public Optional<ET> optionalFind(PKT pk, HierarchyProcessor<ET> hierarchy) throws EntityCRUDExceptionError {
         try {
             return optionalFind(pk);
-        } catch (Exception ex) {
+        } catch ( Exception ex ) {
             throw new EntityCRUDExceptionError(ex);
         }
     }
@@ -134,41 +138,36 @@ final class JPAEntityCRUDReadDelegate<ET extends PrimaryKeyedEntity<PKT>, PKT ex
     public final List<ET> findAll(int offset, int limit) throws EntityCRUDExceptionError {
         try {
             return getFindAllByLimitQuery()
-                    .setFirstResult(offset)
-                    .setMaxResults(limit)
-                    .getResultList();
-        } catch (Exception ex) {
+                .setFirstResult(offset)
+                .setMaxResults(limit)
+                .getResultList();
+        } catch ( Exception ex ) {
             throw baseDelegate.enhanceExceptionWithEntityManagerNullCheck(ex);
         }
     }
 
     private TypedQuery<ET> getFindAllByLimitQuery() {
-        if (findAllByLimitQuery == null)
-            synchronized (baseDelegate.getEntityManager()) {
-                if (findAllByLimitQuery == null) {
-                    CriteriaQuery<ET> cb = baseDelegate.getEntityManager().getCriteriaBuilder().createQuery(baseDelegate.classType);
-                    Root<ET> entity = cb.from(baseDelegate.classType);
-                    findAllByLimitQuery
-                            = baseDelegate.getEntityManager()
-                            .createQuery(cb.select(entity))
-                            .setLockMode(LockModeType.NONE);
-                }
-            }
-        return findAllByLimitQuery;
+        CriteriaQuery<ET> cb = baseDelegate.getEntityManager()
+                                           .getCriteriaBuilder()
+                                           .createQuery(baseDelegate.classType);
+        Root<ET> entity = cb.from(baseDelegate.classType);
+        return baseDelegate.getEntityManager()
+                           .createQuery(cb.select(entity))
+                           .setLockMode(LockModeType.NONE);
     }
 
     @Override
     public List<ET> findAll(int offset, int limit, HierarchyProcessor<ET> hierarchy) throws EntityCRUDExceptionError {
         try {
             return initialize
-                    (
-                            getFindAllByLimitQuery()
-                                    .setFirstResult(offset)
-                                    .setMaxResults(limit)
-                                    .getResultStream(),
-                            hierarchy
-                    );
-        } catch (Exception ex) {
+                (
+                    getFindAllByLimitQuery()
+                        .setFirstResult(offset)
+                        .setMaxResults(limit)
+                        .getResultStream(),
+                    hierarchy
+                );
+        } catch ( Exception ex ) {
             throw new EntityCRUDExceptionError(ex);
         }
     }

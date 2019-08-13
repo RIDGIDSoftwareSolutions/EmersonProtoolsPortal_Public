@@ -10,7 +10,11 @@ import com.ridgid.oss.orm.jpa.exception.EntityManagerNullException;
 import org.hibernate.Hibernate;
 
 import javax.persistence.EntityManager;
-import javax.persistence.criteria.*;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.ParameterExpression;
+import javax.persistence.criteria.Path;
+import javax.persistence.criteria.Root;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -19,49 +23,53 @@ import static com.ridgid.oss.common.hierarchy.HierarchyProcessor.Traversal.DEPTH
 
 @SuppressWarnings({"WeakerAccess", "unused"})
 final class JPAEntityCRUDDelegate<ET extends PrimaryKeyedEntity<PKT>, PKT extends Comparable<PKT>>
-        implements JPAEntityCRUDDelegateRequired<ET, PKT> {
+    implements JPAEntityCRUDDelegateRequired<ET, PKT>
+{
 
-    public final String PK_NAME;
-    public final Class<ET> classType;
+    public final String     PK_NAME;
+    public final Class<ET>  classType;
     public final Class<PKT> pkType;
-    public final short loadBatchSize;
+    public final short      loadBatchSize;
 
     EntityManager entityManager;
-    CriteriaQuery<ET> entitiesForPrimaryKeysCriteriaQuery;
 
     public JPAEntityCRUDDelegate(Class<ET> classType,
-                                 Class<PKT> pkType) {
-        this.classType = classType;
-        this.pkType = pkType;
-        this.PK_NAME = "pk";
+                                 Class<PKT> pkType)
+    {
+        this.classType     = classType;
+        this.pkType        = pkType;
+        this.PK_NAME       = "pk";
         this.loadBatchSize = 1000;
     }
 
     public JPAEntityCRUDDelegate(Class<ET> classType,
                                  Class<PKT> pkType,
-                                 String pkName) {
-        this.classType = classType;
-        this.pkType = pkType;
-        this.PK_NAME = pkName;
+                                 String pkName)
+    {
+        this.classType     = classType;
+        this.pkType        = pkType;
+        this.PK_NAME       = pkName;
         this.loadBatchSize = 1000;
     }
 
     public JPAEntityCRUDDelegate(Class<ET> classType,
                                  Class<PKT> pkType,
-                                 short loadBatchSize) {
-        this.classType = classType;
-        this.pkType = pkType;
-        this.PK_NAME = "pk";
+                                 short loadBatchSize)
+    {
+        this.classType     = classType;
+        this.pkType        = pkType;
+        this.PK_NAME       = "pk";
         this.loadBatchSize = loadBatchSize;
     }
 
     public JPAEntityCRUDDelegate(Class<ET> classType,
                                  Class<PKT> pkType,
                                  String pkName,
-                                 short loadBatchSize) {
-        this.classType = classType;
-        this.pkType = pkType;
-        this.PK_NAME = pkName;
+                                 short loadBatchSize)
+    {
+        this.classType     = classType;
+        this.pkType        = pkType;
+        this.PK_NAME       = pkName;
         this.loadBatchSize = loadBatchSize;
     }
 
@@ -85,48 +93,42 @@ final class JPAEntityCRUDDelegate<ET extends PrimaryKeyedEntity<PKT>, PKT extend
 
     @Override
     public final ET initializeAndDetach(ET entity,
-                                        HierarchyProcessor<ET> hierarchy) {
+                                        HierarchyProcessor<ET> hierarchy)
+    {
         visitEntityHierarchy
-                (
-                        entity,
-                        hierarchy,
-                        this::initializeEntityVisitHandler,
-                        this::detachEntityVisitHandler
-                );
+            (
+                entity,
+                hierarchy,
+                this::initializeEntityVisitHandler,
+                this::detachEntityVisitHandler
+            );
         return entity;
     }
 
     @Override
     public final Optional<ET> load(PKT pk) {
         return Optional.ofNullable
-                (
-                        entityManager.find(classType, pk)
-                );
+            (
+                entityManager.find(classType, pk)
+            );
     }
 
     @Override
     public final Stream<ET> loadBatch(List<PKT> pkList) {
         return entityManager
-                .createQuery(getEntitiesForPrimaryKeysQuery())
-                .setParameter("searchKeys", pkList)
-                .getResultStream();
+            .createQuery(getEntitiesForPrimaryKeysQuery())
+            .setParameter("searchKeys", pkList)
+            .getResultStream();
     }
 
     private CriteriaQuery<ET> getEntitiesForPrimaryKeysQuery() {
-        if (entitiesForPrimaryKeysCriteriaQuery == null)
-            synchronized (classType) {
-                if (entitiesForPrimaryKeysCriteriaQuery == null) {
-                    CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-                    entitiesForPrimaryKeysCriteriaQuery = builder.createQuery(classType);
-                    Root<ET> entity = entitiesForPrimaryKeysCriteriaQuery.from(classType);
-                    Path<String> pk = entity.get(PK_NAME);
-                    ParameterExpression<List> searchKeys = builder.parameter(List.class, "searchKeys");
-                    entitiesForPrimaryKeysCriteriaQuery
-                            .select(entity)
-                            .where(pk.in(searchKeys));
-                }
-            }
-        return entitiesForPrimaryKeysCriteriaQuery;
+        CriteriaBuilder           builder    = entityManager.getCriteriaBuilder();
+        CriteriaQuery<ET>         cQuery     = builder.createQuery(classType);
+        Root<ET>                  entity     = cQuery.from(classType);
+        Path<String>              pk         = entity.get(PK_NAME);
+        ParameterExpression<List> searchKeys = builder.parameter(List.class, "searchKeys");
+        cQuery.select(entity).where(pk.in(searchKeys));
+        return cQuery;
     }
 
     @Override
@@ -136,27 +138,29 @@ final class JPAEntityCRUDDelegate<ET extends PrimaryKeyedEntity<PKT>, PKT extend
 
     @Override
     public final ET initialize(ET entity,
-                               HierarchyProcessor<ET> hierarchy) {
+                               HierarchyProcessor<ET> hierarchy)
+    {
         visitEntityHierarchy
-                (
-                        entity,
-                        hierarchy,
-                        this::initializeEntityVisitHandler,
-                        null
-                );
+            (
+                entity,
+                hierarchy,
+                this::initializeEntityVisitHandler,
+                null
+            );
         return entity;
     }
 
     @Override
     public final ET detach(ET entity,
-                           HierarchyProcessor<ET> hierarchy) {
+                           HierarchyProcessor<ET> hierarchy)
+    {
         visitEntityHierarchy
-                (
-                        entity,
-                        hierarchy,
-                        EntityCRUD.NO_OP_VISIT_HANDLER,
-                        this::detachEntityVisitHandler
-                );
+            (
+                entity,
+                hierarchy,
+                EntityCRUD.NO_OP_VISIT_HANDLER,
+                this::detachEntityVisitHandler
+            );
         return entity;
     }
 
@@ -171,7 +175,7 @@ final class JPAEntityCRUDDelegate<ET extends PrimaryKeyedEntity<PKT>, PKT extend
     }
 
     final RuntimeException enhanceExceptionWithEntityManagerNullCheck(Exception e) {
-        if (entityManager == null)
+        if ( entityManager == null )
             return new EntityManagerNullException(e);
         else
             return new EntityCRUDExceptionError(e);
@@ -180,34 +184,36 @@ final class JPAEntityCRUDDelegate<ET extends PrimaryKeyedEntity<PKT>, PKT extend
     private void visitEntityHierarchy(ET entity,
                                       HierarchyProcessor<ET> hierarchy,
                                       GeneralVisitHandler visitor,
-                                      GeneralVisitHandler afterChildrenVisitor) {
+                                      GeneralVisitHandler afterChildrenVisitor)
+    {
         try {
-            if (hierarchy == null) {
+            if ( hierarchy == null ) {
                 visitEntity
-                        (
-                                entity,
-                                visitor,
-                                afterChildrenVisitor
-                        );
+                    (
+                        entity,
+                        visitor,
+                        afterChildrenVisitor
+                    );
                 return;
             }
             hierarchy.visit
-                    (
-                            entity,
-                            visitor,
-                            afterChildrenVisitor,
-                            DEPTH_FIRST
-                    );
-        } catch (Exception e) {
+                (
+                    entity,
+                    visitor,
+                    afterChildrenVisitor,
+                    DEPTH_FIRST
+                );
+        } catch ( Exception e ) {
             throw enhanceExceptionWithEntityManagerNullCheck(e);
         }
     }
 
     private void visitEntity(ET entity,
                              GeneralVisitHandler visitor,
-                             GeneralVisitHandler afterChildrenVisitor) {
+                             GeneralVisitHandler afterChildrenVisitor)
+    {
         visitor.handle(null, entity);
-        if (afterChildrenVisitor != null)
+        if ( afterChildrenVisitor != null )
             afterChildrenVisitor.handle(null, entity);
     }
 
@@ -219,7 +225,7 @@ final class JPAEntityCRUDDelegate<ET extends PrimaryKeyedEntity<PKT>, PKT extend
 
     @SuppressWarnings("unused")
     private VisitStatus detachEntityVisitHandler(Object p, Object o) {
-        if (o instanceof PrimaryKeyedEntity) entityManager.detach(o);
+        if ( o instanceof PrimaryKeyedEntity ) entityManager.detach(o);
         return VisitStatus.OK_CONTINUE;
     }
 }
