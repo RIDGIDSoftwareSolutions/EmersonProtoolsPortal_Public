@@ -2,7 +2,12 @@ package com.ridgid.oss.common.helper;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.*;
+import java.util.AbstractMap;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -94,7 +99,7 @@ public final class FieldReflectionHelpers {
                                                Object... methodNameParameterArrayPairs) {
         if (methodNameParameterArrayPairs.length % 2 != 0)
             throw new IllegalArgumentException("methodNameParameterArrayPairs must consist of one or more pairs of String methodName followed by Class<?>[]");
-        for (int i = 0; i < methodNameParameterArrayPairs.length - 1; i = +2)
+        for ( int i = 0; i < methodNameParameterArrayPairs.length - 1; i += 2 )
             if (declaresMethod
                     (
                             fieldType,
