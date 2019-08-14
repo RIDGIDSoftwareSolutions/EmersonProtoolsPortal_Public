@@ -120,8 +120,8 @@ public class JPAEntityCRUDUpdateDelegate<ET extends PrimaryKeyedEntity<PKT>, PKT
             if (!baseDelegate.getEntityManager().contains(entity)) {
                 if (baseDelegate.getEntityManager().find(baseDelegate.classType, entity.getPk()) == null)
                     return Optional.empty();
-                baseDelegate.getEntityManager().merge(entity);
             }
+            baseDelegate.getEntityManager().merge(entity);
             baseDelegate.getEntityManager().flush();
             baseDelegate.getEntityManager().refresh(entity);
             return Optional.of(entity);
