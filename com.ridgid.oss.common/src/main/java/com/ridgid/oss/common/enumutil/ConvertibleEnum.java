@@ -46,8 +46,8 @@ package com.ridgid.oss.common.enumutil;
  * @param <ToType>   type of the serialized value in the DB for a particular Enum value
  */
 @SuppressWarnings("unused")
-public interface ConvertibleEnum<EnumType extends Enum, ToType> {
-
+public interface ConvertibleEnum<EnumType extends Enum, ToType>
+{
     /**
      * Converts this enum value to the database column value type
      *
