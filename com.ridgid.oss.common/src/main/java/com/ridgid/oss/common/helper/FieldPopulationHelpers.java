@@ -11,8 +11,21 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.time.*;
-import java.util.*;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import java.time.OffsetTime;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.util.Calendar;
+import java.util.Currency;
+import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
+import java.util.UUID;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -474,8 +487,8 @@ public final class FieldPopulationHelpers {
         try {
             int length = lengthMapper.apply(field);
             StringBuilder val = new StringBuilder();
-            for (int i = 0; i < length; i++)
-                val.append((char) (' ' + (idx + fieldIdx) % 95));
+            for ( int i = 0; i < length; i++)
+                  val.append((char) (' ' + (idx + fieldIdx + i) % 95));
             field.set(obj, val.toString());
         } catch (IllegalAccessException e) {
             throwAsRuntimeExceptionUnableToSetField(obj, field, idx, fieldIdx, e);
@@ -497,8 +510,8 @@ public final class FieldPopulationHelpers {
         try {
             int length = lengthMapper.apply(field);
             char[] val = new char[length];
-            for (int i = 0; i < length; i++)
-                val[i] = (char) (' ' + (idx + fieldIdx) % 95);
+            for ( int i = 0; i < length; i++)
+                  val[i] = (char) (' ' + (idx + fieldIdx + i) % 95);
             field.set(obj, val);
         } catch (IllegalAccessException e) {
             throwAsRuntimeExceptionUnableToSetField(obj, field, idx, fieldIdx, e);
@@ -520,8 +533,8 @@ public final class FieldPopulationHelpers {
         try {
             int length = lengthMapper.apply(field);
             byte[] val = new byte[length];
-            for (int i = 0; i < length; i++)
-                val[i] = (byte) (Math.abs(idx + fieldIdx) % (Byte.MAX_VALUE * 2 + 1) - Byte.MAX_VALUE - 1);
+            for ( int i = 0; i < length; i++)
+                  val[i] = (byte) (Math.abs(idx + fieldIdx) % (Byte.MAX_VALUE * 2 + 1 + i) - Byte.MAX_VALUE - 1);
             field.set(obj, val);
         } catch (IllegalAccessException e) {
             throwAsRuntimeExceptionUnableToSetField(obj, field, idx, fieldIdx, e);
