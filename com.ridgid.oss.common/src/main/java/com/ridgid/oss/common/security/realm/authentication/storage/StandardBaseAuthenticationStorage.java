@@ -9,16 +9,17 @@ import java.util.function.Function;
 
 @SuppressWarnings({"unused", "SpellCheckingInspection", "WeakerAccess"})
 public abstract class StandardBaseAuthenticationStorage<RIDT, IDT, ATT>
-        implements
-        AuthenticationStorage<RIDT, IDT, ATT> {
-
+    implements
+    AuthenticationStorage<RIDT, IDT, ATT>
+{
     private final Function<RIDT, Long> expirationPolicy;
     private final Function<RIDT, Long> extensionPolicy;
 
     public StandardBaseAuthenticationStorage(Function<RIDT, Long> expirationPolicy,
-                                             Function<RIDT, Long> extensionPolicy) {
+                                             Function<RIDT, Long> extensionPolicy)
+    {
         this.expirationPolicy = expirationPolicy;
-        this.extensionPolicy = extensionPolicy;
+        this.extensionPolicy  = extensionPolicy;
     }
 
     protected Function<RIDT, Long> getExpirationPolicy() {
@@ -33,16 +34,17 @@ public abstract class StandardBaseAuthenticationStorage<RIDT, IDT, ATT>
     public RealmAuthentication<RIDT, IDT, ATT> construct(RIDT realmId,
                                                          IDT id,
                                                          ATT att,
-                                                         InetAddress clientNetworkAddress) {
+                                                         InetAddress clientNetworkAddress)
+    {
         return construct
-                (
-                        extensionPolicy.apply(realmId),
-                        expirationPolicy.apply(realmId),
-                        realmId,
-                        id,
-                        att,
-                        clientNetworkAddress
-                );
+            (
+                extensionPolicy.apply(realmId),
+                expirationPolicy.apply(realmId),
+                realmId,
+                id,
+                att,
+                clientNetworkAddress
+            );
     }
 
     @Override
@@ -51,15 +53,16 @@ public abstract class StandardBaseAuthenticationStorage<RIDT, IDT, ATT>
                                                          RIDT realmId,
                                                          IDT id,
                                                          ATT att,
-                                                         InetAddress clientNetworkAddress) {
+                                                         InetAddress clientNetworkAddress)
+    {
         return new StandardRealmAuthentication<>
-                (
-                        extensionTimeMillis,
-                        expiresSystemTimeMillis,
-                        realmId,
-                        id,
-                        att,
-                        clientNetworkAddress
-                );
+            (
+                extensionTimeMillis,
+                expiresSystemTimeMillis,
+                realmId,
+                id,
+                att,
+                clientNetworkAddress
+            );
     }
 }

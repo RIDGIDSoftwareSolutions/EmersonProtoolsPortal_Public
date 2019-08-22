@@ -9,9 +9,8 @@ import com.ridgid.oss.common.callback.BiHandler;
  * @param <ATT>  Authentication Token Type
  */
 @SuppressWarnings({"unused", "SpellCheckingInspection"})
-public interface RealmListener<RIDT, IDT, ST, ATT> {
-
+public interface RealmListener<RIDT, IDT, ST, ATT>
+{
     boolean register(BiHandler<RIDT, IDT, Boolean> eventHandler);
-
     boolean unregister(BiHandler<RIDT, IDT, Boolean> eventHandler);
 }

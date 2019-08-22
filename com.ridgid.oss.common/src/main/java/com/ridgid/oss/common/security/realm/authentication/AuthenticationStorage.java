@@ -11,7 +11,8 @@ import java.util.Optional;
  */
 @SuppressWarnings({"unused", "SpellCheckingInspection"})
 public interface AuthenticationStorage<RIDT, IDT, ATT>
-        extends RealmAuthenticatinConstructor<RIDT, IDT, ATT> {
+    extends RealmAuthenticationConstructor<RIDT, IDT, ATT>
+{
 
     void store(RealmAuthentication<RIDT, IDT, ATT> auth) throws SQLException;
 

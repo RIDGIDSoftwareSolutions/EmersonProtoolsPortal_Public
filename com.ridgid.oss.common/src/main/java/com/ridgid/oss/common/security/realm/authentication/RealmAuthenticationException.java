@@ -1,8 +1,8 @@
 package com.ridgid.oss.common.security.realm.authentication;
 
 @SuppressWarnings({"WeakerAccess", "unused"})
-public class RealmAuthenticationException extends Exception {
-
+public class RealmAuthenticationException extends Exception
+{
     public RealmAuthenticationException() {
     }
 
@@ -11,7 +11,8 @@ public class RealmAuthenticationException extends Exception {
     }
 
     public RealmAuthenticationException(String message,
-                                        Throwable cause) {
+                                        Throwable cause)
+    {
         super(message, cause);
     }
 
@@ -22,7 +23,8 @@ public class RealmAuthenticationException extends Exception {
     public RealmAuthenticationException(String message,
                                         Throwable cause,
                                         boolean enableSuppression,
-                                        boolean writableStackTrace) {
+                                        boolean writableStackTrace)
+    {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 }

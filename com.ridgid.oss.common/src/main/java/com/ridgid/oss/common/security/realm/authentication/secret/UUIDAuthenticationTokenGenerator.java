@@ -4,8 +4,8 @@ import java.util.UUID;
 
 @SuppressWarnings("unused")
 public class UUIDAuthenticationTokenGenerator<ST, EST extends EncryptedSecret<ST>>
-        implements AuthenticationTokenGenerator<ST, EST, UUID> {
-
+    implements AuthenticationTokenGenerator<ST, EST, UUID>
+{
     @Override
     public UUID tokenFromEncryptedSecret(EST encryptedSecret) {
         return UUID.randomUUID();

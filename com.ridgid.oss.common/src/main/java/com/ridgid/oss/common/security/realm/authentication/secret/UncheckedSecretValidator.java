@@ -4,8 +4,8 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 @SuppressWarnings({"unused", "SpellCheckingInspection"})
-public class UncheckedSecretValidator<RIDT, IDT, ST, ATT> implements SecretValidator<RIDT, IDT, ST, ATT> {
-
+public class UncheckedSecretValidator<RIDT, IDT, ST, ATT> implements SecretValidator<RIDT, IDT, ST, ATT>
+{
     private final Supplier<ATT> authTokenSupplier;
 
     public UncheckedSecretValidator(Supplier<ATT> authTokenSupplier) {
@@ -15,7 +15,8 @@ public class UncheckedSecretValidator<RIDT, IDT, ST, ATT> implements SecretValid
     @Override
     public Optional<ATT> authenticate(RIDT realmId,
                                       IDT userId,
-                                      ST userSecret) {
+                                      ST userSecret)
+    {
         return Optional.ofNullable(authTokenSupplier.get());
     }
 }

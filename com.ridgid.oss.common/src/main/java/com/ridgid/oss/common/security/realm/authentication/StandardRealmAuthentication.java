@@ -4,13 +4,13 @@ import java.net.InetAddress;
 
 @SuppressWarnings({"unused", "SpellCheckingInspection"})
 public final class StandardRealmAuthentication<RIDT, IDT, ATT>
-        implements RealmAuthentication<RIDT, IDT, ATT> {
-
-    private long expiresSystemTimeMillis;
-    private final long extensionTimeMillis;
-    private final RIDT realmId;
-    private final IDT id;
-    private final ATT authenticationToken;
+    implements RealmAuthentication<RIDT, IDT, ATT>
+{
+    private       long        expiresSystemTimeMillis;
+    private final long        extensionTimeMillis;
+    private final RIDT        realmId;
+    private final IDT         id;
+    private final ATT         authenticationToken;
     private final InetAddress clientNetworkAddress;
 
     public StandardRealmAuthentication(long expiresSystemTimeMillis,
@@ -18,13 +18,14 @@ public final class StandardRealmAuthentication<RIDT, IDT, ATT>
                                        RIDT realmId,
                                        IDT id,
                                        ATT authenticationToken,
-                                       InetAddress clientNetworkAddress) {
+                                       InetAddress clientNetworkAddress)
+    {
         this.expiresSystemTimeMillis = expiresSystemTimeMillis;
-        this.extensionTimeMillis = extensionMillis;
-        this.realmId = realmId;
-        this.id = id;
-        this.authenticationToken = authenticationToken;
-        this.clientNetworkAddress = clientNetworkAddress;
+        this.extensionTimeMillis     = extensionMillis;
+        this.realmId                 = realmId;
+        this.id                      = id;
+        this.authenticationToken     = authenticationToken;
+        this.clientNetworkAddress    = clientNetworkAddress;
     }
 
     @Override
@@ -62,5 +63,4 @@ public final class StandardRealmAuthentication<RIDT, IDT, ATT>
         expiresSystemTimeMillis = System.currentTimeMillis() + extensionTimeMillis;
         return this;
     }
-
 }

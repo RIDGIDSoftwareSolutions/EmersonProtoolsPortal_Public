@@ -11,6 +11,7 @@
     <properties>
 
         <!-- External Dependency Versions -->
+        <h2database.version>1.4.199</h2database.version>
         <hamcrest.version>2.1</hamcrest.version>
         <hibernate-entitymanager.version>5.4.3.Final</hibernate-entitymanager.version>
         <jackson-core.version>2.4.4</jackson-core.version>

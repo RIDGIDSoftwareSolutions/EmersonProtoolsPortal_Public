@@ -7,6 +7,7 @@ package com.ridgid.oss.common.security.realm;
  * @param <ATT>  Authentication Token Type
  */
 @SuppressWarnings({"unused", "SpellCheckingInspection"})
-public interface RealmNotifier<RIDT, IDT, ST, ATT> {
+public interface RealmNotifier<RIDT, IDT, ST, ATT>
+{
     void notify(RIDT realmId, IDT id);
 }

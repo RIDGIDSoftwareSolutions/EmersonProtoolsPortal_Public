@@ -12,7 +12,8 @@ import java.util.Objects;
  */
 @SuppressWarnings({"unused", "SpellCheckingInspection"})
 public interface RealmAuthentication<RIDT, IDT, ATT>
-        extends Expirable {
+    extends Expirable
+{
 
     RIDT getRealmId();
 
@@ -27,12 +28,13 @@ public interface RealmAuthentication<RIDT, IDT, ATT>
     long getExtensionTimeMillis();
 
     default boolean isAuthenticated(ATT authenticationToken,
-                                    InetAddress clientNetworkAddress) {
+                                    InetAddress clientNetworkAddress)
+    {
         return !isExpired()
-                && Objects.nonNull(authenticationToken)
-                && Objects.equals(this.getAuthenticationToken(), authenticationToken)
-                && Objects.nonNull(clientNetworkAddress)
-                && Objects.equals(this.getClientNetworkAddress(), clientNetworkAddress);
+               && Objects.nonNull(authenticationToken)
+               && Objects.equals(this.getAuthenticationToken(), authenticationToken)
+               && Objects.nonNull(clientNetworkAddress)
+               && Objects.equals(this.getClientNetworkAddress(), clientNetworkAddress);
     }
 
     default boolean isExpired() {

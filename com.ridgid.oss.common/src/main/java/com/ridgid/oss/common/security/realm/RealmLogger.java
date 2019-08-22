@@ -7,8 +7,8 @@ import java.net.InetAddress;
  * @param <IDT>  ID Type
  */
 @SuppressWarnings({"SpellCheckingInspection"})
-public interface RealmLogger<RIDT, IDT> {
-
+public interface RealmLogger<RIDT, IDT>
+{
     void warn(RIDT realmId,
               IDT id,
               InetAddress clientNetworkAddress,

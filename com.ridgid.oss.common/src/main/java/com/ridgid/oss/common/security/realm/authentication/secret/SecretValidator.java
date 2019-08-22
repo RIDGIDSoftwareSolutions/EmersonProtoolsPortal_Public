@@ -9,8 +9,8 @@ import java.util.Optional;
  * @param <ATT>  Authentication Token Type
  */
 @SuppressWarnings({"unused", "SpellCheckingInspection"})
-public interface SecretValidator<RIDT, IDT, ST, ATT> {
-
+public interface SecretValidator<RIDT, IDT, ST, ATT>
+{
     Optional<ATT> authenticate(RIDT realmId,
                                IDT userId,
                                ST userSecret);
