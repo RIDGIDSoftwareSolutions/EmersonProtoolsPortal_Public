@@ -8,7 +8,7 @@ import java.util.function.Function;
 public class UUIDStandardJDBCAuthenticationStorage extends StandardJDBCAuthenticationStorage<Integer, Integer, UUID>
 {
     private static final String namedParameterUpsertStatement
-        = "merge into Security.UserSesscionAuthentication usa "
+        = "merge into Security.UserSessionAuthentication usa "
           + "using ( "
           + "    values ( :userId, :realmId, :clientNetworkAddress, :authenticationToken, :expires ) "
           + ") "
