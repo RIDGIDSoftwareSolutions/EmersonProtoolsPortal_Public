@@ -32,6 +32,7 @@ public class StandardJDBCAuthenticationStorage<RIDT, IDT, ATT, ECT, ACT>
 
     private final String                        expiresColumnName;
     private final AttributeConverter<Long, ECT> expiresColumnConverter;
+    private final String                        expiresParameterName;
 
     private final Class<RIDT> realmIdClass;
     private final String      realmIdColumnName;
@@ -55,6 +56,7 @@ public class StandardJDBCAuthenticationStorage<RIDT, IDT, ATT, ECT, ACT>
                                              String namedParameterSelectStatement,
                                              String namedParameterDeleteStatement,
                                              String expiresColumnName,
+                                             String expiresParameterName,
                                              AttributeConverter<Long, ECT> expiresColumnConverter,
                                              Class<RIDT> realmIdClass,
                                              String realmIdColumnName,
@@ -74,6 +76,7 @@ public class StandardJDBCAuthenticationStorage<RIDT, IDT, ATT, ECT, ACT>
         super(expirationPolicy, extensionPolicy);
         this.dataSource                          = dataSource;
         this.expiresColumnConverter              = expiresColumnConverter;
+        this.expiresParameterName                = expiresParameterName;
         this.storage                             = new UpsertableStorage();
         this.upsertStatement                     = JdbcHelpers.parseQuery(namedParameterUpsertStatement);
         this.insertStatement                     = null;
@@ -102,6 +105,7 @@ public class StandardJDBCAuthenticationStorage<RIDT, IDT, ATT, ECT, ACT>
                                              String namedParameterSelectStatement,
                                              String namedParameterDeleteStatement,
                                              String expiresColumnName,
+                                             String expiresParameterName,
                                              AttributeConverter<Long, ECT> expiresColumnConverter,
                                              Class<RIDT> realmIdClass,
                                              String realmIdColumnName,
@@ -128,6 +132,7 @@ public class StandardJDBCAuthenticationStorage<RIDT, IDT, ATT, ECT, ACT>
         this.selectQuery                         = JdbcHelpers.parseQuery(namedParameterSelectStatement);
         this.deleteStatement                     = JdbcHelpers.parseQuery(namedParameterDeleteStatement);
         this.expiresColumnName                   = expiresColumnName;
+        this.expiresParameterName                = expiresParameterName;
         this.realmIdClass                        = realmIdClass;
         this.realmIdColumnName                   = realmIdColumnName;
         this.realmIdParameterName                = realmIdParameterName;
@@ -235,7 +240,7 @@ public class StandardJDBCAuthenticationStorage<RIDT, IDT, ATT, ECT, ACT>
                 int numRowsUpdated =
                     upsertStatement
                         .prepare(conn)
-                        .setParameter(expiresColumnName,
+                        .setParameter(expiresParameterName,
                                       expiresColumnConverter.convertToDatabaseColumn
                                           (
                                               auth.getExpiresSystemTimeMillis()
@@ -269,7 +274,7 @@ public class StandardJDBCAuthenticationStorage<RIDT, IDT, ATT, ECT, ACT>
                 int numRowsInserted =
                     insertStatement
                         .prepare(conn)
-                        .setParameter(expiresColumnName,
+                        .setParameter(expiresParameterName,
                                       expiresColumnConverter.convertToDatabaseColumn
                                           (
                                               auth.getExpiresSystemTimeMillis()
@@ -297,7 +302,7 @@ public class StandardJDBCAuthenticationStorage<RIDT, IDT, ATT, ECT, ACT>
                 int numRowsUpdated =
                     updateStatement
                         .prepare(conn)
-                        .setParameter(expiresColumnName,
+                        .setParameter(expiresParameterName,
                                       expiresColumnConverter.convertToDatabaseColumn
                                           (
                                               auth.getExpiresSystemTimeMillis()

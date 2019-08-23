@@ -42,6 +42,7 @@ public class UUIDStandardJDBCAuthenticationStorage
           + "where UserId = :userId and RealmId = :realmId; ";
 
     private static final String         expiresColumnName                 = "Expires";
+    private static final String         expiresParameterName              = "expires";
     private static final Class<Integer> realmIdClass                      = Integer.class;
     private static final String         realmIdColumnName                 = "RealmId";
     private static final String         realmIdParameterName              = "realmId";
@@ -68,6 +69,7 @@ public class UUIDStandardJDBCAuthenticationStorage
                 namedParameterSelectStatement,
                 namedParameterDeleteStatement,
                 expiresColumnName,
+                expiresParameterName,
                 new SystemTimeMillisAsLocalDateTimeConverter(),
                 realmIdClass,
                 realmIdColumnName,
