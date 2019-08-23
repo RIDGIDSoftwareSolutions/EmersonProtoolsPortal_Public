@@ -84,7 +84,7 @@ class NamedParameterJdbcQuery_Test
     @Test
     void it_executes_a_parameterized_query_with_2_parameters() throws SQLException {
         NamedParameterJdbcQuery         query         = new NamedParameterJdbcQuery(
-            "select * from Dummy where Code = :code");
+            "select * from Dummy where Code = :code;");
         PreparedNamedParameterJdbcQuery preparedQuery = query.prepare(conn);
         preparedQuery.setParameter("code", "XXX");
         try ( ResultSet rs = preparedQuery.executeQuery() ) {

@@ -25,16 +25,16 @@ public class UUIDStandardJDBCAuthenticationStorage extends StandardJDBCAuthentic
           + "when not matched then insert "
           + "    ( UserId, RealmId, ClientNetworkAddress, AuthenticationToken, Expires ) "
           + "    values "
-          + "    ( v.UserId, v.RealmId, v.ClientNetworkAddress, v.AuthenticationToken, v.Expires ) ";
+          + "    ( v.UserId, v.RealmId, v.ClientNetworkAddress, v.AuthenticationToken, v.Expires ); ";
 
     private static final String namedParameterSelectStatement
         = "select UserId, RealmId, ClientNetworkAddress, AuthenticationToken, Expires "
           + "from Security.UserSesscionAuthentication "
-          + "where UserId = :userId and RealmId = :realmId ";
+          + "where UserId = :userId and RealmId = :realmId; ";
 
     private static final String namedParameterDeleteStatement
         = "delete Security.UserSesscionAuthentication "
-          + "where UserId = :userId and RealmId = :realmId ";
+          + "where UserId = :userId and RealmId = :realmId; ";
 
     private static final String         expiresColumnName                 = "Expires";
     private static final Class<Integer> realmIdClass                      = Integer.class;
