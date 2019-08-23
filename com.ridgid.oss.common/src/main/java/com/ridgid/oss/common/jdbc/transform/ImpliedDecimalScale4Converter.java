@@ -1,4 +1,4 @@
-package com.ridgid.oss.orm.convert;
+package com.ridgid.oss.common.jdbc.transform;
 
 public class ImpliedDecimalScale4Converter extends ImpliedDecimalConverter {
     protected ImpliedDecimalScale4Converter() {

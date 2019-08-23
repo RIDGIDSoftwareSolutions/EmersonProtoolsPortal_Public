@@ -6,6 +6,6 @@ import java.time.LocalTime;
 
 @Converter
 public class Hh24MmSsTimeOfDayConverter
-        extends com.ridgid.oss.orm.convert.Hh24MmSsTimeOfDayConverter
+    extends com.ridgid.oss.common.jdbc.transform.Hh24MmSsTimeOfDayConverter
         implements AttributeConverter<LocalTime, Integer> {
 }

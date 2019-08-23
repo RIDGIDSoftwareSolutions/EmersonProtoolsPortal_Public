@@ -8,7 +8,7 @@ import javax.persistence.Converter;
 @SuppressWarnings({"unused", "SpellCheckingInspection"})
 @Converter
 public class EnumConverter<ET extends ConvertibleEnum<? extends Enum, DBCT>, DBCT>
-        extends com.ridgid.oss.orm.convert.EnumConverter<ET, DBCT>
+    extends com.ridgid.oss.common.jdbc.transform.EnumConverter<ET, DBCT>
         implements AttributeConverter<ET, DBCT> {
 
     public EnumConverter(Class<ET> entityValueClass,

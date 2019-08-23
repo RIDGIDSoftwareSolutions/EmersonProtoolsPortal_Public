@@ -1,4 +1,4 @@
-package com.ridgid.oss.orm.convert;
+package com.ridgid.oss.common.jdbc.transform;
 
 /**
  * Interface that all Attribute Converters must implement

@@ -1,4 +1,4 @@
-package com.ridgid.oss.orm.convert;
+package com.ridgid.oss.common.jdbc.transform;
 
 import com.ridgid.oss.common.enumutil.ConvertibleEnum;
 

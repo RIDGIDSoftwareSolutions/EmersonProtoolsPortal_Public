@@ -6,6 +6,6 @@ import java.math.BigDecimal;
 
 @Converter
 public class ImpliedDecimalScale6Converter
-        extends com.ridgid.oss.orm.convert.ImpliedDecimalScale6Converter
+    extends com.ridgid.oss.common.jdbc.transform.ImpliedDecimalScale6Converter
         implements AttributeConverter<BigDecimal, Integer> {
 }

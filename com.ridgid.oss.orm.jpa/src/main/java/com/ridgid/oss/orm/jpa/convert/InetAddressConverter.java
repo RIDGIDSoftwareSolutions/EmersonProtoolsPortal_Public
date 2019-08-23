@@ -5,6 +5,6 @@ import java.net.InetAddress;
 
 @SuppressWarnings("unused")
 public class InetAddressConverter
-        extends com.ridgid.oss.orm.convert.InetAddressConverter
+    extends com.ridgid.oss.common.jdbc.transform.InetAddressConverter
         implements AttributeConverter<InetAddress, byte[]> {
 }

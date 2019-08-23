@@ -1,11 +1,16 @@
 package com.ridgid.oss.common.security.realm.authentication.storage;
 
+import com.ridgid.oss.common.jdbc.transform.SystemTimeMillisAsLocalDateTimeConverter;
+import com.ridgid.oss.common.jdbc.transform.UUIDConverter;
+
 import javax.sql.DataSource;
+import java.time.LocalDateTime;
 import java.util.UUID;
 import java.util.function.Function;
 
 @SuppressWarnings({"SpellCheckingInspection", "unused"})
-public class UUIDStandardJDBCAuthenticationStorage extends StandardJDBCAuthenticationStorage<Integer, Integer, UUID>
+public class UUIDStandardJDBCAuthenticationStorage
+    extends StandardJDBCAuthenticationStorage<Integer, Integer, UUID, LocalDateTime, String>
 {
     private static final String namedParameterUpsertStatement
         = "merge into Security.UserSessionAuthentication usa "
@@ -63,6 +68,7 @@ public class UUIDStandardJDBCAuthenticationStorage extends StandardJDBCAuthentic
                 namedParameterSelectStatement,
                 namedParameterDeleteStatement,
                 expiresColumnName,
+                new SystemTimeMillisAsLocalDateTimeConverter(),
                 realmIdClass,
                 realmIdColumnName,
                 realmIdParameterName,
@@ -72,6 +78,7 @@ public class UUIDStandardJDBCAuthenticationStorage extends StandardJDBCAuthentic
                 authenticationTokenClass,
                 authenticationTokenColumnName,
                 authenticationTokenParameterName,
+                new UUIDConverter(),
                 clientNetworkAddressColumnName,
                 clientNetworkAddressParameterName,
                 expirationPolicy,

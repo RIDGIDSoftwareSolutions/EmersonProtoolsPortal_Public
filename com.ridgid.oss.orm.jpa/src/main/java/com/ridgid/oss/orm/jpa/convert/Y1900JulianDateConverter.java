@@ -6,6 +6,6 @@ import java.time.LocalDate;
 
 @Converter
 public class Y1900JulianDateConverter
-        extends com.ridgid.oss.orm.convert.Y1900JulianDateConverter
+    extends com.ridgid.oss.common.jdbc.transform.Y1900JulianDateConverter
         implements AttributeConverter<LocalDate, Integer> {
 }

@@ -1,5 +1,8 @@
 package com.ridgid.oss.common.jdbc;
 
+import com.ridgid.oss.common.jdbc.transform.AttributeConverter;
+
+import java.net.InetAddress;
 import java.sql.Connection;
 import java.sql.ParameterMetaData;
 import java.sql.PreparedStatement;
@@ -10,6 +13,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -25,6 +29,24 @@ public class NamedParameterJdbcQuery
 
     public NamedParameterJdbcQuery(String query) {
         this.query = parseParametersInQuery(query);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <CT> long getLong(ResultSet rs,
+                                    AttributeConverter<Long, CT> converter,
+                                    String columnName)
+        throws SQLException
+    {
+        return converter.convertToEntityAttribute((CT) rs.getObject(columnName));
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T, CT> T get(ResultSet rs,
+                                AttributeConverter<T, CT> converter,
+                                String columnName)
+        throws SQLException
+    {
+        return converter.convertToEntityAttribute((CT) rs.getObject(columnName));
     }
 
     private String parseParametersInQuery(String query) {
@@ -102,12 +124,45 @@ public class NamedParameterJdbcQuery
                                          int pidx)
             throws SQLException
         {
-            preparedStatement.setObject
-                (
-                    pidx,
-                    value,
-                    md.getParameterType(pidx)
-                );
+            if ( value.getClass().isEnum() )
+                setEnumParameter((Enum) value, md, pidx);
+            else if ( value instanceof UUID )
+                setUUIDParameter((UUID) value, md, pidx);
+            else if ( value instanceof InetAddress )
+                setInetAddressParameter((InetAddress) value, md, pidx);
+            else
+                preparedStatement.setObject
+                    (
+                        pidx,
+                        value,
+                        md.getParameterType(pidx)
+                    );
         }
+
+        private void setEnumParameter(Enum value,
+                                      ParameterMetaData md,
+                                      int pidx)
+            throws SQLException
+        {
+            setNonNullParameter(value.name(), md, pidx);
+        }
+
+        private void setUUIDParameter(UUID value,
+                                      ParameterMetaData md,
+                                      int pidx)
+            throws SQLException
+        {
+            setNonNullParameter(value.toString(), md, pidx);
+        }
+
+        private void setInetAddressParameter(InetAddress value,
+                                             ParameterMetaData md,
+                                             int pidx)
+            throws SQLException
+        {
+            setNonNullParameter(value.getAddress(), md, pidx);
+        }
+
     }
+
 }
