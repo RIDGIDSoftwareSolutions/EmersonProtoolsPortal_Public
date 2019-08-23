@@ -45,6 +45,12 @@ public class InMemoryManagedCache<K, V>
         this.hasRegularCleanupPolicy = timeoutCheckIntervalSeconds > 0;
     }
 
+    @Override
+    protected void finalize() throws Throwable {
+        cleanupTimer.cancel();
+        super.finalize();
+    }
+
     public final void forceCleanup() {
         checkCapacity();
     }
