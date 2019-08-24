@@ -1,5 +1,6 @@
 package com.ridgid.oss.common.security.realm.authentication.secret;
 
+import java.util.Collection;
 import java.util.Optional;
 
 /**
@@ -12,6 +13,10 @@ import java.util.Optional;
 public interface SecretValidator<RIDT, IDT, ST, ATT>
 {
     Optional<ATT> authenticate(RIDT realmId,
+                               IDT userId,
+                               ST userSecret);
+
+    Optional<ATT> authenticate(Collection<RIDT> realmIds,
                                IDT userId,
                                ST userSecret);
 }

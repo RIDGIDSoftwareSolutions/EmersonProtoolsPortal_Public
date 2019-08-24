@@ -14,17 +14,11 @@ import java.util.Objects;
 public interface RealmAuthentication<RIDT, IDT, ATT>
     extends Expirable
 {
-
     RIDT getRealmId();
-
     IDT getId();
-
     ATT getAuthenticationToken();
-
     InetAddress getClientNetworkAddress();
-
     long getExpiresSystemTimeMillis();
-
     long getExtensionTimeMillis();
 
     default boolean isAuthenticated(ATT authenticationToken,
@@ -40,7 +34,5 @@ public interface RealmAuthentication<RIDT, IDT, ATT>
     default boolean isExpired() {
         return getExpiresSystemTimeMillis() < System.currentTimeMillis();
     }
-
     RealmAuthentication<RIDT, IDT, ATT> extendAuthentication();
-
 }

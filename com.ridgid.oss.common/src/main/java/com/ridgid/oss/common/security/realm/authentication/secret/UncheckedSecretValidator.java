@@ -1,5 +1,6 @@
 package com.ridgid.oss.common.security.realm.authentication.secret;
 
+import java.util.Collection;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -14,6 +15,14 @@ public class UncheckedSecretValidator<RIDT, IDT, ST, ATT> implements SecretValid
 
     @Override
     public Optional<ATT> authenticate(RIDT realmId,
+                                      IDT userId,
+                                      ST userSecret)
+    {
+        return Optional.ofNullable(authTokenSupplier.get());
+    }
+
+    @Override
+    public Optional<ATT> authenticate(Collection<RIDT> realmIds,
                                       IDT userId,
                                       ST userSecret)
     {

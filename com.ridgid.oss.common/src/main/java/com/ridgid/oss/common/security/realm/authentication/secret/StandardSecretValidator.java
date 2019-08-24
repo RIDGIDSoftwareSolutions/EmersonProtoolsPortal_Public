@@ -1,5 +1,6 @@
 package com.ridgid.oss.common.security.realm.authentication.secret;
 
+import java.util.Collection;
 import java.util.Optional;
 
 @SuppressWarnings({"unused", "SpellCheckingInspection"})
@@ -21,6 +22,39 @@ public class StandardSecretValidator<RIDT, IDT, ST, ATT, EST extends EncryptedSe
                                       IDT userId,
                                       ST userSecret)
     {
+        return
+            authenticateToSingleRealm
+                (
+                    realmId,
+                    userId,
+                    userSecret
+                )
+                .map
+                    (
+                        tokenGenerator::tokenFromEncryptedSecret
+                    );
+    }
+
+    @Override
+    public Optional<ATT> authenticate(Collection<RIDT> realmIds,
+                                      IDT userId,
+                                      ST userSecret)
+    {
+        return
+            realmIds
+                .stream()
+                .map
+                    (
+                        realmId -> authenticateToSingleRealm
+                            (
+                                realmId,
+                                userId,
+                                userSecret
+                            ).orElse(null)
+                    )
+    }
+
+    private Optional<EST> authenticateToSingleRealm(RIDT realmId, IDT userId, ST userSecret) {
         return credentialStore
             .retrieveCredentialFor
                 (
@@ -34,10 +68,6 @@ public class StandardSecretValidator<RIDT, IDT, ST, ATT, EST extends EncryptedSe
             .filter
                 (
                     EncryptedSecret.matchedBy(userSecret)
-                )
-            .map
-                (
-                    tokenGenerator::tokenFromEncryptedSecret
                 );
     }
 }

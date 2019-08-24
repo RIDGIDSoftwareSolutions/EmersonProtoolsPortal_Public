@@ -11,9 +11,11 @@ import com.ridgid.oss.common.security.realm.authentication.secret.SecretValidato
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.stream.Stream;
 
 /**
  * Realm Authentication Manager
@@ -68,10 +70,10 @@ public class RealmManager<RIDT, IDT, ST, ATT>
         return (short) Math.max(min * 2, Math.max(1, requestedMax));
     }
 
-    public Optional<RealmAuthentication<RIDT, IDT, ATT>> authenticate(RIDT realmId,
-                                                                      IDT id,
-                                                                      ST secret,
-                                                                      InetAddress clientNetworkAddress)
+    public Optional<ATT> authenticate(RIDT realmId,
+                                      IDT id,
+                                      ST secret,
+                                      InetAddress clientNetworkAddress)
         throws BlacklistedException
     {
         checkBlacklisted(clientNetworkAddress);
@@ -89,7 +91,33 @@ public class RealmManager<RIDT, IDT, ST, ATT>
             .map(this::cacheStoreAndNotify);
         if ( !auth.isPresent() )
             checkFailedAuthVisitOk(clientNetworkAddress);
-        return auth;
+        return auth.map(RealmAuthentication::getAuthenticationToken);
+    }
+
+    public Optional<ATT> authenticate(Collection<RIDT> realmIds,
+                                      IDT id,
+                                      ST secret,
+                                      InetAddress clientNetworkAddress)
+        throws BlacklistedException
+    {
+        checkBlacklisted(clientNetworkAddress);
+        Optional<Stream<RealmAuthentication<RIDT, IDT, ATT>>> auths
+            = secretValidator
+            .authenticate(realmIds, id, secret)
+            .map(att -> buildAuthentications
+                     (
+                         realmIds,
+                         id,
+                         att,
+                         clientNetworkAddress
+                     )
+                )
+            .map(this::cacheStoreAndNotify);
+        if ( !auths.isPresent() )
+            checkFailedAuthVisitOk(clientNetworkAddress);
+        return auths.orElseGet(Stream::empty)
+                    .findFirst()
+                    .map(RealmAuthentication::getAuthenticationToken);
     }
 
     public boolean extendAuthentication(RIDT realmId,
@@ -97,13 +125,33 @@ public class RealmManager<RIDT, IDT, ST, ATT>
                                         InetAddress clientNetworkAddress)
         throws BlacklistedException
     {
-
         checkBlacklisted(clientNetworkAddress);
-        if ( readThrougCache(realmId, id)
+        if ( readThroughCache(realmId, id)
             .map(RealmAuthentication::extendAuthentication)
             .map(this::store)
             .map(this::notify)
             .isPresent() )
+            return true;
+        checkFailedAuthVisitOk(clientNetworkAddress);
+        return false;
+    }
+
+    public boolean extendAuthentication(Collection<RIDT> realmIds,
+                                        IDT id,
+                                        InetAddress clientNetworkAddress)
+        throws BlacklistedException
+    {
+        checkBlacklisted(clientNetworkAddress);
+        if ( realmIds.stream()
+                     .allMatch
+                         (
+                             realmId -> readThroughCache(realmId, id)
+                                 .map(RealmAuthentication::extendAuthentication)
+                                 .map(this::store)
+                                 .map(this::notify)
+                                 .isPresent()
+                         )
+        )
             return true;
         checkFailedAuthVisitOk(clientNetworkAddress);
         return false;
@@ -117,6 +165,16 @@ public class RealmManager<RIDT, IDT, ST, ATT>
         notify(realmId, id);
     }
 
+    public void revokeAuthentications(Collection<RIDT> realmIds,
+                                      IDT id)
+    {
+        for ( RIDT realmId : realmIds ) {
+            removeStored(realmId, id);
+            removeCached(realmId, id);
+            notify(realmId, id);
+        }
+    }
+
     public boolean isAuthenticatedInRealm(RIDT realmId,
                                           IDT id,
                                           ATT authenticationToken,
@@ -124,7 +182,7 @@ public class RealmManager<RIDT, IDT, ST, ATT>
         throws BlacklistedException
     {
         checkBlacklisted(clientNetworkAddress);
-        if ( readThrougCache(realmId, id)
+        if ( readThroughCache(realmId, id)
             .map(auth -> auth.isAuthenticated(authenticationToken, clientNetworkAddress))
             .isPresent() )
             return true;
@@ -165,7 +223,7 @@ public class RealmManager<RIDT, IDT, ST, ATT>
             );
     }
 
-    private Optional<RealmAuthentication<RIDT, IDT, ATT>> readThrougCache(RIDT realmId, IDT id) {
+    private Optional<RealmAuthentication<RIDT, IDT, ATT>> readThroughCache(RIDT realmId, IDT id) {
         return Optional.ofNullable
             (
                 authenticationCache
@@ -216,6 +274,33 @@ public class RealmManager<RIDT, IDT, ST, ATT>
                 att,
                 clientNetworkAddress
             );
+    }
+
+    private Stream<RealmAuthentication<RIDT, IDT, ATT>> buildAuthentications(Collection<RIDT> realmIds,
+                                                                             IDT id,
+                                                                             ATT att,
+                                                                             InetAddress clientNetworkAddress)
+    {
+        return realmIds
+            .stream()
+            .map
+                (
+                    realmId -> storage.construct
+                        (
+                            realmId,
+                            id,
+                            att,
+                            clientNetworkAddress
+                        )
+                );
+    }
+
+    private Stream<RealmAuthentication<RIDT, IDT, ATT>> cacheStoreAndNotify(Stream<RealmAuthentication<RIDT, IDT, ATT>> auths) {
+        return auths.peek(auth -> {
+            cache(auth);
+            store(auth);
+            notify(auth);
+        });
     }
 
     private RealmAuthentication<RIDT, IDT, ATT> cacheStoreAndNotify(RealmAuthentication<RIDT, IDT, ATT> auth) {
