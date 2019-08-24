@@ -29,10 +29,7 @@ public class StandardSecretValidator<RIDT, IDT, ST, ATT, EST extends EncryptedSe
                     userId,
                     userSecret
                 )
-                .map
-                    (
-                        tokenGenerator::tokenFromEncryptedSecret
-                    );
+                .map(tokenGenerator::tokenFromEncryptedSecret);
     }
 
     @Override
@@ -40,18 +37,17 @@ public class StandardSecretValidator<RIDT, IDT, ST, ATT, EST extends EncryptedSe
                                       IDT userId,
                                       ST userSecret)
     {
-        return
-            realmIds
-                .stream()
-                .map
-                    (
-                        realmId -> authenticateToSingleRealm
-                            (
-                                realmId,
-                                userId,
-                                userSecret
-                            ).orElse(null)
-                    )
+        Optional<EST> est = Optional.empty();
+        for ( RIDT realmId : realmIds ) {
+            est = authenticateToSingleRealm
+                (
+                    realmId,
+                    userId,
+                    userSecret
+                );
+            if ( !est.isPresent() ) return Optional.empty();
+        }
+        return est.map(tokenGenerator::tokenFromEncryptedSecret);
     }
 
     private Optional<EST> authenticateToSingleRealm(RIDT realmId, IDT userId, ST userSecret) {
