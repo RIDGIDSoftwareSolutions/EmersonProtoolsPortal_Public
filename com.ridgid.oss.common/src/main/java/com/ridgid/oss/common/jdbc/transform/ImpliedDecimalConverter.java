@@ -1,7 +1,6 @@
 package com.ridgid.oss.common.jdbc.transform;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 
 @SuppressWarnings("WeakerAccess")
 public abstract class ImpliedDecimalConverter implements AttributeConverter<BigDecimal, Integer>
@@ -9,9 +8,10 @@ public abstract class ImpliedDecimalConverter implements AttributeConverter<BigD
 
     private final BigDecimal multiplier;
 
+    @SuppressWarnings("BigDecimalMethodWithoutRoundingCalled")
     protected ImpliedDecimalConverter(int numberOfDecimalPlaces) {
-        this.multiplier = BigDecimal.valueOf(Math.pow(10, numberOfDecimalPlaces)).setScale(numberOfDecimalPlaces,
-                                                                                           RoundingMode.HALF_EVEN);
+        this.multiplier = BigDecimal.valueOf(Math.pow(10, numberOfDecimalPlaces))
+                                    .setScale(numberOfDecimalPlaces);
     }
 
     @Override
@@ -19,9 +19,9 @@ public abstract class ImpliedDecimalConverter implements AttributeConverter<BigD
         return entityValue.multiply(multiplier).intValue();
     }
 
+    @SuppressWarnings("BigDecimalMethodWithoutRoundingCalled")
     @Override
     public BigDecimal convertToEntityAttribute(Integer dbValue) {
-        return BigDecimal.valueOf(dbValue).divide(multiplier,
-                                                  RoundingMode.HALF_EVEN);
+        return BigDecimal.valueOf(dbValue).divide(multiplier);
     }
 }
