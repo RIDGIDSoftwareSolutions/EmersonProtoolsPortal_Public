@@ -34,11 +34,11 @@ public class UUIDStandardJDBCAuthenticationStorage
 
     private static final String namedParameterSelectStatement
         = "select UserId, RealmId, ClientNetworkAddress, AuthenticationToken, Expires "
-          + "from Security.UserSesscionAuthentication "
+          + "from Security.UserSessionAuthentication "
           + "where UserId = :userId and RealmId = :realmId; ";
 
     private static final String namedParameterDeleteStatement
-        = "delete Security.UserSesscionAuthentication "
+        = "delete Security.UserSessionAuthentication "
           + "where UserId = :userId and RealmId = :realmId; ";
 
     private static final String         expiresColumnName                 = "Expires";
