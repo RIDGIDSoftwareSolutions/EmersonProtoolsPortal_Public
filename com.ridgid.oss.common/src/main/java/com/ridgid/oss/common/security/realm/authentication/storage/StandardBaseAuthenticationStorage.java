@@ -57,8 +57,8 @@ public abstract class StandardBaseAuthenticationStorage<RIDT, IDT, ATT>
     {
         return new StandardRealmAuthentication<>
             (
-                extensionTimeMillis,
                 expiresSystemTimeMillis,
+                extensionTimeMillis,
                 realmId,
                 id,
                 att,
