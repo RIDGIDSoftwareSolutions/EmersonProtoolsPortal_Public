@@ -20,6 +20,8 @@ public interface RealmAuthentication<RIDT, IDT, ATT>
     InetAddress getClientNetworkAddress();
     long getExpiresSystemTimeMillis();
     long getExtensionTimeMillis();
+    boolean needsPersisted();
+    void persisted();
 
     default boolean isAuthenticated(ATT authenticationToken,
                                     InetAddress clientNetworkAddress)
@@ -34,5 +36,6 @@ public interface RealmAuthentication<RIDT, IDT, ATT>
     default boolean isExpired() {
         return getExpiresSystemTimeMillis() < System.currentTimeMillis();
     }
+
     RealmAuthentication<RIDT, IDT, ATT> extendAuthentication();
 }

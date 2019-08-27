@@ -6,12 +6,14 @@ import java.net.InetAddress;
 public final class StandardRealmAuthentication<RIDT, IDT, ATT>
     implements RealmAuthentication<RIDT, IDT, ATT>
 {
-    private       long        expiresSystemTimeMillis;
     private final long        extensionTimeMillis;
     private final RIDT        realmId;
     private final IDT         id;
     private final ATT         authenticationToken;
     private final InetAddress clientNetworkAddress;
+
+    private long    expiresSystemTimeMillis;
+    private boolean needsPersisted;
 
     public StandardRealmAuthentication(long expiresSystemTimeMillis,
                                        long extensionMillis,
@@ -20,12 +22,14 @@ public final class StandardRealmAuthentication<RIDT, IDT, ATT>
                                        ATT authenticationToken,
                                        InetAddress clientNetworkAddress)
     {
+        this.extensionTimeMillis  = extensionMillis;
+        this.realmId              = realmId;
+        this.id                   = id;
+        this.authenticationToken  = authenticationToken;
+        this.clientNetworkAddress = clientNetworkAddress;
+
         this.expiresSystemTimeMillis = expiresSystemTimeMillis;
-        this.extensionTimeMillis     = extensionMillis;
-        this.realmId                 = realmId;
-        this.id                      = id;
-        this.authenticationToken     = authenticationToken;
-        this.clientNetworkAddress    = clientNetworkAddress;
+        this.needsPersisted          = false;
     }
 
     @Override
@@ -60,7 +64,16 @@ public final class StandardRealmAuthentication<RIDT, IDT, ATT>
 
     @Override
     public RealmAuthentication<RIDT, IDT, ATT> extendAuthentication() {
+        needsPersisted          = true;
         expiresSystemTimeMillis = System.currentTimeMillis() + extensionTimeMillis;
         return this;
+    }
+
+    @Override
+    public boolean needsPersisted() { return needsPersisted; }
+
+    @Override
+    public void persisted() {
+        needsPersisted = false;
     }
 }

@@ -13,6 +13,8 @@ import java.net.UnknownHostException;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Optional;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Stream;
@@ -49,6 +51,8 @@ public class RealmManager<RIDT, IDT, ST, ATT>
     private final RealmLogger<RIDT, IDT>                                               logger;
     private final short                                                                maxCacheSize;
 
+    private final QueueStoreAndNotifyTimer queuedStoreAndNotifyTimer = new QueueStoreAndNotifyTimer(true);
+
     protected RealmManager(RealmListener<RIDT, IDT, ST, ATT> listener,
                            RealmNotifier<RIDT, IDT, ST, ATT> notifier,
                            SecretValidator<RIDT, IDT, ST, ATT> secretValidator,
@@ -63,6 +67,12 @@ public class RealmManager<RIDT, IDT, ST, ATT>
         this.logger          = logger;
         this.maxCacheSize    = computeMaxCacheSize(DEFAULT_MIN_CACHE_SIZE, maxCacheSize);
         listener.register(this::handleListenerEvent);
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        queuedStoreAndNotifyTimer.cancel();
+        super.finalize();
     }
 
     @SuppressWarnings("SameParameterValue")
@@ -127,9 +137,8 @@ public class RealmManager<RIDT, IDT, ST, ATT>
     {
         checkBlacklisted(clientNetworkAddress);
         if ( readThroughCache(realmId, id)
+            .map(queuedStoreAndNotifyTimer::ensureStoredAndNotifiedInTime)
             .map(RealmAuthentication::extendAuthentication)
-            .map(this::store)
-            .map(this::notify)
             .isPresent() )
             return true;
         checkFailedAuthVisitOk(clientNetworkAddress);
@@ -146,9 +155,8 @@ public class RealmManager<RIDT, IDT, ST, ATT>
                      .allMatch
                          (
                              realmId -> readThroughCache(realmId, id)
+                                 .map(queuedStoreAndNotifyTimer::ensureStoredAndNotifiedInTime)
                                  .map(RealmAuthentication::extendAuthentication)
-                                 .map(this::store)
-                                 .map(this::notify)
                                  .isPresent()
                          )
         )
@@ -335,7 +343,7 @@ public class RealmManager<RIDT, IDT, ST, ATT>
         }
     }
 
-    private RealmAuthentication<RIDT, IDT, ATT> store(RealmAuthentication<RIDT, IDT, ATT> auth) {
+    private void store(RealmAuthentication<RIDT, IDT, ATT> auth) {
         try {
             storage.store(auth);
         } catch ( Exception ex ) {
@@ -348,7 +356,6 @@ public class RealmManager<RIDT, IDT, ST, ATT>
                     ex
                 );
         }
-        return auth;
     }
 
     private void removeStored(RIDT realmId, IDT id) {
@@ -392,14 +399,13 @@ public class RealmManager<RIDT, IDT, ST, ATT>
         }
     }
 
-    private RealmAuthentication<RIDT, IDT, ATT> notify(RealmAuthentication<RIDT, IDT, ATT> auth) {
+    private void notify(RealmAuthentication<RIDT, IDT, ATT> auth) {
         notify
             (
                 auth.getRealmId(),
                 auth.getId(),
                 auth.getClientNetworkAddress()
             );
-        return auth;
     }
 
     private void notify(RIDT realmId, IDT id) {
@@ -538,4 +544,50 @@ public class RealmManager<RIDT, IDT, ST, ATT>
         }
     }
 
+    private class QueueStoreAndNotifyTimer extends Timer
+    {
+        private final TimerTask storeNotifyTask = new TimerTask()
+        {
+            @Override
+            public void run() {
+                authenticationCache
+                    .values()
+                    .stream()
+                    .flatMap(Cache::streamValues)
+                    .filter(RealmAuthentication::needsPersisted)
+                    .peek(RealmManager.this::store)
+                    .peek(RealmManager.this::notify)
+                    .forEach(RealmAuthentication::persisted);
+                synchronized ( this ) {
+                    nextTimeToFire = randomNearTimeInFuture();
+                }
+            }
+        };
+
+        private long nextTimeToFire = randomNearTimeInFuture();
+
+        QueueStoreAndNotifyTimer(boolean isDaemon) {
+            super(isDaemon);
+        }
+
+        RealmAuthentication<RIDT, IDT, ATT>
+        ensureStoredAndNotifiedInTime(RealmAuthentication<RIDT, IDT, ATT> auth)
+        {
+            reschedule(Math.min(auth.getExpiresSystemTimeMillis() - 300_000, nextTimeToFire));
+            return auth;
+        }
+
+        private void reschedule(long latestTimeToFire) {
+            if ( latestTimeToFire < nextTimeToFire )
+                synchronized ( storeNotifyTask ) {
+                    if ( latestTimeToFire >= nextTimeToFire && nextTimeToFire > System.currentTimeMillis() ) return;
+                    storeNotifyTask.cancel();
+                    schedule(storeNotifyTask, Math.max(5000, latestTimeToFire - System.currentTimeMillis()));
+                }
+        }
+
+        private long randomNearTimeInFuture() {
+            return System.currentTimeMillis() + (long) Math.floor(Math.random() * 15 + 10) * 60000;
+        }
+    }
 }
