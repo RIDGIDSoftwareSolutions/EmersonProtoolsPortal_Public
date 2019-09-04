@@ -157,14 +157,14 @@ public class StandardJDBCAuthenticationStorage<RIDT, IDT, ATT, ECT, ACT>
 
     @Override
     public Optional<RealmAuthentication<RIDT, IDT, ATT>>
-    retrieve(RIDT realmId, IDT id) throws SQLException
+    retrieve(RIDT realmId, IDT id, ATT authenticationToken) throws SQLException
     {
-        return storage.retrieve(dataSource, realmId, id);
+        return storage.retrieve(dataSource, realmId, id, authenticationToken);
     }
 
     @Override
-    public void remove(RIDT realmId, IDT id) throws SQLException {
-        storage.remove(dataSource, realmId, id);
+    public void remove(RIDT realmId, IDT id, ATT authenticationToken) throws SQLException {
+        storage.remove(dataSource, realmId, id, authenticationToken);
     }
 
     private abstract class Storage
@@ -174,7 +174,8 @@ public class StandardJDBCAuthenticationStorage<RIDT, IDT, ATT, ECT, ACT>
 
         Optional<RealmAuthentication<RIDT, IDT, ATT>> retrieve(DataSource dataSource,
                                                                RIDT realmId,
-                                                               IDT id) throws SQLException
+                                                               IDT id,
+                                                               ATT authenticationToken) throws SQLException
         {
             try ( Connection conn = dataSource.getConnection() ) {
                 try ( ResultSet rs =
@@ -183,6 +184,7 @@ public class StandardJDBCAuthenticationStorage<RIDT, IDT, ATT, ECT, ACT>
                                   .prepare(conn)
                                   .setParameter(realmIdParameterName, realmId)
                                   .setParameter(idParameterName, id)
+                                  .setParameter(authenticationTokenParameterName, authenticationToken)
                                   .executeQuery()
                           )
                 ) {
@@ -216,7 +218,8 @@ public class StandardJDBCAuthenticationStorage<RIDT, IDT, ATT, ECT, ACT>
 
         public void remove(DataSource dataSource,
                            RIDT realmId,
-                           IDT id) throws SQLException
+                           IDT id,
+                           ATT authenticationToken) throws SQLException
         {
             try ( Connection conn = dataSource.getConnection() ) {
                 int numRowsDeleted =
@@ -224,6 +227,7 @@ public class StandardJDBCAuthenticationStorage<RIDT, IDT, ATT, ECT, ACT>
                         .prepare(conn)
                         .setParameter(realmIdParameterName, realmId)
                         .setParameter(idParameterName, id)
+                        .setParameter(authenticationTokenParameterName, authenticationToken)
                         .executeUpdate();
             }
         }

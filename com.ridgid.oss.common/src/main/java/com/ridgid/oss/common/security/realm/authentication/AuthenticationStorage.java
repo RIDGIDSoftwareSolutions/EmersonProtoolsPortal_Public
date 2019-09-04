@@ -17,7 +17,8 @@ public interface AuthenticationStorage<RIDT, IDT, ATT>
     void store(RealmAuthentication<RIDT, IDT, ATT> auth) throws SQLException;
 
     Optional<RealmAuthentication<RIDT, IDT, ATT>> retrieve(RIDT realmId,
-                                                           IDT id) throws SQLException, UnknownHostException;
+                                                           IDT id,
+                                                           ATT authenticationToken) throws SQLException, UnknownHostException;
 
-    void remove(RIDT realmId, IDT id) throws SQLException;
+    void remove(RIDT realmId, IDT id, ATT authenticationToken) throws SQLException;
 }

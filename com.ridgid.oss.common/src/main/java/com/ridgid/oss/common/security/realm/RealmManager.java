@@ -36,7 +36,7 @@ public class RealmManager<RIDT, IDT, ST, ATT>
 
     private final RealmListener<RIDT, IDT, ST, ATT>                                    listener;
     private final RealmNotifier<RIDT, IDT, ST, ATT>                                    notifier;
-    private final ConcurrentMap<RIDT, Cache<IDT, RealmAuthentication<RIDT, IDT, ATT>>> authenticationCache
+    private final ConcurrentMap<RIDT, Cache<ATT, RealmAuthentication<RIDT, IDT, ATT>>> authenticationCache
         = new ConcurrentHashMap<>();
     private final Cache<InetAddress, RequestCount>                                     requestCounts
         = new InMemoryExpirableLRUCache<>
@@ -132,11 +132,12 @@ public class RealmManager<RIDT, IDT, ST, ATT>
 
     public boolean extendAuthentication(RIDT realmId,
                                         IDT id,
+                                        ATT authenticationToken,
                                         InetAddress clientNetworkAddress)
         throws BlacklistedException
     {
         checkBlacklisted(clientNetworkAddress);
-        if ( readThroughCache(realmId, id)
+        if ( readThroughCache(realmId, id, authenticationToken)
             .map(queuedStoreAndNotifyTimer::ensureStoredAndNotifiedInTime)
             .map(RealmAuthentication::extendAuthentication)
             .isPresent() )
@@ -147,6 +148,7 @@ public class RealmManager<RIDT, IDT, ST, ATT>
 
     public boolean extendAuthentication(Collection<RIDT> realmIds,
                                         IDT id,
+                                        ATT authenticationToken,
                                         InetAddress clientNetworkAddress)
         throws BlacklistedException
     {
@@ -154,7 +156,7 @@ public class RealmManager<RIDT, IDT, ST, ATT>
         if ( realmIds.stream()
                      .allMatch
                          (
-                             realmId -> readThroughCache(realmId, id)
+                             realmId -> readThroughCache(realmId, id, authenticationToken)
                                  .map(queuedStoreAndNotifyTimer::ensureStoredAndNotifiedInTime)
                                  .map(RealmAuthentication::extendAuthentication)
                                  .isPresent()
@@ -166,20 +168,22 @@ public class RealmManager<RIDT, IDT, ST, ATT>
     }
 
     public void revokeAuthentication(RIDT realmId,
-                                     IDT id)
+                                     IDT id,
+                                     ATT authenticationToken)
     {
-        removeStored(realmId, id);
-        removeCached(realmId, id);
-        notify(realmId, id);
+        removeStored(realmId, id, authenticationToken);
+        removeCached(realmId, id, authenticationToken);
+        notify(realmId, id, authenticationToken);
     }
 
     public void revokeAuthentications(Collection<RIDT> realmIds,
-                                      IDT id)
+                                      IDT id,
+                                      ATT authenticationToken)
     {
         for ( RIDT realmId : realmIds ) {
-            removeStored(realmId, id);
-            removeCached(realmId, id);
-            notify(realmId, id);
+            removeStored(realmId, id, authenticationToken);
+            removeCached(realmId, id, authenticationToken);
+            notify(realmId, id, authenticationToken);
         }
     }
 
@@ -190,7 +194,7 @@ public class RealmManager<RIDT, IDT, ST, ATT>
         throws BlacklistedException
     {
         checkBlacklisted(clientNetworkAddress);
-        if ( readThroughCache(realmId, id)
+        if ( readThroughCache(realmId, id, authenticationToken)
             .map(auth -> auth.isAuthenticated(authenticationToken, clientNetworkAddress))
             .isPresent() )
             return true;
@@ -198,9 +202,9 @@ public class RealmManager<RIDT, IDT, ST, ATT>
         return false;
     }
 
-    private Boolean handleListenerEvent(RIDT realmId, IDT id) {
+    private Boolean handleListenerEvent(RIDT realmId, IDT id, ATT authenticationToken) {
         try {
-            refreshCache(realmId, id);
+            refreshCache(realmId, id, authenticationToken);
             return true;
         } catch ( Exception ex ) {
             return false;
@@ -208,7 +212,7 @@ public class RealmManager<RIDT, IDT, ST, ATT>
     }
 
     @SuppressWarnings("UnusedReturnValue")
-    private Optional<RealmAuthentication<RIDT, IDT, ATT>> refreshCache(RIDT realmId, IDT id) {
+    private Optional<RealmAuthentication<RIDT, IDT, ATT>> refreshCache(RIDT realmId, IDT id, ATT authenticationToken) {
         ConcurrentMap<String, String> cm;
         return Optional.ofNullable
             (
@@ -220,10 +224,11 @@ public class RealmManager<RIDT, IDT, ST, ATT>
                         )
                     .compute
                         (
-                            id,
+                            authenticationToken,
                             (key, v) -> readStoredUncheckExceptions
                                 (
                                     realmId,
+                                    id,
                                     key
                                 )
                                 .orElse(null)
@@ -231,7 +236,7 @@ public class RealmManager<RIDT, IDT, ST, ATT>
             );
     }
 
-    private Optional<RealmAuthentication<RIDT, IDT, ATT>> readThroughCache(RIDT realmId, IDT id) {
+    private Optional<RealmAuthentication<RIDT, IDT, ATT>> readThroughCache(RIDT realmId, IDT id, ATT authenticationToken) {
         return Optional.ofNullable
             (
                 authenticationCache
@@ -242,10 +247,11 @@ public class RealmManager<RIDT, IDT, ST, ATT>
                         )
                     .computeIfAbsent
                         (
-                            id,
+                            authenticationToken,
                             key -> readStoredUncheckExceptions
                                 (
                                     realmId,
+                                    id,
                                     key
                                 )
                                 .orElse(null)
@@ -254,20 +260,22 @@ public class RealmManager<RIDT, IDT, ST, ATT>
     }
 
     private Optional<RealmAuthentication<RIDT, IDT, ATT>> readStoredUncheckExceptions(RIDT realmId,
-                                                                                      IDT key)
+                                                                                      IDT key,
+                                                                                      ATT authenticationToken)
     {
         try {
-            return readStored(realmId, key);
+            return readStored(realmId, key, authenticationToken);
         } catch ( SQLException | UnknownHostException e ) {
             throw new RuntimeException(e);
         }
     }
 
     private Optional<RealmAuthentication<RIDT, IDT, ATT>> readStored(RIDT realmId,
-                                                                     IDT id)
+                                                                     IDT id,
+                                                                     ATT authenticationToken)
         throws SQLException, UnknownHostException
     {
-        return storage.retrieve(realmId, id);
+        return storage.retrieve(realmId, id, authenticationToken);
     }
 
     private RealmAuthentication<RIDT, IDT, ATT> buildAuthentication(RIDT realmId,
@@ -328,7 +336,7 @@ public class RealmManager<RIDT, IDT, ST, ATT>
                     )
                 .put
                     (
-                        auth.getId(),
+                        auth.getAuthenticationToken(),
                         auth
                     );
         } catch ( Exception ex ) {
@@ -358,25 +366,26 @@ public class RealmManager<RIDT, IDT, ST, ATT>
         }
     }
 
-    private void removeStored(RIDT realmId, IDT id) {
+    private void removeStored(RIDT realmId, IDT id, ATT authenticationToken) {
         try {
             storage.remove
                 (
                     realmId,
-                    id
+                    id,
+                    authenticationToken
                 );
         } catch ( Exception ex ) {
             logger.warn
                 (
                     realmId,
                     id,
-                    "Unable to remove authentication from cache",
+                    "Unable to remove authentication from storage",
                     ex
                 );
         }
     }
 
-    private void removeCached(RIDT realmId, IDT id) {
+    private void removeCached(RIDT realmId, IDT id, ATT authenticationToken) {
         try {
             authenticationCache
                 .computeIfAbsent
@@ -386,7 +395,7 @@ public class RealmManager<RIDT, IDT, ST, ATT>
                     )
                 .remove
                     (
-                        id
+                        authenticationToken
                     );
         } catch ( Exception ex ) {
             logger.warn
@@ -404,20 +413,22 @@ public class RealmManager<RIDT, IDT, ST, ATT>
             (
                 auth.getRealmId(),
                 auth.getId(),
+                auth.getAuthenticationToken(),
                 auth.getClientNetworkAddress()
             );
     }
 
-    private void notify(RIDT realmId, IDT id) {
+    private void notify(RIDT realmId, IDT id, ATT authenticationToken) {
         notify
             (
                 realmId,
                 id,
+                authenticationToken,
                 null
             );
     }
 
-    private void notify(RIDT realmId, IDT id, InetAddress cna) {
+    private void notify(RIDT realmId, IDT id, ATT authenticationToken, InetAddress cna) {
         try {
             notifier.notify
                 (
@@ -445,12 +456,12 @@ public class RealmManager<RIDT, IDT, ST, ATT>
         }
     }
 
-    private InMemoryExpirableLRUCache<IDT, RealmAuthentication<RIDT, IDT, ATT>> makeAuthenticationCache() {
+    private InMemoryExpirableLRUCache<ATT, RealmAuthentication<RIDT, IDT, ATT>> makeAuthenticationCache() {
         return makeAuthenticationCache(DEFAULT_MIN_CACHE_SIZE, maxCacheSize);
     }
 
     @SuppressWarnings("SameParameterValue")
-    private InMemoryExpirableLRUCache<IDT, RealmAuthentication<RIDT, IDT, ATT>>
+    private InMemoryExpirableLRUCache<ATT, RealmAuthentication<RIDT, IDT, ATT>>
     makeAuthenticationCache(short minCacheSize,
                             short maxCacheSize)
     {

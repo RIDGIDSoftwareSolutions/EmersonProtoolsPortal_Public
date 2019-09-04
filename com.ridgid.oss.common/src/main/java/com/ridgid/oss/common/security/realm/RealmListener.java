@@ -1,6 +1,6 @@
 package com.ridgid.oss.common.security.realm;
 
-import com.ridgid.oss.common.callback.BiHandler;
+import com.ridgid.oss.common.callback.TriHandler;
 
 /**
  * @param <RIDT> Realm ID Type
@@ -11,6 +11,6 @@ import com.ridgid.oss.common.callback.BiHandler;
 @SuppressWarnings({"unused", "SpellCheckingInspection"})
 public interface RealmListener<RIDT, IDT, ST, ATT>
 {
-    boolean register(BiHandler<RIDT, IDT, Boolean> eventHandler);
-    boolean unregister(BiHandler<RIDT, IDT, Boolean> eventHandler);
+    boolean register(TriHandler<RIDT, IDT, ATT, Boolean> eventHandler);
+    boolean unregister(TriHandler<RIDT, IDT, ATT, Boolean> eventHandler);
 }
