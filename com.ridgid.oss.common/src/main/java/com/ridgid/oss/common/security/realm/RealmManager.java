@@ -17,6 +17,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -125,9 +126,16 @@ public class RealmManager<RIDT, IDT, ST, ATT>
             .map(this::cacheStoreAndNotify);
         if ( !auths.isPresent() )
             checkFailedAuthVisitOk(clientNetworkAddress);
+
         return auths.orElseGet(Stream::empty)
-                    .findFirst()
-                    .map(RealmAuthentication::getAuthenticationToken);
+                    .map(RealmAuthentication::getAuthenticationToken)
+                    .collect(Collectors.collectingAndThen(Collectors.toList(), list -> {
+                        if (list.isEmpty()) {
+                            throw new IllegalStateException("Failed to find a single authentication token!");
+                        }
+
+                        return Optional.of(list.get(0));
+                    }));
     }
 
     public boolean extendAuthentication(RIDT realmId,
