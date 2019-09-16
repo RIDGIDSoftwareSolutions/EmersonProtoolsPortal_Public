@@ -11,10 +11,13 @@ import java.io.IOException;
 import java.util.Objects;
 
 class PlainTextRenderer implements IRender {
-    private Class<?> previousNodeClass;
-
     @Override
     public void render(Node node, Appendable output) {
+        render(node, null, output);
+    }
+
+    private Node render(Node node, Node previousNode, Appendable output) {
+        Class<?> previousNodeClass = previousNode == null ? null : previousNode.getClass();
         if (node instanceof Text) {
             try {
                 if (Objects.equals(previousNodeClass, SoftLineBreak.class)) {
@@ -32,12 +35,11 @@ class PlainTextRenderer implements IRender {
             }
         }
 
-        previousNodeClass = node.getClass();
-        if (node.hasChildren()) {
-            for (Node childNode : node.getChildren()) {
-                render(childNode, output);
-            }
+        Node temp = node;
+        for (Node childNode : node.getChildren()) {
+            temp = render(childNode, temp, output);
         }
+        return node;
     }
 
     @Override
