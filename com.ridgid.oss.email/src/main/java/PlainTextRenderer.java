@@ -7,64 +7,53 @@ import com.vladsch.flexmark.util.data.DataHolder;
 import com.vladsch.flexmark.util.data.MutableDataSet;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 class PlainTextRenderer implements IRender {
+    private static final Map<Class<?>, NodeHandler> NODE_HANDLERS;
+
+    static {
+        Map<Class<?>, NodeHandler> nodeHandlers = new HashMap<>();
+        nodeHandlers.put(Text.class, (node, previousNodeClass, output) -> {
+            if (Objects.equals(previousNodeClass, SoftLineBreak.class)) {
+                writeTo(output, "  ");
+            }
+            writeTo(output, node.getChars());
+        });
+        nodeHandlers.put(Paragraph.class, (node, previousNodeClass, output) -> {
+            if (previousNodeClass != null) {
+                writeTo(output, "\n\n");
+            }
+        });
+        NODE_HANDLERS = Collections.unmodifiableMap(nodeHandlers);
+    }
+
     @Override
     public void render(Node node, Appendable output) {
         renderDocument(node, output);
     }
 
     private void renderDocument(Node rootNode, Appendable output) {
-        NodeWrapper currentNodeWrapper = new NodeWrapper(rootNode, false);
-        while (currentNodeWrapper.node != null) {
-            Class<?> previousNodeClass = currentNodeWrapper.node.getPrevious() == null ? null : currentNodeWrapper.node.getPrevious().getClass();
-            if (!currentNodeWrapper.alreadyTraversed) {
-                if (currentNodeWrapper.node instanceof Text) {
-                    try {
-                        if (Objects.equals(previousNodeClass, SoftLineBreak.class)) {
-                            output.append("  ");
-                        }
-                        output.append(currentNodeWrapper.node.getChars());
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                } else if (currentNodeWrapper.node instanceof Paragraph && previousNodeClass != null) {
-                    try {
-                        output.append("\n\n");
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-            }
-
-            if (currentNodeWrapper.node.hasChildren() && !currentNodeWrapper.alreadyTraversed) {
-                currentNodeWrapper = new NodeWrapper(currentNodeWrapper.node.getFirstChild(), false);
-            } else if (currentNodeWrapper.node.getNext() != null) {
-                currentNodeWrapper = new NodeWrapper(currentNodeWrapper.node.getNext(), false);
+        NodeWrapper wrapper = new NodeWrapper(rootNode, true);
+        while (wrapper.node != null) {
+            NodeHandler handler = NODE_HANDLERS.getOrDefault(wrapper.node.getClass(), NodeHandler.NULL);
+            Class<? extends Node> previousNodeClass = wrapper.node.getPrevious() == null ? null : wrapper.node.getPrevious().getClass();
+            if (wrapper.beforeTraversal) {
+                handler.startNode(wrapper.node, previousNodeClass, output);
             } else {
-                currentNodeWrapper = new NodeWrapper(currentNodeWrapper.node.getParent(), true);
+                handler.endNode(wrapper.node, previousNodeClass, output);
             }
-        }
-    }
 
-    private static class NodeWrapper {
-        final Node node;
-        final boolean alreadyTraversed;
-
-        private NodeWrapper(Node node, boolean alreadyTraversed) {
-            this.node = node;
-            this.alreadyTraversed = alreadyTraversed;
-        }
-
-        @Override
-        public String toString() {
-            StringBuilder sb = new StringBuilder();
-            sb.append(node);
-            if (alreadyTraversed) {
-                sb.append("; traversed");
+            if (wrapper.node.hasChildren() && wrapper.beforeTraversal) {
+                wrapper = new NodeWrapper(wrapper.node.getFirstChild(), true);
+            } else if (wrapper.node.getNext() != null) {
+                wrapper = new NodeWrapper(wrapper.node.getNext(), true);
+            } else {
+                wrapper = new NodeWrapper(wrapper.node.getParent(), false);
             }
-            return sb.toString();
         }
     }
 
@@ -83,5 +72,42 @@ class PlainTextRenderer implements IRender {
     @Override
     public DataHolder getOptions() {
         return new MutableDataSet();
+    }
+
+    private static void writeTo(Appendable output, CharSequence value) {
+        try {
+            output.append(value);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static class NodeWrapper {
+        final Node node;
+        final boolean beforeTraversal;
+
+        private NodeWrapper(Node node, boolean beforeTraversal) {
+            this.node = node;
+            this.beforeTraversal = beforeTraversal;
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder();
+            sb.append(node);
+            if (beforeTraversal) {
+                sb.append("; traversed");
+            }
+            return sb.toString();
+        }
+    }
+
+    private interface NodeHandler {
+        NodeHandler NULL = (node, previousNodeClass, output) -> {};
+
+        void startNode(Node node, Class<? extends Node> previousNodeClass, Appendable output);
+
+        default void endNode(Node node, Class<? extends Node> previousNodeClass, Appendable output) {
+        }
     }
 }
