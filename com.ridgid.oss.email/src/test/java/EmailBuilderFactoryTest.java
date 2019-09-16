@@ -122,4 +122,13 @@ class EmailBuilderFactoryTest {
         assertThat(sentEmailInfo, hasEntry("html body", "<html><body><p>Hello, world!\nHow are you?</p>\n</body></html>"));
         assertThat(sentEmailInfo, hasEntry("text body", "Hello, world!  How are you?"));
     }
+
+    @Test
+    void it_can_support_multiple_paragraphs() {
+        emailBuilderFactory.createBuilder()
+                .setBody("Hello, world!\n\nHow are you?")
+                .send();
+        assertThat(sentEmailInfo, hasEntry("html body", "<html><body><p>Hello, world!</p>\n<p>How are you?</p>\n</body></html>"));
+        assertThat(sentEmailInfo, hasEntry("text body", "Hello, world!\n\nHow are you?"));
+    }
 }

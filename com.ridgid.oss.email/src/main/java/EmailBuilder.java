@@ -101,9 +101,11 @@ public class EmailBuilder {
         Parser parser = Parser.builder().build();
         Node document = parser.parse(markdown);
 
-        HtmlRenderer renderer = HtmlRenderer.builder().build();
-        htmlEmail.setHtmlMsg(defaultHtmlTemplate.replace("${html}", renderer.render(document)));
-        htmlEmail.setTextMsg(markdown.replaceAll("\n", "  "));
+        HtmlRenderer htmlRenderer = HtmlRenderer.builder().build();
+        htmlEmail.setHtmlMsg(defaultHtmlTemplate.replace("${html}", htmlRenderer.render(document)));
+
+        PlainTextRenderer plainTextRenderer = new PlainTextRenderer();
+        htmlEmail.setTextMsg(plainTextRenderer.render(document));
     }
 
     public void send() {
