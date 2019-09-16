@@ -45,6 +45,7 @@
         <module>com.ridgid.oss.orm.jpa</module>
         <module>com.ridgid.oss.orm.jpa.test</module>
         <module>com.ridgid.oss.common</module>
+        <module>com.ridgid.oss.email</module>
     </modules>
 
     <!-- Required to publish to Maven Central -->
