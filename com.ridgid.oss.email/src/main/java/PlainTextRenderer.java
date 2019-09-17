@@ -40,31 +40,18 @@ class PlainTextRenderer implements IRender {
                 }
             }
         });
-        nodeHandlers.put(BulletList.class, new NodeHandler() {
-            @Override
-            public void startNode(Node node, HandlerData data, Appendable output) throws IOException {
-                if (data.previousNodeClass != null) {
-                    if (data.numberOfIndents == 0) {
-                        output.append("\n\n");
-                    } else {
-                        output.append("\n");
-                    }
-                }
-                data.numberOfIndents++;
-            }
-
-            @Override
-            public void endNode(Node node, HandlerData data, Appendable output) {
-                data.numberOfIndents--;
-            }
-        });
-        nodeHandlers.put(BulletListItem.class, (node, data, output) -> {
+        ListBlockHandler listBlockHandler = new ListBlockHandler();
+        nodeHandlers.put(BulletList.class, listBlockHandler);
+        nodeHandlers.put(OrderedList.class, listBlockHandler);
+        NodeHandler listItemHandler = (node, data, output) -> {
             if (data.previousNodeClass != null) {
                 output.append("\n");
             }
-            BulletListItem bulletListItem = (BulletListItem) node;
+            ListItem bulletListItem = (ListItem) node;
             output.append(StringUtils.repeat(' ', 2 * data.numberOfIndents - 1)).append(bulletListItem.getOpeningMarker()).append(" ");
-        });
+        };
+        nodeHandlers.put(BulletListItem.class, listItemHandler);
+        nodeHandlers.put(OrderedListItem.class, listItemHandler);
         NODE_HANDLERS = Collections.unmodifiableMap(nodeHandlers);
     }
 
@@ -147,6 +134,25 @@ class PlainTextRenderer implements IRender {
         void startNode(Node node, HandlerData data, Appendable output) throws IOException;
 
         default void endNode(Node node, HandlerData data, Appendable output) throws IOException {
+        }
+    }
+
+    private static class ListBlockHandler implements NodeHandler {
+        @Override
+        public void startNode(Node node, HandlerData data, Appendable output) throws IOException {
+            if (data.previousNodeClass != null) {
+                if (data.numberOfIndents == 0) {
+                    output.append("\n\n");
+                } else {
+                    output.append("\n");
+                }
+            }
+            data.numberOfIndents++;
+        }
+
+        @Override
+        public void endNode(Node node, HandlerData data, Appendable output) {
+            data.numberOfIndents--;
         }
     }
 }

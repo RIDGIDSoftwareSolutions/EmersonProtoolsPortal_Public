@@ -242,4 +242,46 @@ class EmailBuilderFactoryTest {
                 "   * Snake"));
         // @formatter:on
     }
+
+    @Test
+    void it_can_support_numbered_lists() {
+        // @formatter:off
+        String markdown =
+                "List of animals:\n" +
+                " 1. Mammal\n" +
+                "    - Dog\n" +
+                "    - Cat\n" +
+                " 2. Reptile\n" +
+                "    * Snake\n";
+        // @formatter:on
+        emailBuilderFactory.createBuilder()
+                .setBody(markdown)
+                .send();
+        // @formatter:off
+        assertThat(sentEmailInfo, hasEntry("html body",
+                "<html><body><p>List of animals:</p>\n" +
+                    "<ol>\n" +
+                        "<li>Mammal\n" +
+                            "<ul>\n" +
+                                "<li>Dog</li>\n" +
+                                "<li>Cat</li>\n" +
+                            "</ul>\n" +
+                        "</li>\n" +
+                        "<li>Reptile\n" +
+                            "<ul>\n" +
+                                "<li>Snake</li>\n" +
+                            "</ul>\n" +
+                        "</li>\n" +
+                    "</ol>\n" +
+                "</body></html>"));
+        assertThat(sentEmailInfo, hasEntry("text body",
+                "List of animals:\n" +
+                "\n" +
+                " 1. Mammal\n" +
+                "   - Dog\n" +
+                "   - Cat\n" +
+                " 2. Reptile\n" +
+                "   * Snake"));
+        // @formatter:on
+    }
 }
