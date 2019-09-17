@@ -26,11 +26,21 @@ import java.util.Arrays;
 @SuppressWarnings("WeakerAccess")
 public class EmailBuilder {
     private static final VelocityEngine fileTemplateEngine;
+    private static final Parser PARSER;
+    private static final HtmlRenderer HTML_RENDERER;
+    private static final PlainTextRenderer PLAIN_TEXT_RENDERER;
 
     static {
         fileTemplateEngine = new VelocityEngine();
         fileTemplateEngine.setProperty("file.resource.loader.class", ClasspathResourceLoader.class.getName());
         fileTemplateEngine.init();
+
+        MutableDataSet options = new MutableDataSet();
+        options.set(Parser.EXTENSIONS, Arrays.asList(AutolinkExtension.create(), WikiLinkExtension.create(), StrikethroughExtension.create()));
+        PARSER = Parser.builder(options).build();
+
+        HTML_RENDERER = HtmlRenderer.builder(options).build();
+        PLAIN_TEXT_RENDERER = new PlainTextRenderer();
     }
 
     private HtmlEmail htmlEmail;
@@ -163,17 +173,10 @@ public class EmailBuilder {
     }
 
     private void setHtmlAndTextBodyFromMarkdown(String markdown) throws EmailException {
-        MutableDataSet options = new MutableDataSet();
-        options.set(Parser.EXTENSIONS, Arrays.asList(AutolinkExtension.create(), WikiLinkExtension.create(), StrikethroughExtension.create()));
-        Parser parser = Parser.builder(options).build();
-        Node document = parser.parse(markdown);
-
-        HtmlRenderer htmlRenderer = HtmlRenderer.builder(options).build();
-        htmlEmail.setHtmlMsg(parseHtmlTemplate(htmlRenderer.render(document)));
-
+        Node document = PARSER.parse(markdown);
+        htmlEmail.setHtmlMsg(parseHtmlTemplate(HTML_RENDERER.render(document)));
         if (StringUtils.isNotEmpty(markdown)) {
-            PlainTextRenderer plainTextRenderer = new PlainTextRenderer();
-            htmlEmail.setTextMsg(plainTextRenderer.render(document));
+            htmlEmail.setTextMsg(PLAIN_TEXT_RENDERER.render(document));
         }
     }
 
