@@ -127,7 +127,7 @@ class EmailBuilderFactoryTest {
                 .setBody("Hello, world!\nHow are you?")
                 .send();
         assertThat(sentEmailInfo, hasEntry("html body", "<html><body><p>Hello, world!\nHow are you?</p>\n</body></html>"));
-        assertThat(sentEmailInfo, hasEntry("text body", "Hello, world!  How are you?"));
+        assertThat(sentEmailInfo, hasEntry("text body", "Hello, world! How are you?"));
     }
 
     @Test

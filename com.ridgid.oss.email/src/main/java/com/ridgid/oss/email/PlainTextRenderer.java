@@ -20,7 +20,7 @@ class PlainTextRenderer implements IRender {
         Map<Class<?>, NodeHandler> nodeHandlers = new HashMap<>();
         nodeHandlers.put(Text.class, (node, data, output) -> {
             if (Objects.equals(data.previousNodeClass, SoftLineBreak.class)) {
-                output.append("  ");
+                output.append(" ");
             }
             output.append(node.getChars());
         });
