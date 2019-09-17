@@ -5,12 +5,13 @@ import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.RepetitionInfo;
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.hasEntry;
 
 class EmailBuilderFactoryTest {
     private static final String EXAMPLE_HOST = "mail.example.com";
@@ -291,6 +292,88 @@ class EmailBuilderFactoryTest {
                 "   - Cat\n" +
                 " 2. Reptile\n" +
                 "   * Snake"));
+        // @formatter:on
+    }
+
+    @Test
+    void it_can_support_mvc_templates_from_a_string() {
+        List<String> model = Arrays.asList("Apple", "Orange", "Banana", "Grape");
+        // @formatter:off
+        String viewTemplate =
+                "# First Heading\n" +
+                "Some description\n" +
+                "#[[##]]# Second Heading\n" +
+                "#foreach($item in $model)\n" +
+                " * $item\n" +
+                "#end\n";
+        // @formatter:on
+
+        emailBuilderFactory.createBuilder()
+                .setBodyFromTemplateText(viewTemplate, model)
+                .send();
+
+        // @formatter:off
+        assertThat(sentEmailInfo, hasEntry("html body",
+                "<html>" +
+                    "<body>" +
+                        "<h1>First Heading</h1>\n" +
+                        "<p>Some description</p>\n" +
+                        "<h2>Second Heading</h2>\n" +
+                        "<ul>\n" +
+                            "<li>Apple</li>\n" +
+                            "<li>Orange</li>\n" +
+                            "<li>Banana</li>\n" +
+                            "<li>Grape</li>\n" +
+                        "</ul>\n" +
+                    "</body>" +
+                "</html>"));
+        assertThat(sentEmailInfo, hasEntry("text body",
+                "First Heading\n" +
+                "\n" +
+                "Some description\n" +
+                "\n" +
+                "Second Heading\n" +
+                "\n" +
+                " * Apple\n" +
+                " * Orange\n" +
+                " * Banana\n" +
+                " * Grape"));
+        // @formatter:on
+    }
+
+    @Test
+    void it_can_support_mvc_templates_from_a_file() {
+        List<String> model = Arrays.asList("Apple", "Orange", "Banana", "Grape");
+        emailBuilderFactory.createBuilder()
+                .setBodyFromTemplatePath("/simple-velocity-template.vm", model)
+                .send();
+
+        // @formatter:off
+        assertThat(sentEmailInfo, hasEntry("html body",
+                "<html>" +
+                    "<body>" +
+                        "<h1>First Heading</h1>\n" +
+                        "<p>Some description</p>\n" +
+                        "<h2>Second Heading</h2>\n" +
+                        "<ul>\n" +
+                            "<li>Apple</li>\n" +
+                            "<li>Orange</li>\n" +
+                            "<li>Banana</li>\n" +
+                            "<li>Grape</li>\n" +
+                        "</ul>\n" +
+                    "</body>" +
+                "</html>"));
+        assertThat(sentEmailInfo, hasEntry("text body",
+                "First Heading\n" +
+                "\n" +
+                "Some description\n" +
+                "\n" +
+                "Second Heading\n" +
+                "\n" +
+                " * Apple\n" +
+                " * Orange\n" +
+                " * Banana\n" +
+                " * Grape"));
         // @formatter:on
     }
 }

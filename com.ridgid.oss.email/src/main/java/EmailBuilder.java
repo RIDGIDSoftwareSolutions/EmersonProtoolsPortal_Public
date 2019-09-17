@@ -9,8 +9,17 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.mail.Email;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
+import org.apache.velocity.Template;
+import org.apache.velocity.VelocityContext;
+import org.apache.velocity.app.VelocityEngine;
+import org.apache.velocity.runtime.resource.loader.StringResourceLoader;
+import org.apache.velocity.runtime.resource.util.StringResourceRepository;
+import org.apache.velocity.runtime.resource.util.StringResourceRepositoryImpl;
 
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.Arrays;
+import java.util.List;
 
 @SuppressWarnings("WeakerAccess")
 public class EmailBuilder {
@@ -101,6 +110,33 @@ public class EmailBuilder {
         } catch (EmailException e) {
             throw new RuntimeException(e);
         }
+        return this;
+    }
+
+    public EmailBuilder setBodyFromTemplateText(String viewTemplate, Object model) {
+        VelocityEngine velocityEngine = new VelocityEngine();
+        velocityEngine.setProperty("resource.loader", "string");
+        velocityEngine.setProperty("string.resource.loader.class", StringResourceLoader.class.getName());
+        velocityEngine.setProperty("string.resource.loader.repository.class", StringResourceRepositoryImpl.class.getName());
+        velocityEngine.setProperty("string.resource.loader.repository.static", false);
+        velocityEngine.setProperty("string.resource.loader.repository.name", "templateRepository");
+        velocityEngine.init();
+
+        StringResourceRepository stringResourceRepository = (StringResourceRepository) velocityEngine.getApplicationAttribute("templateRepository");
+        stringResourceRepository.putStringResource("template", viewTemplate);
+
+        VelocityContext context = new VelocityContext();
+        context.put("model", model);
+
+        Template template = velocityEngine.getTemplate("template", "UTF-8");
+        Writer writer = new StringWriter();
+        template.merge(context, writer);
+        try {
+            setHtmlAndTextBodyFromMarkdown(writer.toString());
+        } catch (EmailException e) {
+            throw new RuntimeException(e);
+        }
+
         return this;
     }
 
