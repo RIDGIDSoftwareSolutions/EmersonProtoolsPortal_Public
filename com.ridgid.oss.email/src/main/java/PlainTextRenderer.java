@@ -3,6 +3,7 @@ import com.vladsch.flexmark.util.ast.IRender;
 import com.vladsch.flexmark.util.ast.Node;
 import com.vladsch.flexmark.util.data.DataHolder;
 import com.vladsch.flexmark.util.data.MutableDataSet;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -15,40 +16,53 @@ class PlainTextRenderer implements IRender {
 
     static {
         Map<Class<?>, NodeHandler> nodeHandlers = new HashMap<>();
-        nodeHandlers.put(Text.class, (node, previousNodeClass, output) -> {
-            if (Objects.equals(previousNodeClass, SoftLineBreak.class)) {
+        nodeHandlers.put(Text.class, (node, data, output) -> {
+            if (Objects.equals(data.previousNodeClass, SoftLineBreak.class)) {
                 output.append("  ");
             }
             output.append(node.getChars());
         });
-        nodeHandlers.put(Paragraph.class, (node, previousNodeClass, output) -> {
-            if (previousNodeClass != null) {
+        nodeHandlers.put(Paragraph.class, (node, data, output) -> {
+            if (data.previousNodeClass != null) {
                 output.append("\n\n");
             }
         });
         nodeHandlers.put(Link.class, new NodeHandler() {
             @Override
-            public void startNode(Node node, Class<? extends Node> previousNodeClass, Appendable output) {
+            public void startNode(Node node, HandlerData data, Appendable output) {
             }
 
             @Override
-            public void endNode(Node node, Class<? extends Node> previousNodeClass, Appendable output) throws IOException {
+            public void endNode(Node node, HandlerData data, Appendable output) throws IOException {
                 Link link = (Link) node;
                 if (!link.getText().equals(link.getUrl())) {
                     output.append(" (").append(link.getUrl()).append(")");
                 }
             }
         });
-        nodeHandlers.put(BulletList.class, (node, previousNodeClass, output) -> {
-            if (previousNodeClass != null) {
-                output.append("\n\n");
+        nodeHandlers.put(BulletList.class, new NodeHandler() {
+            @Override
+            public void startNode(Node node, HandlerData data, Appendable output) throws IOException {
+                if (data.previousNodeClass != null) {
+                    if (data.numberOfIndents == 0) {
+                        output.append("\n\n");
+                    } else {
+                        output.append("\n");
+                    }
+                }
+                data.numberOfIndents++;
+            }
+
+            @Override
+            public void endNode(Node node, HandlerData data, Appendable output) {
+                data.numberOfIndents--;
             }
         });
-        nodeHandlers.put(BulletListItem.class, (node, previousNodeClass, output) -> {
-            if (previousNodeClass != null) {
+        nodeHandlers.put(BulletListItem.class, (node, data, output) -> {
+            if (data.previousNodeClass != null) {
                 output.append("\n");
             }
-            output.append(" * ");
+            output.append(StringUtils.repeat(' ', 2 * data.numberOfIndents - 1)) .append("* ");
         });
         NODE_HANDLERS = Collections.unmodifiableMap(nodeHandlers);
     }
@@ -60,14 +74,15 @@ class PlainTextRenderer implements IRender {
 
     private void renderDocument(Node rootNode, Appendable output) {
         NodeWrapper wrapper = new NodeWrapper(rootNode, true);
+        HandlerData data = new HandlerData();
         while (wrapper.node != null) {
             NodeHandler handler = NODE_HANDLERS.getOrDefault(wrapper.node.getClass(), NodeHandler.NULL);
-            Class<? extends Node> previousNodeClass = wrapper.node.getPrevious() == null ? null : wrapper.node.getPrevious().getClass();
+            data.previousNodeClass = wrapper.node.getPrevious() == null ? null : wrapper.node.getPrevious().getClass();
             try {
                 if (wrapper.beforeTraversal) {
-                    handler.startNode(wrapper.node, previousNodeClass, output);
+                    handler.startNode(wrapper.node, data, output);
                 } else {
-                    handler.endNode(wrapper.node, previousNodeClass, output);
+                    handler.endNode(wrapper.node, data, output);
                 }
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -120,12 +135,17 @@ class PlainTextRenderer implements IRender {
         }
     }
 
+    private static class HandlerData {
+        Class<? extends Node> previousNodeClass;
+        int numberOfIndents;
+    }
+
     private interface NodeHandler {
         NodeHandler NULL = (node, previousNodeClass, output) -> {};
 
-        void startNode(Node node, Class<? extends Node> previousNodeClass, Appendable output) throws IOException;
+        void startNode(Node node, HandlerData data, Appendable output) throws IOException;
 
-        default void endNode(Node node, Class<? extends Node> previousNodeClass, Appendable output) throws IOException {
+        default void endNode(Node node, HandlerData data, Appendable output) throws IOException {
         }
     }
 }
