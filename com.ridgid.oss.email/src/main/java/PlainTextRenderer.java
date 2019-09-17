@@ -22,11 +22,13 @@ class PlainTextRenderer implements IRender {
             }
             output.append(node.getChars());
         });
-        nodeHandlers.put(Paragraph.class, (node, data, output) -> {
+        NodeHandler blockHandler = (node, data, output) -> {
             if (data.previousNodeClass != null) {
                 output.append("\n\n");
             }
-        });
+        };
+        nodeHandlers.put(Paragraph.class, blockHandler);
+        nodeHandlers.put(Heading.class, blockHandler);
         nodeHandlers.put(Link.class, new NodeHandler() {
             @Override
             public void startNode(Node node, HandlerData data, Appendable output) {

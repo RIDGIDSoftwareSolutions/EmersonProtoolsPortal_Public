@@ -148,6 +148,15 @@ class EmailBuilderFactoryTest {
     }
 
     @Test
+    void it_ensures_headings_have_blank_lines_before() {
+        emailBuilderFactory.createBuilder()
+                .setBody("Some text\n# Heading")
+                .send();
+        assertThat(sentEmailInfo, hasEntry("html body", "<html><body><p>Some text</p>\n<h1>Heading</h1>\n</body></html>"));
+        assertThat(sentEmailInfo, hasEntry("text body", "Some text\n\nHeading"));
+    }
+
+    @Test
     void it_can_support_text_with_emphasis() {
         emailBuilderFactory.createBuilder()
                 .setBody("This is *some* text")
