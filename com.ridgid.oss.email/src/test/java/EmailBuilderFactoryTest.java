@@ -207,8 +207,8 @@ class EmailBuilderFactoryTest {
         String markdown =
                 "List of animals:\n" +
                 " * Mammal\n" +
-                "   * Dog\n" +
-                "   * Cat\n" +
+                "   - Dog\n" +
+                "   - Cat\n" +
                 " * Reptile\n" +
                 "   * Snake\n";
         // @formatter:on
@@ -236,8 +236,8 @@ class EmailBuilderFactoryTest {
                 "List of animals:\n" +
                 "\n" +
                 " * Mammal\n" +
-                "   * Dog\n" +
-                "   * Cat\n" +
+                "   - Dog\n" +
+                "   - Cat\n" +
                 " * Reptile\n" +
                 "   * Snake"));
         // @formatter:on

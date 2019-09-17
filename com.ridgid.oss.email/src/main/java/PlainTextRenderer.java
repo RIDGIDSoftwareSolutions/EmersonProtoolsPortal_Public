@@ -62,7 +62,8 @@ class PlainTextRenderer implements IRender {
             if (data.previousNodeClass != null) {
                 output.append("\n");
             }
-            output.append(StringUtils.repeat(' ', 2 * data.numberOfIndents - 1)) .append("* ");
+            BulletListItem bulletListItem = (BulletListItem) node;
+            output.append(StringUtils.repeat(' ', 2 * data.numberOfIndents - 1)).append(bulletListItem.getOpeningMarker()).append(" ");
         });
         NODE_HANDLERS = Collections.unmodifiableMap(nodeHandlers);
     }
