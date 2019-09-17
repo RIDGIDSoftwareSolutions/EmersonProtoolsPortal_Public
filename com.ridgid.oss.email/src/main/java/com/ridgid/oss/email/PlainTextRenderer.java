@@ -1,3 +1,5 @@
+package com.ridgid.oss.email;
+
 import com.vladsch.flexmark.ast.*;
 import com.vladsch.flexmark.util.ast.IRender;
 import com.vladsch.flexmark.util.ast.Node;

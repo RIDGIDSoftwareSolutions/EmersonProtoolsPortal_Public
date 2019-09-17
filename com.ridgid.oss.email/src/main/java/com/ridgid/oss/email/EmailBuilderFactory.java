@@ -1,3 +1,5 @@
+package com.ridgid.oss.email;
+
 import org.apache.commons.mail.HtmlEmail;
 
 @SuppressWarnings("WeakerAccess")

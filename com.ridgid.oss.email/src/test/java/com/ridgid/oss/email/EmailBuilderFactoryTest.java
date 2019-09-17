@@ -1,3 +1,5 @@
+package com.ridgid.oss.email;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.mail.HtmlEmail;
 import org.junit.jupiter.api.BeforeEach;

@@ -1,3 +1,5 @@
+package com.ridgid.oss.email;
+
 import com.vladsch.flexmark.ext.autolink.AutolinkExtension;
 import com.vladsch.flexmark.ext.gfm.strikethrough.StrikethroughExtension;
 import com.vladsch.flexmark.ext.wikilink.WikiLinkExtension;
