@@ -1,7 +1,4 @@
-import com.vladsch.flexmark.ast.Link;
-import com.vladsch.flexmark.ast.Paragraph;
-import com.vladsch.flexmark.ast.SoftLineBreak;
-import com.vladsch.flexmark.ast.Text;
+import com.vladsch.flexmark.ast.*;
 import com.vladsch.flexmark.util.ast.IRender;
 import com.vladsch.flexmark.util.ast.Node;
 import com.vladsch.flexmark.util.data.DataHolder;
@@ -41,6 +38,17 @@ class PlainTextRenderer implements IRender {
                     output.append(" (").append(link.getUrl()).append(")");
                 }
             }
+        });
+        nodeHandlers.put(BulletList.class, (node, previousNodeClass, output) -> {
+            if (previousNodeClass != null) {
+                output.append("\n\n");
+            }
+        });
+        nodeHandlers.put(BulletListItem.class, (node, previousNodeClass, output) -> {
+            if (previousNodeClass != null) {
+                output.append("\n");
+            }
+            output.append(" * ");
         });
         NODE_HANDLERS = Collections.unmodifiableMap(nodeHandlers);
     }

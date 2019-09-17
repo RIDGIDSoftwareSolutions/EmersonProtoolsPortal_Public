@@ -200,4 +200,20 @@ class EmailBuilderFactoryTest {
         assertThat(sentEmailInfo, hasEntry("html body", "<html><body><p>This is <a href=\"https://www.google.com/\">a link</a> to Google</p>\n</body></html>"));
         assertThat(sentEmailInfo, hasEntry("text body", "This is a link (https://www.google.com/) to Google"));
     }
+
+    @Test
+    void it_can_support_bullets() {
+        // @formatter:off
+        String markdown =
+                "List of animals:\n" +
+                " * Dog\n" +
+                " * Cat\n" +
+                " * Snake\n";
+        // @formatter:on
+        emailBuilderFactory.createBuilder()
+                .setBody(markdown)
+                .send();
+        assertThat(sentEmailInfo, hasEntry("html body", "<html><body><p>List of animals:</p>\n<ul>\n<li>Dog</li>\n<li>Cat</li>\n<li>Snake</li>\n</ul>\n</body></html>"));
+        assertThat(sentEmailInfo, hasEntry("text body", "List of animals:\n\n * Dog\n * Cat\n * Snake"));
+    }
 }
