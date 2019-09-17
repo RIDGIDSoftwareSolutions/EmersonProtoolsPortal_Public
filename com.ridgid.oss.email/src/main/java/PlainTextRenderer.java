@@ -20,13 +20,13 @@ class PlainTextRenderer implements IRender {
         Map<Class<?>, NodeHandler> nodeHandlers = new HashMap<>();
         nodeHandlers.put(Text.class, (node, previousNodeClass, output) -> {
             if (Objects.equals(previousNodeClass, SoftLineBreak.class)) {
-                writeTo(output, "  ");
+                output.append("  ");
             }
-            writeTo(output, node.getChars());
+            output.append(node.getChars());
         });
         nodeHandlers.put(Paragraph.class, (node, previousNodeClass, output) -> {
             if (previousNodeClass != null) {
-                writeTo(output, "\n\n");
+                output.append("\n\n");
             }
         });
         nodeHandlers.put(Link.class, new NodeHandler() {
@@ -35,10 +35,10 @@ class PlainTextRenderer implements IRender {
             }
 
             @Override
-            public void endNode(Node node, Class<? extends Node> previousNodeClass, Appendable output) {
+            public void endNode(Node node, Class<? extends Node> previousNodeClass, Appendable output) throws IOException {
                 Link link = (Link) node;
                 if (!link.getText().equals(link.getUrl())) {
-                    writeTo(output, " (" + link.getUrl() + ")");
+                    output.append(" (").append(link.getUrl()).append(")");
                 }
             }
         });
@@ -55,10 +55,14 @@ class PlainTextRenderer implements IRender {
         while (wrapper.node != null) {
             NodeHandler handler = NODE_HANDLERS.getOrDefault(wrapper.node.getClass(), NodeHandler.NULL);
             Class<? extends Node> previousNodeClass = wrapper.node.getPrevious() == null ? null : wrapper.node.getPrevious().getClass();
-            if (wrapper.beforeTraversal) {
-                handler.startNode(wrapper.node, previousNodeClass, output);
-            } else {
-                handler.endNode(wrapper.node, previousNodeClass, output);
+            try {
+                if (wrapper.beforeTraversal) {
+                    handler.startNode(wrapper.node, previousNodeClass, output);
+                } else {
+                    handler.endNode(wrapper.node, previousNodeClass, output);
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
 
             if (wrapper.node.hasChildren() && wrapper.beforeTraversal) {
@@ -88,14 +92,6 @@ class PlainTextRenderer implements IRender {
         return new MutableDataSet();
     }
 
-    private static void writeTo(Appendable output, CharSequence value) {
-        try {
-            output.append(value);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     private static class NodeWrapper {
         final Node node;
         final boolean beforeTraversal;
@@ -119,9 +115,9 @@ class PlainTextRenderer implements IRender {
     private interface NodeHandler {
         NodeHandler NULL = (node, previousNodeClass, output) -> {};
 
-        void startNode(Node node, Class<? extends Node> previousNodeClass, Appendable output);
+        void startNode(Node node, Class<? extends Node> previousNodeClass, Appendable output) throws IOException;
 
-        default void endNode(Node node, Class<? extends Node> previousNodeClass, Appendable output) {
+        default void endNode(Node node, Class<? extends Node> previousNodeClass, Appendable output) throws IOException {
         }
     }
 }
