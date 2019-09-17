@@ -22,10 +22,12 @@ class EmailBuilderFactoryTest {
 
     private EmailBuilderFactory emailBuilderFactory;
     private Map<String, String> sentEmailInfo;
+    private Map<String, String> themes;
 
     @BeforeEach
     void setup() {
-        emailBuilderFactory = new EmailBuilderFactory(EXAMPLE_HOST, EXAMPLE_PORT, EXAMPLE_DEFAULT_HTML_TEMPLATE) {
+        themes = new HashMap<>();
+        emailBuilderFactory = new EmailBuilderFactory(EXAMPLE_HOST, EXAMPLE_PORT, EXAMPLE_DEFAULT_HTML_TEMPLATE, themes) {
             @Override
             protected HtmlEmail createEmail() {
                 return new HtmlEmail() {
@@ -126,6 +128,30 @@ class EmailBuilderFactoryTest {
                 .send();
         assertThat(sentEmailInfo, hasEntry("html body", "<html><body><p>Hello, world!\nHow are you?</p>\n</body></html>"));
         assertThat(sentEmailInfo, hasEntry("text body", "Hello, world!  How are you?"));
+    }
+
+    @Test
+    void it_can_use_a_different_html_theme_from_the_default() {
+        themes.put("custom", "/custom-web-theme.vm");
+
+        emailBuilderFactory.createBuilder()
+                .setHtmlTheme("custom")
+                .setBody("Hello, world!")
+                .send();
+        // @formatter:off
+        assertThat(sentEmailInfo, hasEntry("html body",
+                "<html>" +
+                "<head>" +
+                    "<style type=\"text/css\">" +
+                "</style>" +
+                "</head>" +
+                "<body>" +
+                    "<div><p>Hello, world!</p>\n" +
+                "</div>" +
+                "</body>" +
+                "</html>"));
+        // @formatter:on
+        assertThat(sentEmailInfo, hasEntry("text body", "Hello, world!"));
     }
 
     @Test

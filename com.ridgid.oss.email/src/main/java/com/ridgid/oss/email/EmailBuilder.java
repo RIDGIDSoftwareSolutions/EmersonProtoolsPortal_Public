@@ -22,6 +22,7 @@ import org.apache.velocity.runtime.resource.util.StringResourceRepositoryImpl;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Arrays;
+import java.util.Map;
 
 @SuppressWarnings("WeakerAccess")
 public class EmailBuilder {
@@ -45,10 +46,13 @@ public class EmailBuilder {
 
     private HtmlEmail htmlEmail;
     private String defaultHtmlTemplate;
+    private Map<String, String> themes;
+    private String themeName = "";
 
-    EmailBuilder(HtmlEmail htmlEmail, String defaultHtmlTemplate) {
+    EmailBuilder(HtmlEmail htmlEmail, String defaultHtmlTemplate, Map<String, String> themes) {
         this.htmlEmail = htmlEmail;
         this.defaultHtmlTemplate = defaultHtmlTemplate;
+        this.themes = themes;
     }
 
     public EmailBuilder setSubject(String subject) {
@@ -184,10 +188,15 @@ public class EmailBuilder {
         VelocityContext context = new VelocityContext();
         context.put("html", renderedMarkdown);
 
-        Template template = fileTemplateEngine.getTemplate(defaultHtmlTemplate, "UTF-8");
+        Template template = fileTemplateEngine.getTemplate(themes.getOrDefault(themeName, defaultHtmlTemplate), "UTF-8");
         Writer writer = new StringWriter();
         template.merge(context, writer);
         return writer.toString();
+    }
+
+    public EmailBuilder setHtmlTheme(String themeName) {
+        this.themeName = themeName;
+        return this;
     }
 
     public void send() {
