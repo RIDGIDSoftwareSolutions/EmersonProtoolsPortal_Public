@@ -12,6 +12,7 @@ import org.apache.commons.mail.HtmlEmail;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
+import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 import org.apache.velocity.runtime.resource.loader.StringResourceLoader;
 import org.apache.velocity.runtime.resource.util.StringResourceRepository;
 import org.apache.velocity.runtime.resource.util.StringResourceRepositoryImpl;
@@ -19,10 +20,17 @@ import org.apache.velocity.runtime.resource.util.StringResourceRepositoryImpl;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Arrays;
-import java.util.List;
 
 @SuppressWarnings("WeakerAccess")
 public class EmailBuilder {
+    private static final VelocityEngine fileTemplateEngine;
+
+    static {
+        fileTemplateEngine = new VelocityEngine();
+        fileTemplateEngine.setProperty("file.resource.loader.class", ClasspathResourceLoader.class.getName());
+        fileTemplateEngine.init();
+    }
+
     private HtmlEmail htmlEmail;
     private String defaultHtmlTemplate;
 
@@ -102,11 +110,7 @@ public class EmailBuilder {
 
     public EmailBuilder setBody(String body) {
         try {
-            if (StringUtils.isEmpty(body)) {
-                htmlEmail.setHtmlMsg(defaultHtmlTemplate.replace("${html}", ""));
-            } else {
-                setHtmlAndTextBodyFromMarkdown(body);
-            }
+            setHtmlAndTextBodyFromMarkdown(body);
         } catch (EmailException e) {
             throw new RuntimeException(e);
         }
@@ -114,30 +118,46 @@ public class EmailBuilder {
     }
 
     public EmailBuilder setBodyFromTemplateText(String viewTemplate, Object model) {
-        VelocityEngine velocityEngine = new VelocityEngine();
-        velocityEngine.setProperty("resource.loader", "string");
-        velocityEngine.setProperty("string.resource.loader.class", StringResourceLoader.class.getName());
-        velocityEngine.setProperty("string.resource.loader.repository.class", StringResourceRepositoryImpl.class.getName());
-        velocityEngine.setProperty("string.resource.loader.repository.static", false);
-        velocityEngine.setProperty("string.resource.loader.repository.name", "templateRepository");
-        velocityEngine.init();
+        VelocityEngine engine = new VelocityEngine();
+        engine.setProperty("resource.loader", "string");
+        engine.setProperty("string.resource.loader.class", StringResourceLoader.class.getName());
+        engine.setProperty("string.resource.loader.repository.class", StringResourceRepositoryImpl.class.getName());
+        engine.setProperty("string.resource.loader.repository.static", false);
+        engine.setProperty("string.resource.loader.repository.name", "templateRepository");
+        engine.init();
 
-        StringResourceRepository stringResourceRepository = (StringResourceRepository) velocityEngine.getApplicationAttribute("templateRepository");
+        StringResourceRepository stringResourceRepository = (StringResourceRepository) engine.getApplicationAttribute("templateRepository");
         stringResourceRepository.putStringResource("template", viewTemplate);
 
-        VelocityContext context = new VelocityContext();
-        context.put("model", model);
-
-        Template template = velocityEngine.getTemplate("template", "UTF-8");
-        Writer writer = new StringWriter();
-        template.merge(context, writer);
         try {
-            setHtmlAndTextBodyFromMarkdown(writer.toString());
+            setHtmlAndTextBodyFromMarkdown(parseVelocityTemplate(engine, model, "template"));
         } catch (EmailException e) {
             throw new RuntimeException(e);
         }
 
         return this;
+    }
+
+    public EmailBuilder setBodyFromTemplatePath(String templatePath, Object model) {
+        try {
+            setHtmlAndTextBodyFromMarkdown(parseVelocityTemplate(fileTemplateEngine, model, templatePath));
+        } catch (EmailException e) {
+            throw new RuntimeException(e);
+        }
+        return this;
+    }
+
+    private String parseVelocityTemplate(VelocityEngine engine, Object model, String templatePath) {
+        Template template = engine.getTemplate(templatePath, "UTF-8");
+        Writer writer = new StringWriter();
+        template.merge(createVelocityContext(model), writer);
+        return writer.toString();
+    }
+
+    private VelocityContext createVelocityContext(Object model) {
+        VelocityContext context = new VelocityContext();
+        context.put("model", model);
+        return context;
     }
 
     private void setHtmlAndTextBodyFromMarkdown(String markdown) throws EmailException {
@@ -147,10 +167,22 @@ public class EmailBuilder {
         Node document = parser.parse(markdown);
 
         HtmlRenderer htmlRenderer = HtmlRenderer.builder(options).build();
-        htmlEmail.setHtmlMsg(defaultHtmlTemplate.replace("${html}", htmlRenderer.render(document)));
+        htmlEmail.setHtmlMsg(parseHtmlTemplate(htmlRenderer.render(document)));
 
-        PlainTextRenderer plainTextRenderer = new PlainTextRenderer();
-        htmlEmail.setTextMsg(plainTextRenderer.render(document));
+        if (StringUtils.isNotEmpty(markdown)) {
+            PlainTextRenderer plainTextRenderer = new PlainTextRenderer();
+            htmlEmail.setTextMsg(plainTextRenderer.render(document));
+        }
+    }
+
+    private String parseHtmlTemplate(String renderedMarkdown) {
+        VelocityContext context = new VelocityContext();
+        context.put("html", renderedMarkdown);
+
+        Template template = fileTemplateEngine.getTemplate(defaultHtmlTemplate, "UTF-8");
+        Writer writer = new StringWriter();
+        template.merge(context, writer);
+        return writer.toString();
     }
 
     public void send() {

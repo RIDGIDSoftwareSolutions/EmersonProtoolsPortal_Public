@@ -16,7 +16,7 @@ import static org.hamcrest.Matchers.hasEntry;
 class EmailBuilderFactoryTest {
     private static final String EXAMPLE_HOST = "mail.example.com";
     private static final int EXAMPLE_PORT = 12345;
-    private static final String EXAMPLE_DEFAULT_HTML_TEMPLATE = "<html><body>${html}</body></html>";
+    private static final String EXAMPLE_DEFAULT_HTML_TEMPLATE = "/simple-web-template.vm";
 
     private EmailBuilderFactory emailBuilderFactory;
     private Map<String, String> sentEmailInfo;
