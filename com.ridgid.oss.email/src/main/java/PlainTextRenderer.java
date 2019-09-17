@@ -1,3 +1,4 @@
+import com.vladsch.flexmark.ast.Link;
 import com.vladsch.flexmark.ast.Paragraph;
 import com.vladsch.flexmark.ast.SoftLineBreak;
 import com.vladsch.flexmark.ast.Text;
@@ -26,6 +27,19 @@ class PlainTextRenderer implements IRender {
         nodeHandlers.put(Paragraph.class, (node, previousNodeClass, output) -> {
             if (previousNodeClass != null) {
                 writeTo(output, "\n\n");
+            }
+        });
+        nodeHandlers.put(Link.class, new NodeHandler() {
+            @Override
+            public void startNode(Node node, Class<? extends Node> previousNodeClass, Appendable output) {
+            }
+
+            @Override
+            public void endNode(Node node, Class<? extends Node> previousNodeClass, Appendable output) {
+                Link link = (Link) node;
+                if (!link.getText().equals(link.getUrl())) {
+                    writeTo(output, " (" + link.getUrl() + ")");
+                }
             }
         });
         NODE_HANDLERS = Collections.unmodifiableMap(nodeHandlers);

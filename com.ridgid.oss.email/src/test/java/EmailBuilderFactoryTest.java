@@ -146,4 +146,58 @@ class EmailBuilderFactoryTest {
                         headingLevel)));
         assertThat(sentEmailInfo, hasEntry("text body", "Hello, world!\n\nHow are you?"));
     }
+
+    @Test
+    void it_can_support_text_with_emphasis() {
+        emailBuilderFactory.createBuilder()
+                .setBody("This is *some* text")
+                .send();
+        assertThat(sentEmailInfo, hasEntry("html body", "<html><body><p>This is <em>some</em> text</p>\n</body></html>"));
+        assertThat(sentEmailInfo, hasEntry("text body", "This is some text"));
+    }
+
+    @Test
+    void it_can_support_strong_text() {
+        emailBuilderFactory.createBuilder()
+                .setBody("This is **some** text")
+                .send();
+        assertThat(sentEmailInfo, hasEntry("html body", "<html><body><p>This is <strong>some</strong> text</p>\n</body></html>"));
+        assertThat(sentEmailInfo, hasEntry("text body", "This is some text"));
+    }
+
+    @Test
+    void it_can_support_inline_code_text() {
+        emailBuilderFactory.createBuilder()
+                .setBody("This is `some` text")
+                .send();
+        assertThat(sentEmailInfo, hasEntry("html body", "<html><body><p>This is <code>some</code> text</p>\n</body></html>"));
+        assertThat(sentEmailInfo, hasEntry("text body", "This is some text"));
+    }
+
+    @Test
+    void it_can_support_strikethrough_text() {
+        emailBuilderFactory.createBuilder()
+                .setBody("This is ~~some~~ text")
+                .send();
+        assertThat(sentEmailInfo, hasEntry("html body", "<html><body><p>This is <del>some</del> text</p>\n</body></html>"));
+        assertThat(sentEmailInfo, hasEntry("text body", "This is some text"));
+    }
+
+    @Test
+    void it_can_support_simple_links() {
+        emailBuilderFactory.createBuilder()
+                .setBody("This is a link to www.google.com")
+                .send();
+        assertThat(sentEmailInfo, hasEntry("html body", "<html><body><p>This is a link to <a href=\"http://www.google.com\">www.google.com</a></p>\n</body></html>"));
+        assertThat(sentEmailInfo, hasEntry("text body", "This is a link to www.google.com"));
+    }
+
+    @Test
+    void it_can_support_wiki_links() {
+        emailBuilderFactory.createBuilder()
+                .setBody("This is [a link](https://www.google.com/) to Google")
+                .send();
+        assertThat(sentEmailInfo, hasEntry("html body", "<html><body><p>This is <a href=\"https://www.google.com/\">a link</a> to Google</p>\n</body></html>"));
+        assertThat(sentEmailInfo, hasEntry("text body", "This is a link (https://www.google.com/) to Google"));
+    }
 }

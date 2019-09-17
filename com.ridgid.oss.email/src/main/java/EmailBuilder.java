@@ -1,10 +1,16 @@
+import com.vladsch.flexmark.ext.autolink.AutolinkExtension;
+import com.vladsch.flexmark.ext.gfm.strikethrough.StrikethroughExtension;
+import com.vladsch.flexmark.ext.wikilink.WikiLinkExtension;
 import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.parser.Parser;
 import com.vladsch.flexmark.util.ast.Node;
+import com.vladsch.flexmark.util.data.MutableDataSet;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.mail.Email;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
+
+import java.util.Arrays;
 
 public class EmailBuilder {
     private HtmlEmail htmlEmail;
@@ -98,10 +104,12 @@ public class EmailBuilder {
     }
 
     private void setHtmlAndTextBodyFromMarkdown(String markdown) throws EmailException {
-        Parser parser = Parser.builder().build();
+        MutableDataSet options = new MutableDataSet();
+        options.set(Parser.EXTENSIONS, Arrays.asList(AutolinkExtension.create(), WikiLinkExtension.create(), StrikethroughExtension.create()));
+        Parser parser = Parser.builder(options).build();
         Node document = parser.parse(markdown);
 
-        HtmlRenderer htmlRenderer = HtmlRenderer.builder().build();
+        HtmlRenderer htmlRenderer = HtmlRenderer.builder(options).build();
         htmlEmail.setHtmlMsg(defaultHtmlTemplate.replace("${html}", htmlRenderer.render(document)));
 
         PlainTextRenderer plainTextRenderer = new PlainTextRenderer();
