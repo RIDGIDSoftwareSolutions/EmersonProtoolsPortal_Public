@@ -1,5 +1,6 @@
 import org.apache.commons.mail.HtmlEmail;
 
+@SuppressWarnings("WeakerAccess")
 public abstract class EmailBuilderFactory {
     private final String host;
     private final int port;

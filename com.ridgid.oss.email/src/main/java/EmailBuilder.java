@@ -12,6 +12,7 @@ import org.apache.commons.mail.HtmlEmail;
 
 import java.util.Arrays;
 
+@SuppressWarnings("WeakerAccess")
 public class EmailBuilder {
     private HtmlEmail htmlEmail;
     private String defaultHtmlTemplate;
@@ -124,10 +125,12 @@ public class EmailBuilder {
         }
     }
 
+    @SuppressWarnings("UnusedReturnValue")
     private interface AddressOnlyConsumer {
         Email accept(String email) throws EmailException;
     }
 
+    @SuppressWarnings("UnusedReturnValue")
     private interface AddressAndNameConsumer {
         Email accept(String email, String name) throws EmailException;
     }
