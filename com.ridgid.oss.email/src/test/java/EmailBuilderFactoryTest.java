@@ -1,6 +1,8 @@
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.mail.HtmlEmail;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.RepeatedTest;
+import org.junit.jupiter.api.RepetitionInfo;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -129,6 +131,19 @@ class EmailBuilderFactoryTest {
                 .setBody("Hello, world!\n\nHow are you?")
                 .send();
         assertThat(sentEmailInfo, hasEntry("html body", "<html><body><p>Hello, world!</p>\n<p>How are you?</p>\n</body></html>"));
+        assertThat(sentEmailInfo, hasEntry("text body", "Hello, world!\n\nHow are you?"));
+    }
+
+    @RepeatedTest(value = 6, name = "it can support level {currentRepetition} headings")
+    void it_can_support_headings(RepetitionInfo repetitionInfo) {
+        int headingLevel = repetitionInfo.getCurrentRepetition();
+        emailBuilderFactory.createBuilder()
+                .setBody(StringUtils.repeat('#', headingLevel) + " Hello, world!\nHow are you?")
+                .send();
+        assertThat(sentEmailInfo, hasEntry("html body",
+                String.format("<html><body><h%d>Hello, world!</h%d>\n<p>How are you?</p>\n</body></html>",
+                        headingLevel,
+                        headingLevel)));
         assertThat(sentEmailInfo, hasEntry("text body", "Hello, world!\n\nHow are you?"));
     }
 }
