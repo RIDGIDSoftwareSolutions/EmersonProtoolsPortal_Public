@@ -7,10 +7,7 @@ import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.RepetitionInfo;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasEntry;
@@ -27,7 +24,7 @@ class EmailBuilderFactoryTest {
     @BeforeEach
     void setup() {
         themes = new HashMap<>();
-        emailBuilderFactory = new EmailBuilderFactory(EXAMPLE_HOST, EXAMPLE_PORT, EXAMPLE_DEFAULT_HTML_TEMPLATE, themes) {
+        emailBuilderFactory = new EmailBuilderFactory(EXAMPLE_HOST, EXAMPLE_PORT, EXAMPLE_DEFAULT_HTML_TEMPLATE, themes, Collections.emptyMap()) {
             @Override
             protected HtmlEmail createEmail() {
                 return new HtmlEmail() {
