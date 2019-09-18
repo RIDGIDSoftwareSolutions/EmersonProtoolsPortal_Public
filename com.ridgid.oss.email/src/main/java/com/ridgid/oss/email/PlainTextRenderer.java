@@ -130,11 +130,7 @@ class PlainTextRenderer implements IRender {
 
     @Override
     public void render(Node node, Appendable output) {
-        renderDocument(node, output);
-    }
-
-    private void renderDocument(Node rootNode, Appendable output) {
-        NodeWrapper wrapper = new NodeWrapper(rootNode, true);
+        NodeWrapper wrapper = new NodeWrapper(node, true);
         HandlerData data = new HandlerData();
         data.outputStack.push(output);
         while (wrapper.node != null) {
