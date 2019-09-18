@@ -5,7 +5,7 @@ import org.apache.commons.mail.HtmlEmail;
 import java.util.Map;
 
 @SuppressWarnings("WeakerAccess")
-public abstract class EmailBuilderFactory {
+public class EmailBuilderFactory {
     private final String host;
     private final int port;
     private final String defaultHtmlTemplate;
