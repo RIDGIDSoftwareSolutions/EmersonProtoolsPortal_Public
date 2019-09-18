@@ -20,8 +20,10 @@ import org.apache.velocity.runtime.resource.loader.StringResourceLoader;
 import org.apache.velocity.runtime.resource.util.StringResourceRepository;
 import org.apache.velocity.runtime.resource.util.StringResourceRepositoryImpl;
 
+import java.io.File;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.Map;
 
@@ -203,6 +205,50 @@ public class EmailBuilder {
 
     public EmailBuilder setHtmlTheme(String themeName) {
         this.themeName = themeName;
+        return this;
+    }
+
+    /**
+     * Embed a resource into the email (e.g. an embedded image)
+     * @param url The URL from which the resource should be pulled
+     * @param cid The Content-ID of the resource
+     */
+    public EmailBuilder embed(URL url, String cid) {
+        try {
+            htmlEmail.embed(url, cid);
+        } catch (EmailException e) {
+            throw new RuntimeException(e);
+        }
+        return this;
+    }
+
+
+    /**
+     * Embed a resource into the email (e.g. an embedded image)
+     * @param url The URL from which the resource should be pulled
+     * @param cid The Content-ID of the resource
+     */
+    public EmailBuilder embed(String url, String cid) {
+        try {
+            htmlEmail.embed(url, cid);
+        } catch (EmailException e) {
+            throw new RuntimeException(e);
+        }
+        return this;
+    }
+
+
+    /**
+     * Embed a resource into the email (e.g. an embedded image)
+     * @param file The file containing the resource to be pulled
+     * @param cid The Content-ID of the resource
+     */
+    public EmailBuilder embed(File file, String cid) {
+        try {
+            htmlEmail.embed(file, cid);
+        } catch (EmailException e) {
+            throw new RuntimeException(e);
+        }
         return this;
     }
 
