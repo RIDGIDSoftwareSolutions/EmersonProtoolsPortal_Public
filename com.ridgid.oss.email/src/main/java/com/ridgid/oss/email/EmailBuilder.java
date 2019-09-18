@@ -20,6 +20,7 @@ import org.apache.velocity.runtime.resource.loader.StringResourceLoader;
 import org.apache.velocity.runtime.resource.util.StringResourceRepository;
 import org.apache.velocity.runtime.resource.util.StringResourceRepositoryImpl;
 
+import javax.activation.DataSource;
 import java.io.File;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -246,6 +247,15 @@ public class EmailBuilder {
     public EmailBuilder embed(File file, String cid) {
         try {
             htmlEmail.embed(file, cid);
+        } catch (EmailException e) {
+            throw new RuntimeException(e);
+        }
+        return this;
+    }
+
+    public EmailBuilder attach(DataSource dataSource, String name, String description, String disposition) {
+        try {
+            htmlEmail.attach(dataSource, name, description, disposition);
         } catch (EmailException e) {
             throw new RuntimeException(e);
         }
