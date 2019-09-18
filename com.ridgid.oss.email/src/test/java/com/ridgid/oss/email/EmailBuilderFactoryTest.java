@@ -370,6 +370,42 @@ class EmailBuilderFactoryTest {
     }
 
     @Test
+    void it_escapes_special_characters_inside_a_model_property() {
+        // @formatter:off
+        String viewTemplate =
+                "#foreach($item in $model)\n" +
+                "$item\n" +
+                "#end\n";
+        // @formatter:on
+
+        List<String> model = Arrays.asList(" * Hello, world!", " - Hi there!", "# No heading here", "`No inline code`", "~~No strikethrough~~");
+        emailBuilderFactory.createBuilder()
+                .setBodyFromTemplateText(viewTemplate, model)
+                .send();
+
+        // @formatter:off
+        assertThat(sentEmailInfo, hasEntry("html body",
+                "<html>" +
+                    "<body>" +
+                        "<p>" +
+                            "&#42; Hello, world!\n" +
+                            "&#45; Hi there!\n" +
+                            "&#35; No heading here\n" +
+                            "&#96;No inline code&#96;\n" +
+                            "&#126;&#126;No strikethrough&#126;&#126;" +
+                        "</p>\n" +
+                    "</body>" +
+                "</html>"));
+        assertThat(sentEmailInfo, hasEntry("text body",
+                "* Hello, world! " +
+                "- Hi there! " +
+                "# No heading here " +
+                "`No inline code` " +
+                "~~No strikethrough~~"));
+        // @formatter:on
+    }
+
+    @Test
     void it_can_support_mvc_templates_from_a_file() {
         List<String> model = Arrays.asList("Apple", "Orange", "Banana", "Grape");
         emailBuilderFactory.createBuilder()

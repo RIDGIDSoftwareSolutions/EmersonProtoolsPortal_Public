@@ -43,6 +43,12 @@ class PlainTextRenderer implements IRender {
                 }
             }
         });
+        nodeHandlers.put(HtmlEntity.class, (node, data, output) -> {
+            if (Objects.equals(data.previousNodeClass, SoftLineBreak.class)) {
+                output.append(" ");
+            }
+            output.append(node.getChars().unescape());
+        });
         registerListHandlers(nodeHandlers);
         registerTableHandlers(nodeHandlers);
         NODE_HANDLERS = Collections.unmodifiableMap(nodeHandlers);

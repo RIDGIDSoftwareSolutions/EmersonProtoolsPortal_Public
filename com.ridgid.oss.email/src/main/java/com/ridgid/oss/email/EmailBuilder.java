@@ -33,7 +33,7 @@ public class EmailBuilder {
     private static final PlainTextRenderer PLAIN_TEXT_RENDERER;
 
     static {
-        fileTemplateEngine = new VelocityEngine();
+        fileTemplateEngine = createCommonEngine();
         fileTemplateEngine.setProperty("file.resource.loader.class", ClasspathResourceLoader.class.getName());
         fileTemplateEngine.init();
 
@@ -43,6 +43,12 @@ public class EmailBuilder {
 
         HTML_RENDERER = HtmlRenderer.builder(options).build();
         PLAIN_TEXT_RENDERER = new PlainTextRenderer();
+    }
+
+    private static VelocityEngine createCommonEngine() {
+        VelocityEngine engine = new VelocityEngine();
+        engine.setProperty("event_handler.reference_insertion.class", EscapeMarkdownReferenceInsertionEventHandler.class.getName());
+        return engine;
     }
 
     private HtmlEmail htmlEmail;
@@ -135,7 +141,7 @@ public class EmailBuilder {
     }
 
     public EmailBuilder setBodyFromTemplateText(String viewTemplate, Object model) {
-        VelocityEngine engine = new VelocityEngine();
+        VelocityEngine engine = createCommonEngine();
         engine.setProperty("resource.loader", "string");
         engine.setProperty("string.resource.loader.class", StringResourceLoader.class.getName());
         engine.setProperty("string.resource.loader.repository.class", StringResourceRepositoryImpl.class.getName());
