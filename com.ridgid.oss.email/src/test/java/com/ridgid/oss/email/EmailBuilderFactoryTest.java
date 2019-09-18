@@ -404,4 +404,50 @@ class EmailBuilderFactoryTest {
                 " * Grape"));
         // @formatter:on
     }
+
+    @Test
+    void it_can_support_simple_tables() {
+        // @formatter:off
+        String markdown =
+                "| Letter | Lower Bound | Upper Bound | Passing |\n" +
+                "|----|----|----|----|\n" +
+                "|A|90|100|Yes|\n" +
+                "|B|80|89|Yes|\n" +
+                "|C|70|79|Yes|\n" +
+                "|D|60|69|Yes|\n" +
+                "|F|0|59|No|\n";
+        // @formatter:on
+
+        emailBuilderFactory.createBuilder()
+                .setBody(markdown)
+                .send();
+
+        // @formatter:off
+        assertThat(sentEmailInfo, hasEntry("html body",
+                "<html>" +
+                "<body>" +
+                    "<table>\n" +
+                        "<thead>\n" +
+                            "<tr><th>Letter</th><th>Lower Bound</th><th>Upper Bound</th><th>Passing</th></tr>\n" +
+                        "</thead>\n" +
+                        "<tbody>\n" +
+                            "<tr><td>A</td><td>90</td><td>100</td><td>Yes</td></tr>\n" +
+                            "<tr><td>B</td><td>80</td><td>89</td><td>Yes</td></tr>\n" +
+                            "<tr><td>C</td><td>70</td><td>79</td><td>Yes</td></tr>\n" +
+                            "<tr><td>D</td><td>60</td><td>69</td><td>Yes</td></tr>\n" +
+                            "<tr><td>F</td><td>0</td><td>59</td><td>No</td></tr>\n" +
+                        "</tbody>\n" +
+                    "</table>\n" +
+                "</body>" +
+                "</html>"));
+        assertThat(sentEmailInfo, hasEntry("text body",
+                "| Letter | Lower Bound | Upper Bound | Passing |\n" +
+                "|--------|-------------|-------------|---------|\n" +
+                "| A      | 90          | 100         | Yes     |\n" +
+                "| B      | 80          | 89          | Yes     |\n" +
+                "| C      | 70          | 79          | Yes     |\n" +
+                "| D      | 60          | 69          | Yes     |\n" +
+                "| F      | 0           | 59          | No      |"));
+        // @formatter:on
+    }
 }
