@@ -27,28 +27,43 @@ class EmailBuilderFactoryTest {
         emailBuilderFactory = new EmailBuilderFactory(EXAMPLE_HOST, EXAMPLE_PORT, EXAMPLE_DEFAULT_HTML_TEMPLATE, themes, Collections.emptyMap()) {
             @Override
             protected HtmlEmail createEmail() {
-                return new HtmlEmail() {
-                    @Override
-                    public String send() {
-                        sentEmailInfo = new HashMap<>();
-                        sentEmailInfo.put("smtp host", hostName);
-                        sentEmailInfo.put("smtp port", smtpPort);
-                        sentEmailInfo.put("from", String.valueOf(fromAddress));
-                        addList("to", toList);
-                        addList("cc", ccList);
-                        addList("bcc", bccList);
-                        sentEmailInfo.put("subject", subject);
-                        sentEmailInfo.put("text body", text);
-                        sentEmailInfo.put("html body", html);
-                        return null;
-                    }
+                return createHtmlEmail();
+            }
+        };
+    }
 
-                    private void addList(String key, List<?> values) {
-                        if (values != null && !values.isEmpty()) {
-                            sentEmailInfo.put(key, StringUtils.join(values, "; "));
-                        }
-                    }
-                };
+    private HtmlEmail createHtmlEmail() {
+        return new HtmlEmail() {
+            private String username;
+            private String password;
+
+            @Override
+            public String send() {
+                sentEmailInfo = new HashMap<>();
+                sentEmailInfo.put("smtp host", hostName);
+                sentEmailInfo.put("smtp port", smtpPort);
+                sentEmailInfo.put("from", String.valueOf(fromAddress));
+                addList("to", toList);
+                addList("cc", ccList);
+                addList("bcc", bccList);
+                sentEmailInfo.put("subject", subject);
+                sentEmailInfo.put("text body", text);
+                sentEmailInfo.put("html body", html);
+                sentEmailInfo.put("username", username);
+                sentEmailInfo.put("password", password);
+                return null;
+            }
+
+            private void addList(String key, List<?> values) {
+                if (values != null && !values.isEmpty()) {
+                    sentEmailInfo.put(key, StringUtils.join(values, "; "));
+                }
+            }
+
+            @Override
+            public void setAuthentication(String userName, String password) {
+                this.username = userName;
+                this.password = password;
             }
         };
     }
@@ -58,6 +73,19 @@ class EmailBuilderFactoryTest {
         emailBuilderFactory.createBuilder().send();
         assertThat(sentEmailInfo, hasEntry("smtp host", EXAMPLE_HOST));
         assertThat(sentEmailInfo, hasEntry("smtp port", String.valueOf(EXAMPLE_PORT)));
+    }
+
+    @Test
+    void it_optionally_allows_for_credentials() {
+        emailBuilderFactory = new EmailBuilderFactory(EXAMPLE_HOST, EXAMPLE_PORT, "jdoe", "foobar", EXAMPLE_DEFAULT_HTML_TEMPLATE, themes, Collections.emptyMap()) {
+            @Override
+            protected HtmlEmail createEmail() {
+                return createHtmlEmail();
+            }
+        };
+        emailBuilderFactory.createBuilder().send();
+        assertThat(sentEmailInfo, hasEntry("username", "jdoe"));
+        assertThat(sentEmailInfo, hasEntry("password", "foobar"));
     }
 
     @Test
