@@ -2,11 +2,11 @@ package com.ridgid.oss.email;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.mail.HtmlEmail;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.RepeatedTest;
-import org.junit.jupiter.api.RepetitionInfo;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.*;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -510,5 +510,30 @@ class EmailBuilderFactoryTest {
                 "| D      | 60          | 69          | Yes     |\n" +
                 "| F      | 0           | 59          | No      |"));
         // @formatter:on
+    }
+
+    @Test
+    void integration_test() throws IOException {
+        Assumptions.assumeTrue(System.getProperties().containsKey("com.ridgid.oss.email.host"));
+        Assumptions.assumeTrue(System.getProperties().containsKey("com.ridgid.oss.email.port"));
+        Assumptions.assumeTrue(System.getProperties().containsKey("com.ridgid.oss.email.from"));
+        Assumptions.assumeTrue(System.getProperties().containsKey("com.ridgid.oss.email.to"));
+
+        String host = System.getProperty("com.ridgid.oss.email.host");
+        String port = System.getProperty("com.ridgid.oss.email.port");
+        String from = System.getProperty("com.ridgid.oss.email.from");
+        String to = System.getProperty("com.ridgid.oss.email.to");
+        String username = System.getProperty("com.ridgid.oss.email.username");
+        String password = System.getProperty("com.ridgid.oss.email.password");
+
+        String body = new String(Files.readAllBytes(new File(getClass().getResource("/example-markdown.md").getFile()).toPath()));
+
+        EmailBuilderFactory emailBuilderFactory = new EmailBuilderFactory(host, Integer.parseInt(port), username, password, "/simple-web-template.vm", Collections.emptyMap(), Collections.emptyMap());
+        emailBuilderFactory.createBuilder()
+                .setFrom(from)
+                .addToAddress(to)
+                .setSubject("Integration Test")
+                .setBody(body)
+                .send();
     }
 }
