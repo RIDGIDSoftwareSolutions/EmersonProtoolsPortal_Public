@@ -15,7 +15,7 @@ import static org.hamcrest.Matchers.hasEntry;
 class EmailBuilderFactoryTest {
     private static final String EXAMPLE_HOST = "mail.example.com";
     private static final int EXAMPLE_PORT = 12345;
-    private static final String EXAMPLE_DEFAULT_HTML_TEMPLATE = "/simple-web-template.vm";
+    private static final String EXAMPLE_DEFAULT_HTML_TEMPLATE = "/com/ridgid/oss/email/simple-web-template.vm";
 
     private EmailBuilderFactory emailBuilderFactory;
     private Map<String, String> sentEmailInfo;
@@ -157,7 +157,7 @@ class EmailBuilderFactoryTest {
 
     @Test
     void it_can_use_a_different_html_theme_from_the_default() {
-        themes.put("custom", "/custom-web-theme.vm");
+        themes.put("custom", "/com/ridgid/oss/email/custom-web-theme.vm");
 
         emailBuilderFactory.createBuilder()
                 .setHtmlTheme("custom")
@@ -434,7 +434,7 @@ class EmailBuilderFactoryTest {
     void it_can_support_mvc_templates_from_a_file() {
         List<String> model = Arrays.asList("Apple", "Orange", "Banana", "Grape");
         emailBuilderFactory.createBuilder()
-                .setBodyFromTemplatePath("/simple-velocity-template.vm", model)
+                .setBodyFromTemplatePath("/com/ridgid/oss/email/simple-velocity-template.vm", model)
                 .send();
 
         // @formatter:off
@@ -526,9 +526,10 @@ class EmailBuilderFactoryTest {
         String username = System.getProperty("com.ridgid.oss.email.username");
         String password = System.getProperty("com.ridgid.oss.email.password");
 
-        String body = new String(Files.readAllBytes(new File(getClass().getResource("/example-markdown.md").getFile()).toPath()));
+        String body = new String(Files.readAllBytes(new File(getClass().getResource("/com/ridgid/oss/email/example-markdown.md").getFile()).toPath()));
 
-        EmailBuilderFactory emailBuilderFactory = new EmailBuilderFactory(host, Integer.parseInt(port), username, password, "/simple-web-template.vm", Collections.emptyMap(), Collections.emptyMap());
+        EmailBuilderFactory emailBuilderFactory =
+                new EmailBuilderFactory(host, Integer.parseInt(port), username, password, EXAMPLE_DEFAULT_HTML_TEMPLATE, Collections.emptyMap(), Collections.emptyMap());
         emailBuilderFactory.createBuilder()
                 .setFrom(from)
                 .addToAddress(to)
