@@ -2,6 +2,7 @@ package com.ridgid.oss.orm.jpa;
 
 import com.ridgid.oss.common.hierarchy.GeneralVisitHandler;
 import com.ridgid.oss.common.hierarchy.HierarchyProcessor;
+import com.ridgid.oss.common.hierarchy.HierarchyProcessor.Traversal;
 import com.ridgid.oss.common.hierarchy.VisitStatus;
 import com.ridgid.oss.orm.EntityCRUD;
 import com.ridgid.oss.orm.entity.PrimaryKeyedEntity;
@@ -19,6 +20,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static com.ridgid.oss.common.hierarchy.HierarchyProcessor.Traversal.BREADTH_FIRST;
 import static com.ridgid.oss.common.hierarchy.HierarchyProcessor.Traversal.DEPTH_FIRST;
 
 @SuppressWarnings({"WeakerAccess", "unused"})
@@ -100,7 +102,8 @@ final class JPAEntityCRUDDelegate<ET extends PrimaryKeyedEntity<PKT>, PKT extend
                 entity,
                 hierarchy,
                 this::initializeEntityVisitHandler,
-                this::detachEntityVisitHandler
+                this::detachEntityVisitHandler,
+                BREADTH_FIRST
             );
         return entity;
     }
@@ -145,7 +148,8 @@ final class JPAEntityCRUDDelegate<ET extends PrimaryKeyedEntity<PKT>, PKT extend
                 entity,
                 hierarchy,
                 this::initializeEntityVisitHandler,
-                null
+                null,
+                BREADTH_FIRST
             );
         return entity;
     }
@@ -159,7 +163,8 @@ final class JPAEntityCRUDDelegate<ET extends PrimaryKeyedEntity<PKT>, PKT extend
                 entity,
                 hierarchy,
                 EntityCRUD.NO_OP_VISIT_HANDLER,
-                this::detachEntityVisitHandler
+                this::detachEntityVisitHandler,
+                DEPTH_FIRST
             );
         return entity;
     }
@@ -184,7 +189,8 @@ final class JPAEntityCRUDDelegate<ET extends PrimaryKeyedEntity<PKT>, PKT extend
     private void visitEntityHierarchy(ET entity,
                                       HierarchyProcessor<ET> hierarchy,
                                       GeneralVisitHandler visitor,
-                                      GeneralVisitHandler afterChildrenVisitor)
+                                      GeneralVisitHandler afterChildrenVisitor,
+                                      Traversal traversal)
     {
         try {
             if ( hierarchy == null ) {
@@ -201,7 +207,7 @@ final class JPAEntityCRUDDelegate<ET extends PrimaryKeyedEntity<PKT>, PKT extend
                     entity,
                     visitor,
                     afterChildrenVisitor,
-                    DEPTH_FIRST
+                    traversal
                 );
         } catch ( Exception e ) {
             throw enhanceExceptionWithEntityManagerNullCheck(e);
