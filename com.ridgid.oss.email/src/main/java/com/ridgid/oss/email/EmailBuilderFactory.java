@@ -33,6 +33,7 @@ public class EmailBuilderFactory {
         HtmlEmail htmlEmail = createEmail();
         htmlEmail.setHostName(host);
         htmlEmail.setSmtpPort(port);
+        htmlEmail.setCharset("utf-8");
         embeddedResources.forEach((cid, url) -> {
             try {
                 htmlEmail.embed(url, cid);
