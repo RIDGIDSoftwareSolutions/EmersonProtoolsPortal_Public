@@ -25,8 +25,11 @@ import java.io.File;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("WeakerAccess")
 public class EmailBuilder {
@@ -34,6 +37,7 @@ public class EmailBuilder {
     private static final Parser PARSER;
     private static final HtmlRenderer HTML_RENDERER;
     private static final PlainTextRenderer PLAIN_TEXT_RENDERER;
+    private Runnable setBodyCallback = () -> {};
 
     static {
         fileTemplateEngine = createCommonEngine();
@@ -54,15 +58,20 @@ public class EmailBuilder {
         return engine;
     }
 
-    private HtmlEmail htmlEmail;
-    private String defaultHtmlTemplate;
-    private Map<String, String> themes;
+    private final HtmlEmail htmlEmail;
+    private final String defaultHtmlTemplate;
+    private final Map<String, String> themes;
+    private final String overrideEmail;
     private String themeName = "";
+    private List<String> toAddresses = new ArrayList<>();
+    private List<String> ccAddresses = new ArrayList<>();
+    private List<String> bccAddresses = new ArrayList<>();
 
-    EmailBuilder(HtmlEmail htmlEmail, String defaultHtmlTemplate, Map<String, String> themes) {
+    EmailBuilder(HtmlEmail htmlEmail, String defaultHtmlTemplate, Map<String, String> themes, String overrideEmail) {
         this.htmlEmail = htmlEmail;
         this.defaultHtmlTemplate = defaultHtmlTemplate;
         this.themes = themes;
+        this.overrideEmail = overrideEmail;
     }
 
     public EmailBuilder setSubject(String subject) {
@@ -89,57 +98,59 @@ public class EmailBuilder {
     }
 
     public EmailBuilder addToAddress(String email) {
-        addEmailAddress(email, htmlEmail::addTo);
+        addEmailAddress(email, htmlEmail::addTo, toAddresses);
         return this;
     }
 
     public EmailBuilder addToAddress(String email, String name) {
-        addEmailAddress(email, name, htmlEmail::addTo);
+        addEmailAddress(email, name, htmlEmail::addTo, toAddresses);
         return this;
     }
 
     public EmailBuilder addCcAddress(String email) {
-        addEmailAddress(email, htmlEmail::addCc);
+        addEmailAddress(email, htmlEmail::addCc, ccAddresses);
         return this;
     }
 
     public EmailBuilder addCcAddress(String email, String name) {
-        addEmailAddress(email, name, htmlEmail::addCc);
+        addEmailAddress(email, name, htmlEmail::addCc, ccAddresses);
         return this;
     }
 
     public EmailBuilder addBccAddress(String email) {
-        addEmailAddress(email, htmlEmail::addBcc);
+        addEmailAddress(email, htmlEmail::addBcc, bccAddresses);
         return this;
     }
 
     public EmailBuilder addBccAddress(String email, String name) {
-        addEmailAddress(email, name, htmlEmail::addBcc);
+        addEmailAddress(email, name, htmlEmail::addBcc, bccAddresses);
         return this;
     }
 
-    private static void addEmailAddress(String email, AddressOnlyConsumer consumer) {
-        try {
-            consumer.accept(email);
-        } catch (EmailException e) {
-            throw new RuntimeException(e);
+    private void addEmailAddress(String email, AddressOnlyConsumer consumer, List<String> addressesList) {
+        if (!isOverridden()) {
+            try {
+                consumer.accept(email);
+            } catch (EmailException e) {
+                throw new RuntimeException(e);
+            }
         }
+        addressesList.add(email);
     }
 
-    private static void addEmailAddress(String email, String name, AddressAndNameConsumer consumer) {
-        try {
-            consumer.accept(email, name);
-        } catch (EmailException e) {
-            throw new RuntimeException(e);
+    private void addEmailAddress(String email, String name, AddressAndNameConsumer consumer, List<String> addressesList) {
+        if (!isOverridden()) {
+            try {
+                consumer.accept(email, name);
+            } catch (EmailException e) {
+                throw new RuntimeException(e);
+            }
         }
+        addressesList.add(email);
     }
 
     public EmailBuilder setBody(String body) {
-        try {
-            setHtmlAndTextBodyFromMarkdown(body);
-        } catch (EmailException e) {
-            throw new RuntimeException(e);
-        }
+        setHtmlAndTextBodyFromMarkdown(body);
         return this;
     }
 
@@ -154,22 +165,18 @@ public class EmailBuilder {
 
         StringResourceRepository stringResourceRepository = (StringResourceRepository) engine.getApplicationAttribute("templateRepository");
         stringResourceRepository.putStringResource("template", viewTemplate);
-
-        try {
-            setHtmlAndTextBodyFromMarkdown(parseVelocityTemplate(engine, model, "template"));
-        } catch (EmailException e) {
-            throw new RuntimeException(e);
-        }
+        setHtmlAndTextBodyFromMarkdown(parseVelocityTemplate(engine, model, "template"));
 
         return this;
     }
 
+    public EmailBuilder setBodyFromTemplatePath(Class<?> referenceClass, String relativePath, Object model) {
+        setBodyFromTemplatePath("/" + referenceClass.getPackage().getName().replace(".", "/") + "/" + relativePath, model);
+        return this;
+    }
+
     public EmailBuilder setBodyFromTemplatePath(String templatePath, Object model) {
-        try {
-            setHtmlAndTextBodyFromMarkdown(parseVelocityTemplate(fileTemplateEngine, model, templatePath));
-        } catch (EmailException e) {
-            throw new RuntimeException(e);
-        }
+        setHtmlAndTextBodyFromMarkdown(parseVelocityTemplate(fileTemplateEngine, model, templatePath));
         return this;
     }
 
@@ -186,17 +193,36 @@ public class EmailBuilder {
         return context;
     }
 
-    private void setHtmlAndTextBodyFromMarkdown(String markdown) throws EmailException {
-        Node document = PARSER.parse(markdown);
-        htmlEmail.setHtmlMsg(parseHtmlTemplate(HTML_RENDERER.render(document)));
-        if (StringUtils.isNotEmpty(markdown)) {
-            htmlEmail.setTextMsg(PLAIN_TEXT_RENDERER.render(document));
-        }
+    private void setHtmlAndTextBodyFromMarkdown(String markdown) {
+        setBodyCallback = () -> {
+            try {
+                Node document = PARSER.parse(markdown);
+                htmlEmail.setHtmlMsg(parseHtmlTemplate(HTML_RENDERER.render(document)));
+                if (StringUtils.isNotEmpty(markdown)) {
+                    StringBuilder textBody = new StringBuilder(PLAIN_TEXT_RENDERER.render(document));
+                    if (isOverridden()) {
+                        textBody.append("\n\nOriginal To Addresses:\n")
+                                .append(toAddresses.stream().map(address -> " - " + address).collect(Collectors.joining("\n")))
+                                .append("\n\nOriginal CC Addresses:\n")
+                                .append(ccAddresses.stream().map(address -> " - " + address).collect(Collectors.joining("\n")))
+                                .append("\n\nOriginal BCC Addresses:\n")
+                                .append(bccAddresses.stream().map(address -> " - " + address).collect(Collectors.joining("\n")));
+                    }
+                    htmlEmail.setTextMsg(textBody.toString());
+                }
+            } catch (EmailException e) {
+                throw new RuntimeException(e);
+            }
+        };
     }
 
     private String parseHtmlTemplate(String renderedMarkdown) {
         VelocityContext context = new VelocityContext();
         context.put("html", renderedMarkdown);
+        context.put("overridden", isOverridden());
+        context.put("toAddresses", toAddresses);
+        context.put("ccAddresses", ccAddresses);
+        context.put("bccAddresses", bccAddresses);
 
         Template template = fileTemplateEngine.getTemplate(themes.getOrDefault(themeName, defaultHtmlTemplate), "UTF-8");
         Writer writer = new StringWriter();
@@ -262,8 +288,16 @@ public class EmailBuilder {
         return this;
     }
 
+    private boolean isOverridden() {
+        return StringUtils.isNotEmpty(overrideEmail);
+    }
+
     public void send() {
         try {
+            if (isOverridden()) {
+                htmlEmail.addTo(overrideEmail);
+            }
+            setBodyCallback.run();
             htmlEmail.send();
         } catch (EmailException e) {
             throw new RuntimeException(e);

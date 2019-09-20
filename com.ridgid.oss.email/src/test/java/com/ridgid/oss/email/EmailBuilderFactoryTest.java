@@ -4,18 +4,23 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.mail.HtmlEmail;
 import org.junit.jupiter.api.*;
 
+import javax.activation.DataSource;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasEntry;
+import static org.hamcrest.Matchers.*;
 
 class EmailBuilderFactoryTest {
     private static final String EXAMPLE_HOST = "mail.example.com";
     private static final int EXAMPLE_PORT = 12345;
     private static final String EXAMPLE_DEFAULT_HTML_TEMPLATE = "/com/ridgid/oss/email/simple-web-template.vm";
+    private static final String USERNAME_NOT_REQUIRED = null;
+    private static final String PASSWORD_NOT_REQUIRED = null;
+    private static final String DO_NOT_OVERRIDE_EMAIL = null;
 
     private EmailBuilderFactory emailBuilderFactory;
     private Map<String, String> sentEmailInfo;
@@ -24,7 +29,24 @@ class EmailBuilderFactoryTest {
     @BeforeEach
     void setup() {
         themes = new HashMap<>();
-        emailBuilderFactory = new EmailBuilderFactory(EXAMPLE_HOST, EXAMPLE_PORT, EXAMPLE_DEFAULT_HTML_TEMPLATE, themes, Collections.emptyMap()) {
+        emailBuilderFactory = createEmailBuilderFactory(EXAMPLE_HOST, EXAMPLE_PORT, EXAMPLE_DEFAULT_HTML_TEMPLATE, themes, Collections.emptyMap());
+    }
+
+    @SuppressWarnings("SameParameterValue")
+    private EmailBuilderFactory createEmailBuilderFactory(String host, int port, String defaultHtmlTemplate, Map<String, String> themes, Map<String, DataSource> commonDataSources) {
+        return createEmailBuilderFactory(host, port, USERNAME_NOT_REQUIRED, PASSWORD_NOT_REQUIRED, defaultHtmlTemplate, themes, commonDataSources, DO_NOT_OVERRIDE_EMAIL);
+    }
+
+    @SuppressWarnings("SameParameterValue")
+    private EmailBuilderFactory createEmailBuilderFactory(String host,
+            int port,
+            String userName,
+            String password,
+            String defaultHtmlTemplate,
+            Map<String, String> themes,
+            Map<String, DataSource> commonDataSources,
+            String overrideEmail) {
+        return new EmailBuilderFactory(host, port, userName, password, defaultHtmlTemplate, themes, commonDataSources, overrideEmail) {
             @Override
             protected HtmlEmail createEmail() {
                 return createHtmlEmail();
@@ -48,7 +70,12 @@ class EmailBuilderFactoryTest {
                 addList("bcc", bccList);
                 sentEmailInfo.put("subject", subject);
                 sentEmailInfo.put("text body", text);
-                sentEmailInfo.put("html body", html);
+                if (html != null) {
+                    sentEmailInfo.put("html body", Arrays.stream(html.split("\r?\n"))
+                            .map(String::trim)
+                            .filter(line -> !line.isEmpty())
+                            .collect(Collectors.joining("\n")));
+                }
                 sentEmailInfo.put("username", username);
                 sentEmailInfo.put("password", password);
                 return null;
@@ -77,12 +104,7 @@ class EmailBuilderFactoryTest {
 
     @Test
     void it_optionally_allows_for_credentials() {
-        emailBuilderFactory = new EmailBuilderFactory(EXAMPLE_HOST, EXAMPLE_PORT, "jdoe", "foobar", EXAMPLE_DEFAULT_HTML_TEMPLATE, themes, Collections.emptyMap()) {
-            @Override
-            protected HtmlEmail createEmail() {
-                return createHtmlEmail();
-            }
-        };
+        emailBuilderFactory = createEmailBuilderFactory(EXAMPLE_HOST, EXAMPLE_PORT, "jdoe", "foobar", EXAMPLE_DEFAULT_HTML_TEMPLATE, themes, Collections.emptyMap(), null);
         emailBuilderFactory.createBuilder().send();
         assertThat(sentEmailInfo, hasEntry("username", "jdoe"));
         assertThat(sentEmailInfo, hasEntry("password", "foobar"));
@@ -142,7 +164,7 @@ class EmailBuilderFactoryTest {
         emailBuilderFactory.createBuilder()
                 .setBody("")
                 .send();
-        assertThat(sentEmailInfo, hasEntry("html body", "<html><body></body></html>"));
+        assertThat(sentEmailInfo, hasEntry("html body", "<html>\n<body>\n</body>\n</html>"));
         assertThat(sentEmailInfo, hasEntry("text body", null));
     }
 
@@ -151,7 +173,7 @@ class EmailBuilderFactoryTest {
         emailBuilderFactory.createBuilder()
                 .setBody("Hello, world!\nHow are you?")
                 .send();
-        assertThat(sentEmailInfo, hasEntry("html body", "<html><body><p>Hello, world!\nHow are you?</p>\n</body></html>"));
+        assertThat(sentEmailInfo, hasEntry("html body", "<html>\n<body>\n<p>Hello, world!\nHow are you?</p>\n</body>\n</html>"));
         assertThat(sentEmailInfo, hasEntry("text body", "Hello, world! How are you?"));
     }
 
@@ -184,7 +206,7 @@ class EmailBuilderFactoryTest {
         emailBuilderFactory.createBuilder()
                 .setBody("Hello, world!\n\nHow are you?")
                 .send();
-        assertThat(sentEmailInfo, hasEntry("html body", "<html><body><p>Hello, world!</p>\n<p>How are you?</p>\n</body></html>"));
+        assertThat(sentEmailInfo, hasEntry("html body", "<html>\n<body>\n<p>Hello, world!</p>\n<p>How are you?</p>\n</body>\n</html>"));
         assertThat(sentEmailInfo, hasEntry("text body", "Hello, world!\n\nHow are you?"));
     }
 
@@ -195,7 +217,7 @@ class EmailBuilderFactoryTest {
                 .setBody(StringUtils.repeat('#', headingLevel) + " Hello, world!\nHow are you?")
                 .send();
         assertThat(sentEmailInfo, hasEntry("html body",
-                String.format("<html><body><h%d>Hello, world!</h%d>\n<p>How are you?</p>\n</body></html>",
+                String.format("<html>\n<body>\n<h%d>Hello, world!</h%d>\n<p>How are you?</p>\n</body>\n</html>",
                         headingLevel,
                         headingLevel)));
         assertThat(sentEmailInfo, hasEntry("text body", "Hello, world!\n\nHow are you?"));
@@ -206,7 +228,7 @@ class EmailBuilderFactoryTest {
         emailBuilderFactory.createBuilder()
                 .setBody("Some text\n# Heading")
                 .send();
-        assertThat(sentEmailInfo, hasEntry("html body", "<html><body><p>Some text</p>\n<h1>Heading</h1>\n</body></html>"));
+        assertThat(sentEmailInfo, hasEntry("html body", "<html>\n<body>\n<p>Some text</p>\n<h1>Heading</h1>\n</body>\n</html>"));
         assertThat(sentEmailInfo, hasEntry("text body", "Some text\n\nHeading"));
     }
 
@@ -215,7 +237,7 @@ class EmailBuilderFactoryTest {
         emailBuilderFactory.createBuilder()
                 .setBody("This is *some* text")
                 .send();
-        assertThat(sentEmailInfo, hasEntry("html body", "<html><body><p>This is <em>some</em> text</p>\n</body></html>"));
+        assertThat(sentEmailInfo, hasEntry("html body", "<html>\n<body>\n<p>This is <em>some</em> text</p>\n</body>\n</html>"));
         assertThat(sentEmailInfo, hasEntry("text body", "This is some text"));
     }
 
@@ -224,7 +246,7 @@ class EmailBuilderFactoryTest {
         emailBuilderFactory.createBuilder()
                 .setBody("This is **some** text")
                 .send();
-        assertThat(sentEmailInfo, hasEntry("html body", "<html><body><p>This is <strong>some</strong> text</p>\n</body></html>"));
+        assertThat(sentEmailInfo, hasEntry("html body", "<html>\n<body>\n<p>This is <strong>some</strong> text</p>\n</body>\n</html>"));
         assertThat(sentEmailInfo, hasEntry("text body", "This is some text"));
     }
 
@@ -233,7 +255,7 @@ class EmailBuilderFactoryTest {
         emailBuilderFactory.createBuilder()
                 .setBody("This is `some` text")
                 .send();
-        assertThat(sentEmailInfo, hasEntry("html body", "<html><body><p>This is <code>some</code> text</p>\n</body></html>"));
+        assertThat(sentEmailInfo, hasEntry("html body", "<html>\n<body>\n<p>This is <code>some</code> text</p>\n</body>\n</html>"));
         assertThat(sentEmailInfo, hasEntry("text body", "This is some text"));
     }
 
@@ -242,7 +264,7 @@ class EmailBuilderFactoryTest {
         emailBuilderFactory.createBuilder()
                 .setBody("This is ~~some~~ text")
                 .send();
-        assertThat(sentEmailInfo, hasEntry("html body", "<html><body><p>This is <del>some</del> text</p>\n</body></html>"));
+        assertThat(sentEmailInfo, hasEntry("html body", "<html>\n<body>\n<p>This is <del>some</del> text</p>\n</body>\n</html>"));
         assertThat(sentEmailInfo, hasEntry("text body", "This is some text"));
     }
 
@@ -251,7 +273,7 @@ class EmailBuilderFactoryTest {
         emailBuilderFactory.createBuilder()
                 .setBody("This is a link to www.google.com")
                 .send();
-        assertThat(sentEmailInfo, hasEntry("html body", "<html><body><p>This is a link to <a href=\"http://www.google.com\">www.google.com</a></p>\n</body></html>"));
+        assertThat(sentEmailInfo, hasEntry("html body", "<html>\n<body>\n<p>This is a link to <a href=\"http://www.google.com\">www.google.com</a></p>\n</body>\n</html>"));
         assertThat(sentEmailInfo, hasEntry("text body", "This is a link to www.google.com"));
     }
 
@@ -260,7 +282,7 @@ class EmailBuilderFactoryTest {
         emailBuilderFactory.createBuilder()
                 .setBody("This is [a link](https://www.google.com/) to Google")
                 .send();
-        assertThat(sentEmailInfo, hasEntry("html body", "<html><body><p>This is <a href=\"https://www.google.com/\">a link</a> to Google</p>\n</body></html>"));
+        assertThat(sentEmailInfo, hasEntry("html body", "<html>\n<body>\n<p>This is <a href=\"https://www.google.com/\">a link</a> to Google</p>\n</body>\n</html>"));
         assertThat(sentEmailInfo, hasEntry("text body", "This is a link (https://www.google.com/) to Google"));
     }
 
@@ -280,21 +302,24 @@ class EmailBuilderFactoryTest {
                 .send();
         // @formatter:off
         assertThat(sentEmailInfo, hasEntry("html body",
-                "<html><body><p>List of animals:</p>\n" +
-                    "<ul>\n" +
-                        "<li>Mammal\n" +
-                            "<ul>\n" +
-                                "<li>Dog</li>\n" +
-                                "<li>Cat</li>\n" +
-                            "</ul>\n" +
-                        "</li>\n" +
-                        "<li>Reptile\n" +
-                            "<ul>\n" +
-                                "<li>Snake</li>\n" +
-                            "</ul>\n" +
-                        "</li>\n" +
-                    "</ul>\n" +
-                "</body></html>"));
+                "<html>\n" +
+                    "<body>\n" +
+                        "<p>List of animals:</p>\n" +
+                        "<ul>\n" +
+                            "<li>Mammal\n" +
+                                "<ul>\n" +
+                                    "<li>Dog</li>\n" +
+                                    "<li>Cat</li>\n" +
+                                "</ul>\n" +
+                            "</li>\n" +
+                            "<li>Reptile\n" +
+                                "<ul>\n" +
+                                    "<li>Snake</li>\n" +
+                                "</ul>\n" +
+                            "</li>\n" +
+                        "</ul>\n" +
+                    "</body>\n" +
+                "</html>"));
         assertThat(sentEmailInfo, hasEntry("text body",
                 "List of animals:\n" +
                 "\n" +
@@ -322,21 +347,24 @@ class EmailBuilderFactoryTest {
                 .send();
         // @formatter:off
         assertThat(sentEmailInfo, hasEntry("html body",
-                "<html><body><p>List of animals:</p>\n" +
-                    "<ol>\n" +
-                        "<li>Mammal\n" +
-                            "<ul>\n" +
-                                "<li>Dog</li>\n" +
-                                "<li>Cat</li>\n" +
-                            "</ul>\n" +
-                        "</li>\n" +
-                        "<li>Reptile\n" +
-                            "<ul>\n" +
-                                "<li>Snake</li>\n" +
-                            "</ul>\n" +
-                        "</li>\n" +
-                    "</ol>\n" +
-                "</body></html>"));
+                "<html>\n" +
+                    "<body>\n" +
+                        "<p>List of animals:</p>\n" +
+                        "<ol>\n" +
+                            "<li>Mammal\n" +
+                                "<ul>\n" +
+                                    "<li>Dog</li>\n" +
+                                    "<li>Cat</li>\n" +
+                                "</ul>\n" +
+                            "</li>\n" +
+                            "<li>Reptile\n" +
+                                "<ul>\n" +
+                                    "<li>Snake</li>\n" +
+                                "</ul>\n" +
+                            "</li>\n" +
+                        "</ol>\n" +
+                    "</body>\n" +
+                "</html>"));
         assertThat(sentEmailInfo, hasEntry("text body",
                 "List of animals:\n" +
                 "\n" +
@@ -367,8 +395,8 @@ class EmailBuilderFactoryTest {
 
         // @formatter:off
         assertThat(sentEmailInfo, hasEntry("html body",
-                "<html>" +
-                    "<body>" +
+                "<html>\n" +
+                    "<body>\n" +
                         "<h1>First Heading</h1>\n" +
                         "<p>Some description</p>\n" +
                         "<h2>Second Heading</h2>\n" +
@@ -378,7 +406,7 @@ class EmailBuilderFactoryTest {
                             "<li>Banana</li>\n" +
                             "<li>Grape</li>\n" +
                         "</ul>\n" +
-                    "</body>" +
+                    "</body>\n" +
                 "</html>"));
         assertThat(sentEmailInfo, hasEntry("text body",
                 "First Heading\n" +
@@ -410,8 +438,8 @@ class EmailBuilderFactoryTest {
 
         // @formatter:off
         assertThat(sentEmailInfo, hasEntry("html body",
-                "<html>" +
-                    "<body>" +
+                "<html>\n" +
+                    "<body>\n" +
                         "<p>" +
                             "&#42; Hello, world!\n" +
                             "&#45; Hi there!\n" +
@@ -419,7 +447,7 @@ class EmailBuilderFactoryTest {
                             "&#96;No inline code&#96;\n" +
                             "&#126;&#126;No strikethrough&#126;&#126;" +
                         "</p>\n" +
-                    "</body>" +
+                    "</body>\n" +
                 "</html>"));
         assertThat(sentEmailInfo, hasEntry("text body",
                 "* Hello, world! " +
@@ -439,8 +467,8 @@ class EmailBuilderFactoryTest {
 
         // @formatter:off
         assertThat(sentEmailInfo, hasEntry("html body",
-                "<html>" +
-                    "<body>" +
+                "<html>\n" +
+                    "<body>\n" +
                         "<h1>First Heading</h1>\n" +
                         "<p>Some description</p>\n" +
                         "<h2>Second Heading</h2>\n" +
@@ -450,7 +478,43 @@ class EmailBuilderFactoryTest {
                             "<li>Banana</li>\n" +
                             "<li>Grape</li>\n" +
                         "</ul>\n" +
-                    "</body>" +
+                    "</body>\n" +
+                "</html>"));
+        assertThat(sentEmailInfo, hasEntry("text body",
+                "First Heading\n" +
+                "\n" +
+                "Some description\n" +
+                "\n" +
+                "Second Heading\n" +
+                "\n" +
+                " * Apple\n" +
+                " * Orange\n" +
+                " * Banana\n" +
+                " * Grape"));
+        // @formatter:on
+    }
+
+    @Test
+    void it_can_support_mvc_templates_from_a_file_with_path_relative_to_given_class() {
+        List<String> model = Arrays.asList("Apple", "Orange", "Banana", "Grape");
+        emailBuilderFactory.createBuilder()
+                .setBodyFromTemplatePath(getClass(), "simple-velocity-template.vm", model)
+                .send();
+
+        // @formatter:off
+        assertThat(sentEmailInfo, hasEntry("html body",
+                "<html>\n" +
+                    "<body>\n" +
+                        "<h1>First Heading</h1>\n" +
+                        "<p>Some description</p>\n" +
+                        "<h2>Second Heading</h2>\n" +
+                        "<ul>\n" +
+                            "<li>Apple</li>\n" +
+                            "<li>Orange</li>\n" +
+                            "<li>Banana</li>\n" +
+                            "<li>Grape</li>\n" +
+                        "</ul>\n" +
+                    "</body>\n" +
                 "</html>"));
         assertThat(sentEmailInfo, hasEntry("text body",
                 "First Heading\n" +
@@ -485,8 +549,8 @@ class EmailBuilderFactoryTest {
 
         // @formatter:off
         assertThat(sentEmailInfo, hasEntry("html body",
-                "<html>" +
-                "<body>" +
+                "<html>\n" +
+                "<body>\n" +
                     "<table>\n" +
                         "<thead>\n" +
                             "<tr><th>Letter</th><th>Lower Bound</th><th>Upper Bound</th><th>Passing</th></tr>\n" +
@@ -499,7 +563,7 @@ class EmailBuilderFactoryTest {
                             "<tr><td>F</td><td>0</td><td>59</td><td>No</td></tr>\n" +
                         "</tbody>\n" +
                     "</table>\n" +
-                "</body>" +
+                "</body>\n" +
                 "</html>"));
         assertThat(sentEmailInfo, hasEntry("text body",
                 "| Letter | Lower Bound | Upper Bound | Passing |\n" +
@@ -513,6 +577,57 @@ class EmailBuilderFactoryTest {
     }
 
     @Test
+    void it_overrides_the_email_addresses_when_needed() {
+        createEmailBuilderFactory(EXAMPLE_HOST, EXAMPLE_PORT, null, null, EXAMPLE_DEFAULT_HTML_TEMPLATE, themes, Collections.emptyMap(), "override.email@example.com")
+                .createBuilder()
+                .setBody("The body here")
+                .addToAddress("first.to@address.net")
+                .addToAddress("second.to@address.net")
+                .addCcAddress("first.cc@address.net")
+                .addBccAddress("first.bcc@address.net")
+                .send();
+
+        assertThat(sentEmailInfo, hasEntry("to", "override.email@example.com"));
+        assertThat(sentEmailInfo, not(hasKey("cc")));
+        assertThat(sentEmailInfo, not(hasKey("bcc")));
+        //@formatter:off
+        assertThat(sentEmailInfo, hasEntry("html body",
+                "<html>\n" +
+                "<body>\n" +
+                    "<p>The body here</p>\n" +
+                    "<div>\n" +
+                        "Original To Addresses:\n" +
+                        "<ul>\n" +
+                            "<li>first.to@address.net</li>\n" +
+                            "<li>second.to@address.net</li>\n" +
+                        "</ul>\n" +
+                        "Original CC Addresses:\n" +
+                        "<ul>\n" +
+                            "<li>first.cc@address.net</li>\n" +
+                        "</ul>\n" +
+                        "Original BCC Addresses:\n" +
+                        "<ul>\n" +
+                            "<li>first.bcc@address.net</li>\n" +
+                        "</ul>\n" +
+                    "</div>\n" +
+                "</body>\n" +
+                "</html>"));
+        assertThat(sentEmailInfo, hasEntry("text body",
+                "The body here\n" +
+                "\n" +
+                "Original To Addresses:\n" +
+                " - first.to@address.net\n" +
+                " - second.to@address.net\n" +
+                "\n" +
+                "Original CC Addresses:\n" +
+                " - first.cc@address.net\n" +
+                "\n" +
+                "Original BCC Addresses:\n" +
+                " - first.bcc@address.net"));
+        //@formatter:on
+    }
+
+    @Test
     void integration_test() throws IOException {
         Assumptions.assumeTrue(System.getProperties().containsKey("com.ridgid.oss.email.host"));
         Assumptions.assumeTrue(System.getProperties().containsKey("com.ridgid.oss.email.port"));
@@ -523,8 +638,8 @@ class EmailBuilderFactoryTest {
         String port = System.getProperty("com.ridgid.oss.email.port");
         String from = System.getProperty("com.ridgid.oss.email.from");
         String to = System.getProperty("com.ridgid.oss.email.to");
-        String username = System.getProperty("com.ridgid.oss.email.username");
-        String password = System.getProperty("com.ridgid.oss.email.password");
+        String username = System.getProperty("com.ridgid.oss.email.username", USERNAME_NOT_REQUIRED);
+        String password = System.getProperty("com.ridgid.oss.email.password", PASSWORD_NOT_REQUIRED);
 
         String body = new String(Files.readAllBytes(new File(getClass().getResource("/com/ridgid/oss/email/example-markdown.md").getFile()).toPath()));
 
