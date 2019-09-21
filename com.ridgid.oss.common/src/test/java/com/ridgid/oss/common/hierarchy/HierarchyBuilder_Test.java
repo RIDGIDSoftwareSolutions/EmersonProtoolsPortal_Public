@@ -122,7 +122,8 @@ class HierarchyBuilder_Test
                 "Friend 2",
                 "Spot",
                 "Kibble",
-                "Milk-Bone"
+                "Milk-Bone",
+                "Spouse of Friend 2"
                          ),
             names,
             () -> "Breadth-First Visited List does not match expected list:\n"
