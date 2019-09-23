@@ -31,6 +31,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Build an email using markdown.
+ */
 @SuppressWarnings("WeakerAccess")
 public class EmailBuilder {
     private static final VelocityEngine markdownFileTemplateEngine;
@@ -79,11 +82,21 @@ public class EmailBuilder {
         this.overrideEmail = overrideEmail;
     }
 
+    /**
+     * Set the subject for the email
+     * @param subject The email subject
+     * @return The current {@link EmailBuilder} instance
+     */
     public EmailBuilder setSubject(String subject) {
         htmlEmail.setSubject(subject);
         return this;
     }
 
+    /**
+     * Set the From-address for the email
+     * @param email The email address
+     * @return The current {@link EmailBuilder} instance
+     */
     public EmailBuilder setFrom(String email) {
         try {
             htmlEmail.setFrom(email);
@@ -93,6 +106,16 @@ public class EmailBuilder {
         return this;
     }
 
+    /**
+     * Set the From-address that is attached to a name
+     *
+     * If the email is {@code john.doe@example.com} and the name is {@code John Doe}, then the from email address
+     * will look like {@code John Doe <john.doe@example.com>} on most email clients
+     *
+     * @param email The email address
+     * @param name The name to attach to it
+     * @return The current {@link EmailBuilder} instance
+     */
     public EmailBuilder setFrom(String email, String name) {
         try {
             htmlEmail.setFrom(email, name);
@@ -102,31 +125,76 @@ public class EmailBuilder {
         return this;
     }
 
+    /**
+     * Add a To-address to the email
+     * @param email The email address
+     * @return The current {@link EmailBuilder} instance
+     */
     public EmailBuilder addToAddress(String email) {
         addEmailAddress(email, htmlEmail::addTo, toAddresses);
         return this;
     }
 
+    /**
+     * Add a To-address that is attached to a name
+     *
+     * If the email is {@code john.doe@example.com} and the name is {@code John Doe}, then the from email address
+     * will look like {@code John Doe <john.doe@example.com>} on most email clients
+     *
+     * @param email The email address
+     * @param name The name to attach to it
+     * @return The current {@link EmailBuilder} instance
+     */
     public EmailBuilder addToAddress(String email, String name) {
         addEmailAddress(email, name, htmlEmail::addTo, toAddresses);
         return this;
     }
 
+    /**
+     * Add a Carbon Copy (CC) address to the email
+     * @param email The email address
+     * @return The current {@link EmailBuilder} instance
+     */
     public EmailBuilder addCcAddress(String email) {
         addEmailAddress(email, htmlEmail::addCc, ccAddresses);
         return this;
     }
 
+    /**
+     * Add a Carbon Copy (CC) address that is attached to a name
+     *
+     * If the email is {@code john.doe@example.com} and the name is {@code John Doe}, then the from email address
+     * will look like {@code John Doe <john.doe@example.com>} on most email clients
+     *
+     * @param email The email address
+     * @param name The name to attach to it
+     * @return The current {@link EmailBuilder} instance
+     */
     public EmailBuilder addCcAddress(String email, String name) {
         addEmailAddress(email, name, htmlEmail::addCc, ccAddresses);
         return this;
     }
 
+    /**
+     * Add a Blind Carbon Copy (BCC) address to the email
+     * @param email The email address
+     * @return The current {@link EmailBuilder} instance
+     */
     public EmailBuilder addBccAddress(String email) {
         addEmailAddress(email, htmlEmail::addBcc, bccAddresses);
         return this;
     }
 
+    /**
+     * Add a Blind Carbon Copy (BCC) address that is attached to a name
+     *
+     * If the email is {@code john.doe@example.com} and the name is {@code John Doe}, then the from email address
+     * will look like {@code John Doe <john.doe@example.com>} on most email clients
+     *
+     * @param email The email address
+     * @param name The name to attach to it
+     * @return The current {@link EmailBuilder} instance
+     */
     public EmailBuilder addBccAddress(String email, String name) {
         addEmailAddress(email, name, htmlEmail::addBcc, bccAddresses);
         return this;
@@ -154,11 +222,29 @@ public class EmailBuilder {
         addressesList.add(email);
     }
 
-    public EmailBuilder setBody(String body) {
-        setHtmlAndTextBodyFromMarkdown(body);
+    /**
+     * Set the email body based on the given markdown text
+     *
+     * The markdown will be used generate both the HTML and plain text alternatives
+     *
+     * @param markdown The markdown to use as the email body
+     * @return The current {@link EmailBuilder} instance
+     */
+    public EmailBuilder setBody(String markdown) {
+        setHtmlAndTextBodyFromMarkdown(markdown);
         return this;
     }
 
+    /**
+     * Set the email body based on the given Apache Velocity template and model
+     *
+     * The template is expected to generate markdown, not HTML.  Any special markdown characters in the model will be
+     * escaped.  The markdown generated by the template will be used to generate both HTML and plain-text alternatives.
+     *
+     * @param viewTemplate The Apache Velocity template
+     * @param model The model used by the template
+     * @return The current {@link EmailBuilder} instance
+     */
     public EmailBuilder setBodyFromTemplateText(String viewTemplate, Object model) {
         VelocityEngine engine = createCommonEngine();
         engine.setProperty("resource.loaders", "string");
@@ -175,11 +261,32 @@ public class EmailBuilder {
         return this;
     }
 
+    /**
+     * Set the email body based on the Apache Velocity template found at the given resource path
+     *
+     * The template is expected to generate markdown, not HTML.  Any special markdown characters in the model will be
+     * escaped.  The markdown generated by the template will be used to generate both HTML and plain-text alternatives.
+     *
+     * @param referenceClass The class whose package will be used as a reference point for {@code relativePath}
+     * @param relativePath The resource path to the Apache Velocity template, relative to the package of {@code referenceClass}
+     * @param model The model to pass to the Apache Velocity template
+     * @return The current {@link EmailBuilder} instance
+     */
     public EmailBuilder setBodyFromTemplatePath(Class<?> referenceClass, String relativePath, Object model) {
         setBodyFromTemplatePath("/" + referenceClass.getPackage().getName().replace(".", "/") + "/" + relativePath, model);
         return this;
     }
 
+    /**
+     * Set the email body based on the Apache Velocity template found at the given resource path
+     *
+     * The template is expected to generate markdown, not HTML.  Any special markdown characters in the model will be
+     * escaped.  The markdown generated by the template will be used to generate both HTML and plain-text alternatives.
+     *
+     * @param templatePath The absolute resource path to the Apache Velocity template
+     * @param model The model to pass to the Apache Velocity template
+     * @return The current {@link EmailBuilder} instance
+     */
     public EmailBuilder setBodyFromTemplatePath(String templatePath, Object model) {
         setHtmlAndTextBodyFromMarkdown(parseVelocityTemplate(markdownFileTemplateEngine, model, templatePath));
         return this;
@@ -254,6 +361,14 @@ public class EmailBuilder {
         return writer.toString();
     }
 
+    /**
+     * Set the theme away from the default
+     *
+     * Different themes use different HTML templates
+     *
+     * @param themeName The name of the theme to use
+     * @return The current {@link EmailBuilder} instance
+     */
     public EmailBuilder setHtmlTheme(String themeName) {
         this.themeName = themeName;
         return this;
@@ -263,6 +378,7 @@ public class EmailBuilder {
      * Embed a resource into the email (e.g. an embedded image)
      * @param url The URL from which the resource should be pulled
      * @param cid The Content-ID of the resource
+     * @return The current {@link EmailBuilder} instance
      */
     public EmailBuilder embed(URL url, String cid) {
         try {
@@ -278,6 +394,7 @@ public class EmailBuilder {
      * Embed a resource into the email (e.g. an embedded image)
      * @param url The URL from which the resource should be pulled
      * @param cid The Content-ID of the resource
+     * @return The current {@link EmailBuilder} instance
      */
     public EmailBuilder embed(String url, String cid) {
         try {
@@ -293,6 +410,7 @@ public class EmailBuilder {
      * Embed a resource into the email (e.g. an embedded image)
      * @param file The file containing the resource to be pulled
      * @param cid The Content-ID of the resource
+     * @return The current {@link EmailBuilder} instance
      */
     public EmailBuilder embed(File file, String cid) {
         try {
@@ -303,6 +421,14 @@ public class EmailBuilder {
         return this;
     }
 
+    /**
+     * Add an attachment to the email
+     * @param dataSource The resource to attach
+     * @param name The name of the attachment
+     * @param description The description of the attachment
+     * @param disposition The disposition of the attachment
+     * @return The current {@link EmailBuilder} instance
+     */
     public EmailBuilder attach(DataSource dataSource, String name, String description, String disposition) {
         try {
             htmlEmail.attach(dataSource, name, description, disposition);
@@ -316,6 +442,12 @@ public class EmailBuilder {
         return StringUtils.isNotEmpty(overrideEmail);
     }
 
+    /**
+     * Send the email
+     *
+     * If the email has been overridden, then the email will only be sent to the override email address; None of the
+     * To-, CC-, or BCC- addresses will be added.
+     */
     public void send() {
         try {
             if (isOverridden()) {
