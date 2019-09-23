@@ -39,7 +39,7 @@ class EmailBuilderFactoryTest {
                 EXAMPLE_PORT,
                 EXAMPLE_DEFAULT_HTML_TEMPLATE,
                 themes,
-                Collections.emptyMap());
+                null);
     }
 
     @SuppressWarnings("SameParameterValue")

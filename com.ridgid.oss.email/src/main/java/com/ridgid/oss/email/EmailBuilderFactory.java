@@ -176,8 +176,8 @@ public class EmailBuilderFactory {
         this.username = username;
         this.password = password;
         this.defaultHtmlTemplate = defaultHtmlTemplate;
-        this.themes = themes;
-        this.commonDataSources = commonDataSources;
+        this.themes = themes == null ? Collections.emptyMap() : themes;
+        this.commonDataSources = commonDataSources == null ? Collections.emptyMap() : commonDataSources;
         this.overrideEmail = overrideEmail;
         this.permanentToAddresses = permanentToAddresses == null ? Collections.emptyList() : permanentToAddresses;
         this.permanentCcAddresses = permanentCcAddresses == null ? Collections.emptyList() : permanentCcAddresses;
