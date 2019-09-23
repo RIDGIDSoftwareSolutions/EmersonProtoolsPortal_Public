@@ -33,16 +33,21 @@ import java.util.stream.Collectors;
 
 @SuppressWarnings("WeakerAccess")
 public class EmailBuilder {
-    private static final VelocityEngine fileTemplateEngine;
+    private static final VelocityEngine markdownFileTemplateEngine;
+    private static final VelocityEngine htmlTemplateEngine;
     private static final Parser PARSER;
     private static final HtmlRenderer HTML_RENDERER;
     private static final PlainTextRenderer PLAIN_TEXT_RENDERER;
     private Runnable setBodyCallback = () -> {};
 
     static {
-        fileTemplateEngine = createCommonEngine();
-        fileTemplateEngine.setProperty("file.resource.loader.class", ClasspathResourceLoader.class.getName());
-        fileTemplateEngine.init();
+        markdownFileTemplateEngine = createCommonEngine();
+        markdownFileTemplateEngine.setProperty("file.resource.loader.class", ClasspathResourceLoader.class.getName());
+        markdownFileTemplateEngine.init();
+
+        htmlTemplateEngine = new VelocityEngine();
+        htmlTemplateEngine.setProperty("file.resource.loader.class", ClasspathResourceLoader.class.getName());
+        htmlTemplateEngine.init();
 
         MutableDataSet options = new MutableDataSet();
         options.set(Parser.EXTENSIONS, Arrays.asList(AutolinkExtension.create(), WikiLinkExtension.create(), StrikethroughExtension.create(), TablesExtension.create()));
@@ -176,7 +181,7 @@ public class EmailBuilder {
     }
 
     public EmailBuilder setBodyFromTemplatePath(String templatePath, Object model) {
-        setHtmlAndTextBodyFromMarkdown(parseVelocityTemplate(fileTemplateEngine, model, templatePath));
+        setHtmlAndTextBodyFromMarkdown(parseVelocityTemplate(markdownFileTemplateEngine, model, templatePath));
         return this;
     }
 
@@ -197,7 +202,7 @@ public class EmailBuilder {
         setBodyCallback = () -> {
             try {
                 Node document = PARSER.parse(markdown);
-                htmlEmail.setHtmlMsg(parseHtmlTemplate(HTML_RENDERER.render(document)));
+                htmlEmail.setHtmlMsg(parseHtmlTemplate(unescapeEntitiesForInlineCodeAndCodeBlocks(HTML_RENDERER.render(document))));
                 if (StringUtils.isNotEmpty(markdown)) {
                     StringBuilder textBody = new StringBuilder(PLAIN_TEXT_RENDERER.render(document));
                     if (isOverridden()) {
@@ -216,6 +221,25 @@ public class EmailBuilder {
         };
     }
 
+    private String unescapeEntitiesForInlineCodeAndCodeBlocks(String html) {
+        StringBuilder resultHtml = new StringBuilder();
+        int previousIndex = 0;
+        int startIndex = html.indexOf("<code>");
+        while (startIndex != -1) {
+            resultHtml.append(html, previousIndex, startIndex);
+            int endIndex = html.indexOf("</code>", startIndex);
+            String substr = html.substring(startIndex, endIndex);
+            String replacement = substr.replace("&amp;", "&");
+            resultHtml.append(replacement);
+            previousIndex = endIndex;
+            startIndex = html.indexOf("<code>", previousIndex);
+        }
+        if (previousIndex == 0 && resultHtml.length() == 0 || previousIndex > 0) {
+            resultHtml.append(html.substring(previousIndex));
+        }
+        return resultHtml.toString();
+    }
+
     private String parseHtmlTemplate(String renderedMarkdown) {
         VelocityContext context = new VelocityContext();
         context.put("html", renderedMarkdown);
@@ -224,7 +248,7 @@ public class EmailBuilder {
         context.put("ccAddresses", ccAddresses);
         context.put("bccAddresses", bccAddresses);
 
-        Template template = fileTemplateEngine.getTemplate(themes.getOrDefault(themeName, defaultHtmlTemplate), "UTF-8");
+        Template template = htmlTemplateEngine.getTemplate(themes.getOrDefault(themeName, defaultHtmlTemplate), "UTF-8");
         Writer writer = new StringWriter();
         template.merge(context, writer);
         return writer.toString();

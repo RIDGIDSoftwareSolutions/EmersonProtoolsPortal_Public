@@ -441,11 +441,11 @@ class EmailBuilderFactoryTest {
                 "<html>\n" +
                     "<body>\n" +
                         "<p>" +
-                            "&#42; Hello, world!\n" +
-                            "&#45; Hi there!\n" +
-                            "&#35; No heading here\n" +
-                            "&#96;No inline code&#96;\n" +
-                            "&#126;&#126;No strikethrough&#126;&#126;" +
+                            "* Hello, world!\n" +
+                            "- Hi there!\n" +
+                            "# No heading here\n" +
+                            "`No inline code`\n" +
+                            "~~No strikethrough~~" +
                         "</p>\n" +
                     "</body>\n" +
                 "</html>"));
@@ -456,6 +456,37 @@ class EmailBuilderFactoryTest {
                 "`No inline code` " +
                 "~~No strikethrough~~"));
         // @formatter:on
+    }
+
+    @Test
+    void it_does_not_escape_special_characters_in_a_fenced_code_block_in_html() {
+        String markdown = "```\n$model\n```";
+        String model = "-*`#~~";
+
+        emailBuilderFactory.createBuilder()
+                .setBodyFromTemplateText(markdown, model)
+                .send();
+
+        // @formatter:off
+        assertThat(sentEmailInfo, hasEntry("html body",
+                "<html>\n<body>\n<pre><code>&#45;&#42;&#96;&#35;&#126;&#126;\n</code></pre>\n</body>\n</html>"));
+        assertThat(sentEmailInfo, hasEntry("text body",
+                "-*`#~~\n"));
+        // @formatter:on
+    }
+
+    @Test
+    void it_does_not_escape_special_characters_in_an_inline_code_block_in_html() {
+        String markdown = "`$model`";
+        String model = "-*`#~~";
+
+        emailBuilderFactory.createBuilder()
+                .setBodyFromTemplateText(markdown, model)
+                .send();
+
+        assertThat(sentEmailInfo, hasEntry("html body",
+                "<html>\n<body>\n<p><code>&#45;&#42;&#96;&#35;&#126;&#126;</code></p>\n</body>\n</html>"));
+        assertThat(sentEmailInfo, hasEntry("text body", "-*`#~~"));
     }
 
     @Test

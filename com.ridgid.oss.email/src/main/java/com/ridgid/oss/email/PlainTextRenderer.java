@@ -10,6 +10,8 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 class PlainTextRenderer implements IRender {
@@ -21,7 +23,24 @@ class PlainTextRenderer implements IRender {
             if (Objects.equals(data.previousNodeClass, SoftLineBreak.class)) {
                 output.append(" ");
             }
-            output.append(node.getChars());
+            if (data.unescapeEntities) {
+                String originalText = node.getChars().toString();
+                StringBuilder newText = new StringBuilder();
+                Matcher entityMatcher = Pattern.compile("&#(\\d+);").matcher(originalText);
+                newText.append(originalText, 0, entityMatcher.regionStart());
+                int lastEndIndex = entityMatcher.regionStart();
+                while (entityMatcher.find()) {
+                    newText.append(originalText, lastEndIndex, entityMatcher.start());
+                    int codepoint = Integer.parseInt(entityMatcher.group(1));
+                    newText.append(Character.toChars(codepoint));
+                    lastEndIndex = entityMatcher.end();
+                }
+                newText.append(originalText, lastEndIndex, entityMatcher.regionEnd());
+                newText.append(originalText.substring(entityMatcher.regionEnd()));
+                output.append(newText);
+            } else {
+                output.append(node.getChars());
+            }
         });
         NodeHandler blockHandler = (node, data, output) -> {
             if (data.previousNodeClass != null) {
@@ -51,6 +70,7 @@ class PlainTextRenderer implements IRender {
         });
         registerListHandlers(nodeHandlers);
         registerTableHandlers(nodeHandlers);
+        registerCodeHandlers(nodeHandlers);
         NODE_HANDLERS = Collections.unmodifiableMap(nodeHandlers);
     }
 
@@ -134,6 +154,22 @@ class PlainTextRenderer implements IRender {
         });
     }
 
+    private static void registerCodeHandlers(Map<Class<?>, NodeHandler> nodeHandlers) {
+        NodeHandler nodeHandler = new NodeHandler() {
+            @Override
+            public void startNode(Node node, HandlerData data, Appendable output) {
+                data.unescapeEntities = true;
+            }
+
+            @Override
+            public void endNode(Node node, HandlerData data, Appendable output) {
+                data.unescapeEntities = false;
+            }
+        };
+        nodeHandlers.put(Code.class, nodeHandler);
+        nodeHandlers.put(FencedCodeBlock.class, nodeHandler);
+    }
+
     @Override
     public void render(Node node, Appendable output) {
         NodeWrapper wrapper = new NodeWrapper(node, true);
@@ -207,6 +243,7 @@ class PlainTextRenderer implements IRender {
         boolean inHeaderRow;
         boolean inBodyRow;
         Deque<Appendable> outputStack = new ArrayDeque<>();
+        boolean unescapeEntities;
     }
 
     private interface NodeHandler {
