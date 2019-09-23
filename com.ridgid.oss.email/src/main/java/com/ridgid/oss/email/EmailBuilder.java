@@ -42,11 +42,11 @@ public class EmailBuilder {
 
     static {
         markdownFileTemplateEngine = createCommonEngine();
-        markdownFileTemplateEngine.setProperty("file.resource.loader.class", ClasspathResourceLoader.class.getName());
+        markdownFileTemplateEngine.setProperty("resource.loader.file.class", ClasspathResourceLoader.class.getName());
         markdownFileTemplateEngine.init();
 
         htmlTemplateEngine = new VelocityEngine();
-        htmlTemplateEngine.setProperty("file.resource.loader.class", ClasspathResourceLoader.class.getName());
+        htmlTemplateEngine.setProperty("resource.loader.file.class", ClasspathResourceLoader.class.getName());
         htmlTemplateEngine.init();
 
         MutableDataSet options = new MutableDataSet();
@@ -161,11 +161,11 @@ public class EmailBuilder {
 
     public EmailBuilder setBodyFromTemplateText(String viewTemplate, Object model) {
         VelocityEngine engine = createCommonEngine();
-        engine.setProperty("resource.loader", "string");
-        engine.setProperty("string.resource.loader.class", StringResourceLoader.class.getName());
-        engine.setProperty("string.resource.loader.repository.class", StringResourceRepositoryImpl.class.getName());
-        engine.setProperty("string.resource.loader.repository.static", false);
-        engine.setProperty("string.resource.loader.repository.name", "templateRepository");
+        engine.setProperty("resource.loaders", "string");
+        engine.setProperty("resource.loader.string.class", StringResourceLoader.class.getName());
+        engine.setProperty("resource.loader.string.repository.class", StringResourceRepositoryImpl.class.getName());
+        engine.setProperty("resource.loader.string.repository.static", false);
+        engine.setProperty("resource.loader.string.repository.name", "templateRepository");
         engine.init();
 
         StringResourceRepository stringResourceRepository = (StringResourceRepository) engine.getApplicationAttribute("templateRepository");
