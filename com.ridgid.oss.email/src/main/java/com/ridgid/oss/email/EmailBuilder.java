@@ -75,11 +75,20 @@ public class EmailBuilder {
     private List<String> ccAddresses = new ArrayList<>();
     private List<String> bccAddresses = new ArrayList<>();
 
-    EmailBuilder(HtmlEmail htmlEmail, String defaultHtmlTemplate, Map<String, String> themes, String overrideEmail) {
+    EmailBuilder(HtmlEmail htmlEmail,
+            String defaultHtmlTemplate,
+            Map<String, String> themes,
+            String overrideEmail,
+            List<String> permanentToAddresses,
+            List<String> permanentCcAddresses,
+            List<String> permanentBccAddresses) {
         this.htmlEmail = htmlEmail;
         this.defaultHtmlTemplate = defaultHtmlTemplate;
         this.themes = themes;
         this.overrideEmail = overrideEmail;
+        permanentToAddresses.forEach(this::addToAddress);
+        permanentCcAddresses.forEach(this::addCcAddress);
+        permanentBccAddresses.forEach(this::addBccAddress);
     }
 
     /**

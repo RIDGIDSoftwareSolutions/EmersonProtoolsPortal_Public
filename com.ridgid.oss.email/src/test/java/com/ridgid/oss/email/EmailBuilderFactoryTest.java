@@ -25,16 +25,26 @@ class EmailBuilderFactoryTest {
     private EmailBuilderFactory emailBuilderFactory;
     private Map<String, String> sentEmailInfo;
     private Map<String, String> themes;
+    private List<String> permanentToAddresses;
+    private List<String> permanentCcAddresses;
+    private List<String> permanentBccAddresses;
 
     @BeforeEach
     void setup() {
         themes = new HashMap<>();
-        emailBuilderFactory = createEmailBuilderFactory(EXAMPLE_HOST, EXAMPLE_PORT, EXAMPLE_DEFAULT_HTML_TEMPLATE, themes, Collections.emptyMap());
+        permanentToAddresses = new ArrayList<>();
+        permanentCcAddresses = new ArrayList<>();
+        permanentBccAddresses = new ArrayList<>();
+        emailBuilderFactory = createEmailBuilderFactory(EXAMPLE_HOST,
+                EXAMPLE_PORT,
+                EXAMPLE_DEFAULT_HTML_TEMPLATE,
+                themes,
+                Collections.emptyMap());
     }
 
     @SuppressWarnings("SameParameterValue")
     private EmailBuilderFactory createEmailBuilderFactory(String host, int port, String defaultHtmlTemplate, Map<String, String> themes, Map<String, DataSource> commonDataSources) {
-        return createEmailBuilderFactory(host, port, USERNAME_NOT_REQUIRED, PASSWORD_NOT_REQUIRED, defaultHtmlTemplate, themes, commonDataSources, DO_NOT_OVERRIDE_EMAIL);
+        return createEmailBuilderFactory(host, port, USERNAME_NOT_REQUIRED, PASSWORD_NOT_REQUIRED, defaultHtmlTemplate, themes, commonDataSources, DO_NOT_OVERRIDE_EMAIL, permanentToAddresses, permanentCcAddresses, permanentBccAddresses);
     }
 
     @SuppressWarnings("SameParameterValue")
@@ -45,8 +55,11 @@ class EmailBuilderFactoryTest {
             String defaultHtmlTemplate,
             Map<String, String> themes,
             Map<String, DataSource> commonDataSources,
-            String overrideEmail) {
-        return new EmailBuilderFactory(host, port, userName, password, defaultHtmlTemplate, themes, commonDataSources, overrideEmail) {
+            String overrideEmail,
+            List<String> permanentToAddresses,
+            List<String> permanentCcAddresses,
+            List<String> permanentBccAddresses) {
+        return new EmailBuilderFactory(host, port, userName, password, defaultHtmlTemplate, themes, commonDataSources, overrideEmail, permanentToAddresses, permanentCcAddresses, permanentBccAddresses) {
             @Override
             protected HtmlEmail createEmail() {
                 return createHtmlEmail();
@@ -104,7 +117,7 @@ class EmailBuilderFactoryTest {
 
     @Test
     void it_optionally_allows_for_credentials() {
-        emailBuilderFactory = createEmailBuilderFactory(EXAMPLE_HOST, EXAMPLE_PORT, "jdoe", "foobar", EXAMPLE_DEFAULT_HTML_TEMPLATE, themes, Collections.emptyMap(), null);
+        emailBuilderFactory = createEmailBuilderFactory(EXAMPLE_HOST, EXAMPLE_PORT, "jdoe", "foobar", EXAMPLE_DEFAULT_HTML_TEMPLATE, themes, Collections.emptyMap(), null, null, null, null);
         emailBuilderFactory.createBuilder().send();
         assertThat(sentEmailInfo, hasEntry("username", "jdoe"));
         assertThat(sentEmailInfo, hasEntry("password", "foobar"));
@@ -609,7 +622,7 @@ class EmailBuilderFactoryTest {
 
     @Test
     void it_overrides_the_email_addresses_when_needed() {
-        createEmailBuilderFactory(EXAMPLE_HOST, EXAMPLE_PORT, null, null, EXAMPLE_DEFAULT_HTML_TEMPLATE, themes, Collections.emptyMap(), "override.email@example.com")
+        createEmailBuilderFactory(EXAMPLE_HOST, EXAMPLE_PORT, null, null, EXAMPLE_DEFAULT_HTML_TEMPLATE, themes, Collections.emptyMap(), "override.email@example.com", null, null, null)
                 .createBuilder()
                 .setBody("The body here")
                 .addToAddress("first.to@address.net")
@@ -656,6 +669,42 @@ class EmailBuilderFactoryTest {
                 "Original BCC Addresses:\n" +
                 " - first.bcc@address.net"));
         //@formatter:on
+    }
+
+    @Test
+    void it_can_have_permanent_to_addresses() {
+        permanentToAddresses.add("first@example.com");
+        permanentToAddresses.add("second@example.com");
+
+        emailBuilderFactory.createBuilder()
+                .addToAddress("new@example.com")
+                .send();
+
+        assertThat(sentEmailInfo, hasEntry("to", "first@example.com; second@example.com; new@example.com"));
+    }
+
+    @Test
+    void it_can_have_permanent_cc_addresses() {
+        permanentCcAddresses.add("first@example.com");
+        permanentCcAddresses.add("second@example.com");
+
+        emailBuilderFactory.createBuilder()
+                .addCcAddress("new@example.com")
+                .send();
+
+        assertThat(sentEmailInfo, hasEntry("cc", "first@example.com; second@example.com; new@example.com"));
+    }
+
+    @Test
+    void it_can_have_permanent_bcc_addresses() {
+        permanentBccAddresses.add("first@example.com");
+        permanentBccAddresses.add("second@example.com");
+
+        emailBuilderFactory.createBuilder()
+                .addBccAddress("new@example.com")
+                .send();
+
+        assertThat(sentEmailInfo, hasEntry("bcc", "first@example.com; second@example.com; new@example.com"));
     }
 
     @Test

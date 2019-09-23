@@ -5,6 +5,8 @@ import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
 
 import javax.activation.DataSource;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -73,6 +75,9 @@ public class EmailBuilderFactory {
     private final Map<String, String> themes;
     private final Map<String, DataSource> commonDataSources;
     private final String overrideEmail;
+    private final List<String> permanentToAddresses;
+    private final List<String> permanentCcAddresses;
+    private final List<String> permanentBccAddresses;
 
     /**
      * Specify the information to be used by all constructed {@link EmailBuilder} instances.
@@ -90,7 +95,7 @@ public class EmailBuilderFactory {
      * @param commonDataSources A map of content ids to commonly used DataSources that should be automatically embedded into every email
      */
     public EmailBuilderFactory(String host, int port, String defaultHtmlTemplate, Map<String, String> themes, Map<String, DataSource> commonDataSources) {
-        this(host, port, null, null, defaultHtmlTemplate, themes, commonDataSources, null);
+        this(host, port, null, null, defaultHtmlTemplate, themes, commonDataSources, null, null, null, null);
     }
 
     /**
@@ -110,7 +115,7 @@ public class EmailBuilderFactory {
      * @param overrideEmail When provided, sends emails to this email address instead of the to/cc/bcc addresses.  This is useful for development and staging servers
      */
     public EmailBuilderFactory(String host, int port, String defaultHtmlTemplate, Map<String, String> themes, Map<String, DataSource> commonDataSources, String overrideEmail) {
-        this(host, port, null, null, defaultHtmlTemplate, themes, commonDataSources, null);
+        this(host, port, null, null, defaultHtmlTemplate, themes, commonDataSources, null, null, null, null);
     }
 
     /**
@@ -131,7 +136,7 @@ public class EmailBuilderFactory {
      * @param commonDataSources A map of content ids to commonly used DataSources that should be automatically embedded into every email
      */
     public EmailBuilderFactory(String host, int port, String username, String password, String defaultHtmlTemplate, Map<String, String> themes, Map<String, DataSource> commonDataSources) {
-        this(host, port, username, password, defaultHtmlTemplate, themes, commonDataSources, null);
+        this(host, port, username, password, defaultHtmlTemplate, themes, commonDataSources, null, null, null, null);
     }
 
     /**
@@ -151,6 +156,9 @@ public class EmailBuilderFactory {
      * @param themes A map of theme names to their HTML templates
      * @param commonDataSources A map of commonly used DataSources that should be automatically embedded into every email
      * @param overrideEmail When provided, sends emails to this email address instead of the to/cc/bcc addresses.  This is useful for development and staging servers
+     * @param permanentToAddresses A list of To-addresses that will always be added to the emails
+     * @param permanentCcAddresses A list of CC-addresses that will always be added to the emails
+     * @param permanentBccAddresses A list of BCC-addresses that will always be added to the emails
      */
     public EmailBuilderFactory(String host,
             int port,
@@ -159,7 +167,10 @@ public class EmailBuilderFactory {
             String defaultHtmlTemplate,
             Map<String, String> themes,
             Map<String, DataSource> commonDataSources,
-            String overrideEmail) {
+            String overrideEmail,
+            List<String> permanentToAddresses,
+            List<String> permanentCcAddresses,
+            List<String> permanentBccAddresses) {
         this.host = host;
         this.port = port;
         this.username = username;
@@ -168,6 +179,9 @@ public class EmailBuilderFactory {
         this.themes = themes;
         this.commonDataSources = commonDataSources;
         this.overrideEmail = overrideEmail;
+        this.permanentToAddresses = permanentToAddresses == null ? Collections.emptyList() : permanentToAddresses;
+        this.permanentCcAddresses = permanentCcAddresses == null ? Collections.emptyList() : permanentCcAddresses;
+        this.permanentBccAddresses = permanentBccAddresses == null ? Collections.emptyList() : permanentBccAddresses;
     }
 
     /**
@@ -190,7 +204,7 @@ public class EmailBuilderFactory {
                 throw new RuntimeException(e);
             }
         });
-        return new EmailBuilder(htmlEmail, defaultHtmlTemplate, themes, overrideEmail);
+        return new EmailBuilder(htmlEmail, defaultHtmlTemplate, themes, overrideEmail, permanentToAddresses, permanentCcAddresses, permanentBccAddresses);
     }
 
     protected HtmlEmail createEmail() {
