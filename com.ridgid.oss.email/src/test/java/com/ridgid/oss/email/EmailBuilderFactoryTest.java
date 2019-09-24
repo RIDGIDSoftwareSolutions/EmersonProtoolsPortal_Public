@@ -35,31 +35,20 @@ class EmailBuilderFactoryTest {
         permanentToAddresses = new ArrayList<>();
         permanentCcAddresses = new ArrayList<>();
         permanentBccAddresses = new ArrayList<>();
-        emailBuilderFactory = createEmailBuilderFactory(EXAMPLE_HOST,
-                EXAMPLE_PORT,
-                EXAMPLE_DEFAULT_HTML_TEMPLATE,
-                themes,
-                null);
+
+        emailBuilderFactory = createEmailBuilderFactory();
+        emailBuilderFactory.setHost(EXAMPLE_HOST);
+        emailBuilderFactory.setPort(EXAMPLE_PORT);
+        emailBuilderFactory.setDefaultHtmlTemplate(EXAMPLE_DEFAULT_HTML_TEMPLATE);
+        emailBuilderFactory.setThemes(themes);
+        emailBuilderFactory.setPermanentToAddresses(permanentToAddresses);
+        emailBuilderFactory.setPermanentCcAddresses(permanentCcAddresses);
+        emailBuilderFactory.setPermanentBccAddresses(permanentBccAddresses);
     }
 
     @SuppressWarnings("SameParameterValue")
-    private EmailBuilderFactory createEmailBuilderFactory(String host, int port, String defaultHtmlTemplate, Map<String, String> themes, Map<String, DataSource> commonDataSources) {
-        return createEmailBuilderFactory(host, port, USERNAME_NOT_REQUIRED, PASSWORD_NOT_REQUIRED, defaultHtmlTemplate, themes, commonDataSources, DO_NOT_OVERRIDE_EMAIL, permanentToAddresses, permanentCcAddresses, permanentBccAddresses);
-    }
-
-    @SuppressWarnings("SameParameterValue")
-    private EmailBuilderFactory createEmailBuilderFactory(String host,
-            int port,
-            String userName,
-            String password,
-            String defaultHtmlTemplate,
-            Map<String, String> themes,
-            Map<String, DataSource> commonDataSources,
-            String overrideEmail,
-            List<String> permanentToAddresses,
-            List<String> permanentCcAddresses,
-            List<String> permanentBccAddresses) {
-        return new EmailBuilderFactory(host, port, userName, password, defaultHtmlTemplate, themes, commonDataSources, overrideEmail, permanentToAddresses, permanentCcAddresses, permanentBccAddresses) {
+    private EmailBuilderFactory createEmailBuilderFactory() {
+        return new EmailBuilderFactory() {
             @Override
             protected HtmlEmail createEmail() {
                 return createHtmlEmail();
@@ -110,28 +99,37 @@ class EmailBuilderFactoryTest {
 
     @Test
     void it_sends_the_request_to_the_correct_server() {
-        emailBuilderFactory.createBuilder().send();
+        emailBuilderFactory.createBuilder()
+                .setFrom("from@address.com")
+                .send();
         assertThat(sentEmailInfo, hasEntry("smtp host", EXAMPLE_HOST));
         assertThat(sentEmailInfo, hasEntry("smtp port", String.valueOf(EXAMPLE_PORT)));
     }
 
     @Test
     void it_optionally_allows_for_credentials() {
-        emailBuilderFactory = createEmailBuilderFactory(EXAMPLE_HOST, EXAMPLE_PORT, "jdoe", "foobar", EXAMPLE_DEFAULT_HTML_TEMPLATE, themes, Collections.emptyMap(), null, null, null, null);
-        emailBuilderFactory.createBuilder().send();
+        emailBuilderFactory.setUsername("jdoe");
+        emailBuilderFactory.setPassword("foobar");
+        emailBuilderFactory.createBuilder()
+                .setFrom("from@address.com")
+                .send();
         assertThat(sentEmailInfo, hasEntry("username", "jdoe"));
         assertThat(sentEmailInfo, hasEntry("password", "foobar"));
     }
 
     @Test
     void it_sends_the_request_with_the_correct_subject() {
-        emailBuilderFactory.createBuilder().setSubject("The Quick Brown Fox Jumped over the Lazy Dog").send();
+        emailBuilderFactory.createBuilder()
+                .setSubject("The Quick Brown Fox Jumped over the Lazy Dog")
+                .setFrom("from@address.com")
+                .send();
         assertThat(sentEmailInfo, hasEntry("subject", "The Quick Brown Fox Jumped over the Lazy Dog"));
     }
 
     @Test
     void it_sends_the_request_with_the_correct_to_addresses() {
         emailBuilderFactory.createBuilder()
+                .setFrom("from@address.com")
                 .addToAddress("john.doe@example.com")
                 .addToAddress("jane.smith@example.net", "Smith, Jane")
                 .send();
@@ -141,6 +139,7 @@ class EmailBuilderFactoryTest {
     @Test
     void it_sends_the_request_with_the_correct_cc_addresses() {
         emailBuilderFactory.createBuilder()
+                .setFrom("from@address.com")
                 .addCcAddress("john.doe@example.com")
                 .addCcAddress("jane.smith@example.net", "Smith, Jane")
                 .send();
@@ -150,6 +149,7 @@ class EmailBuilderFactoryTest {
     @Test
     void it_sends_the_request_with_the_correct_bcc_addresses() {
         emailBuilderFactory.createBuilder()
+                .setFrom("from@address.com")
                 .addBccAddress("john.doe@example.com")
                 .addBccAddress("jane.smith@example.net", "Smith, Jane")
                 .send();
@@ -175,6 +175,7 @@ class EmailBuilderFactoryTest {
     @Test
     void it_can_have_an_empty_body() {
         emailBuilderFactory.createBuilder()
+                .setFrom("from@address.com")
                 .setBody("")
                 .send();
         assertThat(sentEmailInfo, hasEntry("html body", "<html>\n<body>\n</body>\n</html>"));
@@ -184,6 +185,7 @@ class EmailBuilderFactoryTest {
     @Test
     void it_can_have_a_simple_body() {
         emailBuilderFactory.createBuilder()
+                .setFrom("from@address.com")
                 .setBody("Hello, world!\nHow are you?")
                 .send();
         assertThat(sentEmailInfo, hasEntry("html body", "<html>\n<body>\n<p>Hello, world!\nHow are you?</p>\n</body>\n</html>"));
@@ -195,6 +197,7 @@ class EmailBuilderFactoryTest {
         themes.put("custom", "/com/ridgid/oss/email/custom-web-theme.vm");
 
         emailBuilderFactory.createBuilder()
+                .setFrom("from@address.com")
                 .setHtmlTheme("custom")
                 .setBody("Hello, world!")
                 .send();
@@ -217,6 +220,7 @@ class EmailBuilderFactoryTest {
     @Test
     void it_can_support_multiple_paragraphs() {
         emailBuilderFactory.createBuilder()
+                .setFrom("from@address.com")
                 .setBody("Hello, world!\n\nHow are you?")
                 .send();
         assertThat(sentEmailInfo, hasEntry("html body", "<html>\n<body>\n<p>Hello, world!</p>\n<p>How are you?</p>\n</body>\n</html>"));
@@ -227,6 +231,7 @@ class EmailBuilderFactoryTest {
     void it_can_support_headings(RepetitionInfo repetitionInfo) {
         int headingLevel = repetitionInfo.getCurrentRepetition();
         emailBuilderFactory.createBuilder()
+                .setFrom("from@address.com")
                 .setBody(StringUtils.repeat('#', headingLevel) + " Hello, world!\nHow are you?")
                 .send();
         assertThat(sentEmailInfo, hasEntry("html body",
@@ -239,6 +244,7 @@ class EmailBuilderFactoryTest {
     @Test
     void it_ensures_headings_have_blank_lines_before() {
         emailBuilderFactory.createBuilder()
+                .setFrom("from@address.com")
                 .setBody("Some text\n# Heading")
                 .send();
         assertThat(sentEmailInfo, hasEntry("html body", "<html>\n<body>\n<p>Some text</p>\n<h1>Heading</h1>\n</body>\n</html>"));
@@ -248,6 +254,7 @@ class EmailBuilderFactoryTest {
     @Test
     void it_can_support_text_with_emphasis() {
         emailBuilderFactory.createBuilder()
+                .setFrom("from@address.com")
                 .setBody("This is *some* text")
                 .send();
         assertThat(sentEmailInfo, hasEntry("html body", "<html>\n<body>\n<p>This is <em>some</em> text</p>\n</body>\n</html>"));
@@ -257,6 +264,7 @@ class EmailBuilderFactoryTest {
     @Test
     void it_can_support_strong_text() {
         emailBuilderFactory.createBuilder()
+                .setFrom("from@address.com")
                 .setBody("This is **some** text")
                 .send();
         assertThat(sentEmailInfo, hasEntry("html body", "<html>\n<body>\n<p>This is <strong>some</strong> text</p>\n</body>\n</html>"));
@@ -266,6 +274,7 @@ class EmailBuilderFactoryTest {
     @Test
     void it_can_support_inline_code_text() {
         emailBuilderFactory.createBuilder()
+                .setFrom("from@address.com")
                 .setBody("This is `some` text")
                 .send();
         assertThat(sentEmailInfo, hasEntry("html body", "<html>\n<body>\n<p>This is <code>some</code> text</p>\n</body>\n</html>"));
@@ -275,6 +284,7 @@ class EmailBuilderFactoryTest {
     @Test
     void it_can_support_strikethrough_text() {
         emailBuilderFactory.createBuilder()
+                .setFrom("from@address.com")
                 .setBody("This is ~~some~~ text")
                 .send();
         assertThat(sentEmailInfo, hasEntry("html body", "<html>\n<body>\n<p>This is <del>some</del> text</p>\n</body>\n</html>"));
@@ -284,6 +294,7 @@ class EmailBuilderFactoryTest {
     @Test
     void it_can_support_simple_links() {
         emailBuilderFactory.createBuilder()
+                .setFrom("from@address.com")
                 .setBody("This is a link to www.google.com")
                 .send();
         assertThat(sentEmailInfo, hasEntry("html body", "<html>\n<body>\n<p>This is a link to <a href=\"http://www.google.com\">www.google.com</a></p>\n</body>\n</html>"));
@@ -293,6 +304,7 @@ class EmailBuilderFactoryTest {
     @Test
     void it_can_support_wiki_links() {
         emailBuilderFactory.createBuilder()
+                .setFrom("from@address.com")
                 .setBody("This is [a link](https://www.google.com/) to Google")
                 .send();
         assertThat(sentEmailInfo, hasEntry("html body", "<html>\n<body>\n<p>This is <a href=\"https://www.google.com/\">a link</a> to Google</p>\n</body>\n</html>"));
@@ -311,6 +323,7 @@ class EmailBuilderFactoryTest {
                 "   * Snake\n";
         // @formatter:on
         emailBuilderFactory.createBuilder()
+                .setFrom("from@address.com")
                 .setBody(markdown)
                 .send();
         // @formatter:off
@@ -356,6 +369,7 @@ class EmailBuilderFactoryTest {
                 "    * Snake\n";
         // @formatter:on
         emailBuilderFactory.createBuilder()
+                .setFrom("from@address.com")
                 .setBody(markdown)
                 .send();
         // @formatter:off
@@ -403,6 +417,7 @@ class EmailBuilderFactoryTest {
         // @formatter:on
 
         emailBuilderFactory.createBuilder()
+                .setFrom("from@address.com")
                 .setBodyFromTemplateText(viewTemplate, model)
                 .send();
 
@@ -446,6 +461,7 @@ class EmailBuilderFactoryTest {
 
         List<String> model = Arrays.asList(" * Hello, world!", " - Hi there!", "# No heading here", "`No inline code`", "~~No strikethrough~~");
         emailBuilderFactory.createBuilder()
+                .setFrom("from@address.com")
                 .setBodyFromTemplateText(viewTemplate, model)
                 .send();
 
@@ -477,6 +493,7 @@ class EmailBuilderFactoryTest {
         String model = "-*`#~~";
 
         emailBuilderFactory.createBuilder()
+                .setFrom("from@address.com")
                 .setBodyFromTemplateText(markdown, model)
                 .send();
 
@@ -494,6 +511,7 @@ class EmailBuilderFactoryTest {
         String model = "-*`#~~";
 
         emailBuilderFactory.createBuilder()
+                .setFrom("from@address.com")
                 .setBodyFromTemplateText(markdown, model)
                 .send();
 
@@ -506,6 +524,7 @@ class EmailBuilderFactoryTest {
     void it_can_support_mvc_templates_from_a_file() {
         List<String> model = Arrays.asList("Apple", "Orange", "Banana", "Grape");
         emailBuilderFactory.createBuilder()
+                .setFrom("from@address.com")
                 .setBodyFromTemplatePath("/com/ridgid/oss/email/simple-velocity-template.vm", model)
                 .send();
 
@@ -542,6 +561,7 @@ class EmailBuilderFactoryTest {
     void it_can_support_mvc_templates_from_a_file_with_path_relative_to_given_class() {
         List<String> model = Arrays.asList("Apple", "Orange", "Banana", "Grape");
         emailBuilderFactory.createBuilder()
+                .setFrom("from@address.com")
                 .setBodyFromTemplatePath(getClass(), "simple-velocity-template.vm", model)
                 .send();
 
@@ -588,6 +608,7 @@ class EmailBuilderFactoryTest {
         // @formatter:on
 
         emailBuilderFactory.createBuilder()
+                .setFrom("from@address.com")
                 .setBody(markdown)
                 .send();
 
@@ -622,8 +643,10 @@ class EmailBuilderFactoryTest {
 
     @Test
     void it_overrides_the_email_addresses_when_needed() {
-        createEmailBuilderFactory(EXAMPLE_HOST, EXAMPLE_PORT, null, null, EXAMPLE_DEFAULT_HTML_TEMPLATE, themes, Collections.emptyMap(), "override.email@example.com", null, null, null)
+        emailBuilderFactory.setOverrideEmail("override.email@example.com");
+        emailBuilderFactory
                 .createBuilder()
+                .setFrom("from@address.com")
                 .setBody("The body here")
                 .addToAddress("first.to@address.net")
                 .addToAddress("second.to@address.net")
@@ -677,6 +700,7 @@ class EmailBuilderFactoryTest {
         permanentToAddresses.add("second@example.com");
 
         emailBuilderFactory.createBuilder()
+                .setFrom("from@address.com")
                 .addToAddress("new@example.com")
                 .send();
 
@@ -689,6 +713,7 @@ class EmailBuilderFactoryTest {
         permanentCcAddresses.add("second@example.com");
 
         emailBuilderFactory.createBuilder()
+                .setFrom("from@address.com")
                 .addCcAddress("new@example.com")
                 .send();
 
@@ -701,6 +726,7 @@ class EmailBuilderFactoryTest {
         permanentBccAddresses.add("second@example.com");
 
         emailBuilderFactory.createBuilder()
+                .setFrom("from@address.com")
                 .addBccAddress("new@example.com")
                 .send();
 
@@ -723,8 +749,13 @@ class EmailBuilderFactoryTest {
 
         String body = new String(Files.readAllBytes(new File(getClass().getResource("/com/ridgid/oss/email/example-markdown.md").getFile()).toPath()));
 
-        EmailBuilderFactory emailBuilderFactory =
-                new EmailBuilderFactory(host, Integer.parseInt(port), username, password, EXAMPLE_DEFAULT_HTML_TEMPLATE, Collections.emptyMap(), Collections.emptyMap());
+        EmailBuilderFactory emailBuilderFactory = new EmailBuilderFactory();
+        emailBuilderFactory.setHost(host);
+        emailBuilderFactory.setPort(Integer.parseInt(port));
+        emailBuilderFactory.setUsername(username);
+        emailBuilderFactory.setPassword(password);
+        emailBuilderFactory.setDefaultHtmlTemplate(EXAMPLE_DEFAULT_HTML_TEMPLATE);
+
         emailBuilderFactory.createBuilder()
                 .setFrom(from)
                 .addToAddress(to)

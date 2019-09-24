@@ -9,7 +9,6 @@ import com.vladsch.flexmark.parser.Parser;
 import com.vladsch.flexmark.util.ast.Node;
 import com.vladsch.flexmark.util.data.MutableDataSet;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.mail.Email;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
 import org.apache.velocity.Template;
@@ -21,14 +20,17 @@ import org.apache.velocity.runtime.resource.util.StringResourceRepository;
 import org.apache.velocity.runtime.resource.util.StringResourceRepositoryImpl;
 
 import javax.activation.DataSource;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 import java.io.File;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -41,7 +43,6 @@ public class EmailBuilder {
     private static final Parser PARSER;
     private static final HtmlRenderer HTML_RENDERER;
     private static final PlainTextRenderer PLAIN_TEXT_RENDERER;
-    private Runnable setBodyCallback = () -> {};
 
     static {
         markdownFileTemplateEngine = createCommonEngine();
@@ -66,29 +67,18 @@ public class EmailBuilder {
         return engine;
     }
 
-    private final HtmlEmail htmlEmail;
-    private final String defaultHtmlTemplate;
-    private final Map<String, String> themes;
-    private final String overrideEmail;
+    private final EmailBuilderFactory factory;
     private String themeName = "";
-    private List<String> toAddresses = new ArrayList<>();
-    private List<String> ccAddresses = new ArrayList<>();
-    private List<String> bccAddresses = new ArrayList<>();
+    private InternetAddress fromAddress;
+    private List<InternetAddress> toAddresses = new ArrayList<>();
+    private List<InternetAddress> ccAddresses = new ArrayList<>();
+    private List<InternetAddress> bccAddresses = new ArrayList<>();
+    private List<HtmlMailConsumer> attachments = new ArrayList<>();
+    private String subject;
+    private String markdown = "";
 
-    EmailBuilder(HtmlEmail htmlEmail,
-            String defaultHtmlTemplate,
-            Map<String, String> themes,
-            String overrideEmail,
-            List<String> permanentToAddresses,
-            List<String> permanentCcAddresses,
-            List<String> permanentBccAddresses) {
-        this.htmlEmail = htmlEmail;
-        this.defaultHtmlTemplate = defaultHtmlTemplate;
-        this.themes = themes;
-        this.overrideEmail = overrideEmail;
-        permanentToAddresses.forEach(this::addToAddress);
-        permanentCcAddresses.forEach(this::addCcAddress);
-        permanentBccAddresses.forEach(this::addBccAddress);
+    EmailBuilder(EmailBuilderFactory emailBuilderFactory) {
+        this.factory = emailBuilderFactory;
     }
 
     /**
@@ -97,7 +87,7 @@ public class EmailBuilder {
      * @return The current {@link EmailBuilder} instance
      */
     public EmailBuilder setSubject(String subject) {
-        htmlEmail.setSubject(subject);
+        this.subject = subject;
         return this;
     }
 
@@ -108,8 +98,8 @@ public class EmailBuilder {
      */
     public EmailBuilder setFrom(String email) {
         try {
-            htmlEmail.setFrom(email);
-        } catch (EmailException e) {
+            this.fromAddress = new InternetAddress(email);
+        } catch (AddressException e) {
             throw new RuntimeException(e);
         }
         return this;
@@ -127,8 +117,8 @@ public class EmailBuilder {
      */
     public EmailBuilder setFrom(String email, String name) {
         try {
-            htmlEmail.setFrom(email, name);
-        } catch (EmailException e) {
+            fromAddress = new InternetAddress(email, name);
+        } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
         return this;
@@ -140,7 +130,11 @@ public class EmailBuilder {
      * @return The current {@link EmailBuilder} instance
      */
     public EmailBuilder addToAddress(String email) {
-        addEmailAddress(email, htmlEmail::addTo, toAddresses);
+        try {
+            toAddresses.add(new InternetAddress(email));
+        } catch (AddressException e) {
+            throw new RuntimeException(e);
+        }
         return this;
     }
 
@@ -155,7 +149,11 @@ public class EmailBuilder {
      * @return The current {@link EmailBuilder} instance
      */
     public EmailBuilder addToAddress(String email, String name) {
-        addEmailAddress(email, name, htmlEmail::addTo, toAddresses);
+        try {
+            toAddresses.add(new InternetAddress(email, name));
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
         return this;
     }
 
@@ -165,7 +163,11 @@ public class EmailBuilder {
      * @return The current {@link EmailBuilder} instance
      */
     public EmailBuilder addCcAddress(String email) {
-        addEmailAddress(email, htmlEmail::addCc, ccAddresses);
+        try {
+            ccAddresses.add(new InternetAddress(email));
+        } catch (AddressException e) {
+            throw new RuntimeException(e);
+        }
         return this;
     }
 
@@ -180,7 +182,11 @@ public class EmailBuilder {
      * @return The current {@link EmailBuilder} instance
      */
     public EmailBuilder addCcAddress(String email, String name) {
-        addEmailAddress(email, name, htmlEmail::addCc, ccAddresses);
+        try {
+            ccAddresses.add(new InternetAddress(email, name));
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
         return this;
     }
 
@@ -190,7 +196,11 @@ public class EmailBuilder {
      * @return The current {@link EmailBuilder} instance
      */
     public EmailBuilder addBccAddress(String email) {
-        addEmailAddress(email, htmlEmail::addBcc, bccAddresses);
+        try {
+            bccAddresses.add(new InternetAddress(email));
+        } catch (AddressException e) {
+            throw new RuntimeException(e);
+        }
         return this;
     }
 
@@ -205,30 +215,12 @@ public class EmailBuilder {
      * @return The current {@link EmailBuilder} instance
      */
     public EmailBuilder addBccAddress(String email, String name) {
-        addEmailAddress(email, name, htmlEmail::addBcc, bccAddresses);
+        try {
+            bccAddresses.add(new InternetAddress(email, name));
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
         return this;
-    }
-
-    private void addEmailAddress(String email, AddressOnlyConsumer consumer, List<String> addressesList) {
-        if (!isOverridden()) {
-            try {
-                consumer.accept(email);
-            } catch (EmailException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        addressesList.add(email);
-    }
-
-    private void addEmailAddress(String email, String name, AddressAndNameConsumer consumer, List<String> addressesList) {
-        if (!isOverridden()) {
-            try {
-                consumer.accept(email, name);
-            } catch (EmailException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        addressesList.add(email);
     }
 
     /**
@@ -240,7 +232,7 @@ public class EmailBuilder {
      * @return The current {@link EmailBuilder} instance
      */
     public EmailBuilder setBody(String markdown) {
-        setHtmlAndTextBodyFromMarkdown(markdown);
+        this.markdown = markdown;
         return this;
     }
 
@@ -265,7 +257,7 @@ public class EmailBuilder {
 
         StringResourceRepository stringResourceRepository = (StringResourceRepository) engine.getApplicationAttribute("templateRepository");
         stringResourceRepository.putStringResource("template", viewTemplate);
-        setHtmlAndTextBodyFromMarkdown(parseVelocityTemplate(engine, model, "template"));
+        markdown = parseVelocityTemplate(engine, model, "template");
 
         return this;
     }
@@ -297,7 +289,7 @@ public class EmailBuilder {
      * @return The current {@link EmailBuilder} instance
      */
     public EmailBuilder setBodyFromTemplatePath(String templatePath, Object model) {
-        setHtmlAndTextBodyFromMarkdown(parseVelocityTemplate(markdownFileTemplateEngine, model, templatePath));
+        markdown = parseVelocityTemplate(markdownFileTemplateEngine, model, templatePath);
         return this;
     }
 
@@ -314,27 +306,130 @@ public class EmailBuilder {
         return context;
     }
 
-    private void setHtmlAndTextBodyFromMarkdown(String markdown) {
-        setBodyCallback = () -> {
+    /**
+     * Set the theme away from the default
+     *
+     * Different themes use different HTML templates
+     *
+     * @param themeName The name of the theme to use
+     * @return The current {@link EmailBuilder} instance
+     */
+    public EmailBuilder setHtmlTheme(String themeName) {
+        this.themeName = themeName;
+        return this;
+    }
+
+    /**
+     * Embed a resource into the email (e.g. an embedded image)
+     * @param url The URL from which the resource should be pulled
+     * @param cid The Content-ID of the resource
+     * @return The current {@link EmailBuilder} instance
+     */
+    public EmailBuilder embed(URL url, String cid) {
+        attachments.add(htmlEmail -> htmlEmail.embed(url, cid));
+        return this;
+    }
+
+
+    /**
+     * Embed a resource into the email (e.g. an embedded image)
+     * @param url The URL from which the resource should be pulled
+     * @param cid The Content-ID of the resource
+     * @return The current {@link EmailBuilder} instance
+     */
+    public EmailBuilder embed(String url, String cid) {
+        attachments.add(htmlEmail -> htmlEmail.embed(url, cid));
+        return this;
+    }
+
+
+    /**
+     * Embed a resource into the email (e.g. an embedded image)
+     * @param file The file containing the resource to be pulled
+     * @param cid The Content-ID of the resource
+     * @return The current {@link EmailBuilder} instance
+     */
+    public EmailBuilder embed(File file, String cid) {
+        attachments.add(htmlEmail -> htmlEmail.embed(file, cid));
+        return this;
+    }
+
+    /**
+     * Add an attachment to the email
+     * @param dataSource The resource to attach
+     * @param name The name of the attachment
+     * @param description The description of the attachment
+     * @param disposition The disposition of the attachment
+     * @return The current {@link EmailBuilder} instance
+     */
+    public EmailBuilder attach(DataSource dataSource, String name, String description, String disposition) {
+        attachments.add(htmlEmail -> htmlEmail.attach(dataSource, name, description, disposition));
+        return this;
+    }
+
+    /**
+     * Send the email
+     *
+     * If the email has been overridden, then the email will only be sent to the override email address; None of the
+     * To-, CC-, or BCC- addresses will be added.
+     */
+    public void send() {
+        factory.lockWrapper.doInReadLock(() -> {
             try {
-                Node document = PARSER.parse(markdown);
-                htmlEmail.setHtmlMsg(parseHtmlTemplate(unescapeEntitiesForInlineCodeAndCodeBlocks(HTML_RENDERER.render(document))));
-                if (StringUtils.isNotEmpty(markdown)) {
-                    StringBuilder textBody = new StringBuilder(PLAIN_TEXT_RENDERER.render(document));
-                    if (isOverridden()) {
-                        textBody.append("\n\nOriginal To Addresses:\n")
-                                .append(toAddresses.stream().map(address -> " - " + address).collect(Collectors.joining("\n")))
-                                .append("\n\nOriginal CC Addresses:\n")
-                                .append(ccAddresses.stream().map(address -> " - " + address).collect(Collectors.joining("\n")))
-                                .append("\n\nOriginal BCC Addresses:\n")
-                                .append(bccAddresses.stream().map(address -> " - " + address).collect(Collectors.joining("\n")));
-                    }
-                    htmlEmail.setTextMsg(textBody.toString());
+                HtmlEmail htmlEmail = factory.createEmail();
+                htmlEmail.setHostName(factory.host);
+                htmlEmail.setSmtpPort(factory.port);
+                if (StringUtils.isNotEmpty(factory.username) || StringUtils.isNotEmpty(factory.password)) {
+                    htmlEmail.setAuthentication(factory.username, factory.password);
                 }
+                htmlEmail.setCharset("utf-8");
+                factory.commonDataSources.forEach((cid, dataSource) -> {
+                    try {
+                        htmlEmail.embed(dataSource, cid);
+                    } catch (EmailException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+                htmlEmail.setSubject(subject);
+                htmlEmail.setFrom(fromAddress.getAddress(), fromAddress.getPersonal());
+                if (isOverridden()) {
+                    htmlEmail.addTo(factory.overrideEmail);
+                } else {
+                    factory.permanentToAddresses.forEach(wrap(htmlEmail::addTo));
+                    factory.permanentCcAddresses.forEach(wrap(htmlEmail::addCc));
+                    factory.permanentBccAddresses.forEach(wrap(htmlEmail::addBcc));
+                    toAddresses.forEach(wrap(address -> htmlEmail.addTo(address.getAddress(), address.getPersonal())));
+                    ccAddresses.forEach(wrap(address -> htmlEmail.addCc(address.getAddress(), address.getPersonal())));
+                    bccAddresses.forEach(wrap(address -> htmlEmail.addBcc(address.getAddress(), address.getPersonal())));
+                }
+                attachments.forEach(wrap(consumer -> consumer.accept(htmlEmail)));
+                setHtmlAndTextBodyFromMarkdown(htmlEmail);
+                htmlEmail.send();
             } catch (EmailException e) {
                 throw new RuntimeException(e);
             }
-        };
+        });
+    }
+
+    private void setHtmlAndTextBodyFromMarkdown(HtmlEmail htmlEmail) {
+        try {
+            Node document = PARSER.parse(markdown);
+            htmlEmail.setHtmlMsg(parseHtmlTemplate(unescapeEntitiesForInlineCodeAndCodeBlocks(HTML_RENDERER.render(document))));
+            if (StringUtils.isNotEmpty(markdown)) {
+                StringBuilder textBody = new StringBuilder(PLAIN_TEXT_RENDERER.render(document));
+                if (isOverridden()) {
+                    textBody.append("\n\nOriginal To Addresses:\n")
+                            .append(toAddresses.stream().map(address -> " - " + address).collect(Collectors.joining("\n")))
+                            .append("\n\nOriginal CC Addresses:\n")
+                            .append(ccAddresses.stream().map(address -> " - " + address).collect(Collectors.joining("\n")))
+                            .append("\n\nOriginal BCC Addresses:\n")
+                            .append(bccAddresses.stream().map(address -> " - " + address).collect(Collectors.joining("\n")));
+                }
+                htmlEmail.setTextMsg(textBody.toString());
+            }
+        } catch (EmailException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private String unescapeEntitiesForInlineCodeAndCodeBlocks(String html) {
@@ -364,118 +459,31 @@ public class EmailBuilder {
         context.put("ccAddresses", ccAddresses);
         context.put("bccAddresses", bccAddresses);
 
-        Template template = htmlTemplateEngine.getTemplate(themes.getOrDefault(themeName, defaultHtmlTemplate), "UTF-8");
+        Template template = htmlTemplateEngine.getTemplate(factory.themes.getOrDefault(themeName, factory.defaultHtmlTemplate), "UTF-8");
         Writer writer = new StringWriter();
         template.merge(context, writer);
         return writer.toString();
     }
 
-    /**
-     * Set the theme away from the default
-     *
-     * Different themes use different HTML templates
-     *
-     * @param themeName The name of the theme to use
-     * @return The current {@link EmailBuilder} instance
-     */
-    public EmailBuilder setHtmlTheme(String themeName) {
-        this.themeName = themeName;
-        return this;
-    }
-
-    /**
-     * Embed a resource into the email (e.g. an embedded image)
-     * @param url The URL from which the resource should be pulled
-     * @param cid The Content-ID of the resource
-     * @return The current {@link EmailBuilder} instance
-     */
-    public EmailBuilder embed(URL url, String cid) {
-        try {
-            htmlEmail.embed(url, cid);
-        } catch (EmailException e) {
-            throw new RuntimeException(e);
-        }
-        return this;
-    }
-
-
-    /**
-     * Embed a resource into the email (e.g. an embedded image)
-     * @param url The URL from which the resource should be pulled
-     * @param cid The Content-ID of the resource
-     * @return The current {@link EmailBuilder} instance
-     */
-    public EmailBuilder embed(String url, String cid) {
-        try {
-            htmlEmail.embed(url, cid);
-        } catch (EmailException e) {
-            throw new RuntimeException(e);
-        }
-        return this;
-    }
-
-
-    /**
-     * Embed a resource into the email (e.g. an embedded image)
-     * @param file The file containing the resource to be pulled
-     * @param cid The Content-ID of the resource
-     * @return The current {@link EmailBuilder} instance
-     */
-    public EmailBuilder embed(File file, String cid) {
-        try {
-            htmlEmail.embed(file, cid);
-        } catch (EmailException e) {
-            throw new RuntimeException(e);
-        }
-        return this;
-    }
-
-    /**
-     * Add an attachment to the email
-     * @param dataSource The resource to attach
-     * @param name The name of the attachment
-     * @param description The description of the attachment
-     * @param disposition The disposition of the attachment
-     * @return The current {@link EmailBuilder} instance
-     */
-    public EmailBuilder attach(DataSource dataSource, String name, String description, String disposition) {
-        try {
-            htmlEmail.attach(dataSource, name, description, disposition);
-        } catch (EmailException e) {
-            throw new RuntimeException(e);
-        }
-        return this;
-    }
-
     private boolean isOverridden() {
-        return StringUtils.isNotEmpty(overrideEmail);
+        return StringUtils.isNotEmpty(factory.overrideEmail);
     }
 
-    /**
-     * Send the email
-     *
-     * If the email has been overridden, then the email will only be sent to the override email address; None of the
-     * To-, CC-, or BCC- addresses will be added.
-     */
-    public void send() {
-        try {
-            if (isOverridden()) {
-                htmlEmail.addTo(overrideEmail);
+    private interface HtmlMailConsumer {
+        void accept(HtmlEmail htmlEmail) throws EmailException;
+    }
+
+    private interface CommonsMailConsumerWrapper<T> {
+        void accept(T value) throws EmailException;
+    }
+
+    private <T> Consumer<T> wrap(CommonsMailConsumerWrapper<T> wrapper) {
+        return value -> {
+            try {
+                wrapper.accept(value);
+            } catch (EmailException e) {
+                throw new RuntimeException(e);
             }
-            setBodyCallback.run();
-            htmlEmail.send();
-        } catch (EmailException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @SuppressWarnings("UnusedReturnValue")
-    private interface AddressOnlyConsumer {
-        Email accept(String email) throws EmailException;
-    }
-
-    @SuppressWarnings("UnusedReturnValue")
-    private interface AddressAndNameConsumer {
-        Email accept(String email, String name) throws EmailException;
+        };
     }
 }
