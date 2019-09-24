@@ -3,6 +3,7 @@ package com.ridgid.oss.email;
 import org.apache.commons.mail.HtmlEmail;
 
 import javax.activation.DataSource;
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -65,6 +66,8 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 @SuppressWarnings("WeakerAccess")
 public class EmailBuilderFactory {
     private static final int DEFAULT_SMTP_PORT = 25;
+    private static final int DEFAULT_RETRY_ATTEMPTS = 3;
+    private static final Duration DEFAULT_DURATION_BETWEEN_RETRIES = Duration.ofSeconds(3);
 
     final ReadWriteLockWrapper lockWrapper = new ReadWriteLockWrapper(new ReentrantReadWriteLock());
     String host;
@@ -78,6 +81,8 @@ public class EmailBuilderFactory {
     List<String> permanentToAddresses = new ArrayList<>();
     List<String> permanentCcAddresses = new ArrayList<>();
     List<String> permanentBccAddresses = new ArrayList<>();
+    int retryAttempts = DEFAULT_RETRY_ATTEMPTS;
+    Duration durationBetweenRetries = DEFAULT_DURATION_BETWEEN_RETRIES;
 
     /**
      * Build an email which has been preconfigured with the information given in the {@link EmailBuilderFactory} constructor.
@@ -180,5 +185,19 @@ public class EmailBuilderFactory {
      */
     public void setPermanentBccAddresses(List<String> permanentBccAddresses) {
         lockWrapper.doInWriteLock(() -> this.permanentBccAddresses = permanentBccAddresses);
+    }
+
+    /**
+     * The maximum number of unsuccessful attempts before throwing an exception (defaults to 3)
+     */
+    public void setRetryAttempts(int retryAttempts) {
+        lockWrapper.doInWriteLock(() -> this.retryAttempts = retryAttempts);
+    }
+
+    /**
+     * The amount of time between retries (defaults to 3 seconds)
+     */
+    public void setDurationBetweenRetries(Duration durationBetweenRetries) {
+        this.durationBetweenRetries = durationBetweenRetries;
     }
 }

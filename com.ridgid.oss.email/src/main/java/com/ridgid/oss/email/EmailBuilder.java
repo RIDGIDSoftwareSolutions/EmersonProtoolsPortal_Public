@@ -20,6 +20,7 @@ import org.apache.velocity.runtime.resource.util.StringResourceRepository;
 import org.apache.velocity.runtime.resource.util.StringResourceRepositoryImpl;
 
 import javax.activation.DataSource;
+import javax.mail.SendFailedException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import java.io.File;
@@ -404,11 +405,39 @@ public class EmailBuilder {
                 }
                 attachments.forEach(wrap(consumer -> consumer.accept(htmlEmail)));
                 setHtmlAndTextBodyFromMarkdown(htmlEmail);
-                htmlEmail.send();
+                send(htmlEmail, factory.retryAttempts);
             } catch (EmailException e) {
                 throw new EmailBuilderException(e);
             }
         });
+    }
+
+    private void send(HtmlEmail htmlEmail, int retryAttempts) {
+        while (retryAttempts-- > 0) {
+            if (trySend(htmlEmail)) {
+                break;
+            }
+            try {
+                Thread.sleep(factory.durationBetweenRetries.toMillis());
+            } catch (InterruptedException e) {
+                throw new EmailBuilderException(e);
+            }
+        }
+        if (retryAttempts < 0) {
+            throw new EmailBuilderSendFailedException();
+        }
+    }
+
+    private boolean trySend(HtmlEmail htmlEmail) {
+        try {
+            htmlEmail.send();
+            return true;
+        } catch (EmailException e) {
+            if (e.getCause() instanceof SendFailedException) {
+                return false;
+            }
+            throw new EmailBuilderException("Could not send email", e);
+        }
     }
 
     private void setHtmlAndTextBodyFromMarkdown(HtmlEmail htmlEmail) {

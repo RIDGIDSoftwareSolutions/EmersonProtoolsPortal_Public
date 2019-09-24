@@ -5,9 +5,11 @@ import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
 import org.junit.jupiter.api.*;
 
+import javax.mail.SendFailedException;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.time.Duration;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -21,7 +23,6 @@ class EmailBuilderFactoryTest {
     private static final String EXAMPLE_DEFAULT_HTML_TEMPLATE = "/com/ridgid/oss/email/simple-web-template.vm";
     private static final String USERNAME_NOT_REQUIRED = null;
     private static final String PASSWORD_NOT_REQUIRED = null;
-    private static final String DO_NOT_OVERRIDE_EMAIL = null;
 
     private EmailBuilderFactory emailBuilderFactory;
     private Map<String, String> sentEmailInfo;
@@ -29,7 +30,6 @@ class EmailBuilderFactoryTest {
     private List<String> permanentToAddresses;
     private List<String> permanentCcAddresses;
     private List<String> permanentBccAddresses;
-    private EmailException emailException;
 
     @BeforeEach
     void setup() {
@@ -64,10 +64,7 @@ class EmailBuilderFactoryTest {
             private String password;
 
             @Override
-            public String send() throws EmailException {
-                if (emailException != null) {
-                    throw emailException;
-                }
+            public String send() {
                 sentEmailInfo = new HashMap<>();
                 sentEmailInfo.put("smtp host", hostName);
                 sentEmailInfo.put("smtp port", smtpPort);
@@ -740,10 +737,98 @@ class EmailBuilderFactoryTest {
 
     @Test
     void it_sends_EmailBuilderException_when_unknown_error_happens_on_send() {
-        emailException = new EmailException();
-        assertThrows(EmailBuilderException.class, () -> emailBuilderFactory
+        EmailException emailException = new EmailException();
+        emailBuilderFactory = new EmailBuilderFactory() {
+            private int timesCalled = 0;
+            @Override
+            protected HtmlEmail createEmail() {
+                return new HtmlEmail() {
+                    @Override
+                    public String send() throws EmailException {
+                        assertThat(timesCalled++, equalTo(0));
+                        throw emailException;
+                    }
+                };
+            }
+        };
+        emailBuilderFactory.setHost(EXAMPLE_HOST);
+        emailBuilderFactory.setPort(EXAMPLE_PORT);
+        emailBuilderFactory.setDefaultHtmlTemplate(EXAMPLE_DEFAULT_HTML_TEMPLATE);
+        emailBuilderFactory.setThemes(themes);
+        emailBuilderFactory.setPermanentToAddresses(permanentToAddresses);
+        emailBuilderFactory.setPermanentCcAddresses(permanentCcAddresses);
+        emailBuilderFactory.setPermanentBccAddresses(permanentBccAddresses);
+        emailBuilderFactory.setDurationBetweenRetries(Duration.ofMillis(1L));
+        Throwable t = assertThrows(EmailBuilderException.class, () -> emailBuilderFactory
                 .createBuilder()
                 .setFrom("from@address.com")
+                .send());
+        assertThat(t.getMessage(), equalTo("Could not send email"));
+        assertThat(t.getCause(), sameInstance(emailException));
+    }
+
+    @Test
+    void it_retries_when_email_fails_to_due_network_issues() {
+        int[] timesCalled = { 0 };
+        EmailException emailException = new EmailException(new SendFailedException());
+        emailBuilderFactory = new EmailBuilderFactory() {
+            @Override
+            protected HtmlEmail createEmail() {
+                return new HtmlEmail() {
+                    @Override
+                    public String send() throws EmailException {
+                        if (timesCalled[0]++ < 2) {
+                            throw emailException;
+                        }
+                        return null;
+                    }
+                };
+            }
+        };
+        emailBuilderFactory.setHost(EXAMPLE_HOST);
+        emailBuilderFactory.setPort(EXAMPLE_PORT);
+        emailBuilderFactory.setDefaultHtmlTemplate(EXAMPLE_DEFAULT_HTML_TEMPLATE);
+        emailBuilderFactory.setThemes(themes);
+        emailBuilderFactory.setPermanentToAddresses(permanentToAddresses);
+        emailBuilderFactory.setPermanentCcAddresses(permanentCcAddresses);
+        emailBuilderFactory.setPermanentBccAddresses(permanentBccAddresses);
+        emailBuilderFactory.setRetryAttempts(5);
+        emailBuilderFactory.setDurationBetweenRetries(Duration.ofMillis(1L));
+
+        emailBuilderFactory
+                .createBuilder()
+                .setFrom("from@address.net")
+                .send();
+        assertThat(timesCalled[0], equalTo(3));
+    }
+
+    @Test
+    void it_throws_a_special_exception_when_the_email_could_not_be_sent_due_to_network_issues() {
+        EmailException emailException = new EmailException(new SendFailedException());
+        emailBuilderFactory = new EmailBuilderFactory() {
+            @Override
+            protected HtmlEmail createEmail() {
+                return new HtmlEmail() {
+                    @Override
+                    public String send() throws EmailException {
+                        throw emailException;
+                    }
+                };
+            }
+        };
+        emailBuilderFactory.setHost(EXAMPLE_HOST);
+        emailBuilderFactory.setPort(EXAMPLE_PORT);
+        emailBuilderFactory.setDefaultHtmlTemplate(EXAMPLE_DEFAULT_HTML_TEMPLATE);
+        emailBuilderFactory.setThemes(themes);
+        emailBuilderFactory.setPermanentToAddresses(permanentToAddresses);
+        emailBuilderFactory.setPermanentCcAddresses(permanentCcAddresses);
+        emailBuilderFactory.setPermanentBccAddresses(permanentBccAddresses);
+        emailBuilderFactory.setRetryAttempts(5);
+        emailBuilderFactory.setDurationBetweenRetries(Duration.ofMillis(1L));
+
+        assertThrows(EmailBuilderSendFailedException.class, () -> emailBuilderFactory
+                .createBuilder()
+                .setFrom("from@address.net")
                 .send());
     }
 
