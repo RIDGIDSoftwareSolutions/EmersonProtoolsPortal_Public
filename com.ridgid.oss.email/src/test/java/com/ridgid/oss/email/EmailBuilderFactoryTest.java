@@ -1,5 +1,6 @@
 package com.ridgid.oss.email;
 
+import com.ridgid.oss.junit5.RequiredSystemProperties;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
@@ -832,13 +833,9 @@ class EmailBuilderFactoryTest {
                 .send());
     }
 
+    @RequiredSystemProperties({"com.ridgid.oss.email.host", "com.ridgid.oss.email.port", "com.ridgid.oss.email.from", "com.ridgid.oss.email.to"})
     @Test
     void integration_test() throws IOException {
-        Assumptions.assumeTrue(System.getProperties().containsKey("com.ridgid.oss.email.host"));
-        Assumptions.assumeTrue(System.getProperties().containsKey("com.ridgid.oss.email.port"));
-        Assumptions.assumeTrue(System.getProperties().containsKey("com.ridgid.oss.email.from"));
-        Assumptions.assumeTrue(System.getProperties().containsKey("com.ridgid.oss.email.to"));
-
         String host = System.getProperty("com.ridgid.oss.email.host");
         String port = System.getProperty("com.ridgid.oss.email.port");
         String from = System.getProperty("com.ridgid.oss.email.from");
