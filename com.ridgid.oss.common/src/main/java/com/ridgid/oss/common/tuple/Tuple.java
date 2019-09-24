@@ -1,5 +1,6 @@
 package com.ridgid.oss.common.tuple;
 
+import com.ridgid.oss.common.helper.ComparisonHelpers;
 import com.ridgid.oss.common.tuple.Tuple.Implementation.Tuple0Impl;
 import com.ridgid.oss.common.tuple.Tuple.Implementation.Tuple1Impl;
 import com.ridgid.oss.common.tuple.Tuple.Implementation.Tuple2Impl;
@@ -8,10 +9,11 @@ import com.ridgid.oss.common.tuple.Tuple.Implementation.Tuple4Impl;
 import com.ridgid.oss.common.tuple.Tuple.Implementation.Tuple5Impl;
 import com.ridgid.oss.common.tuple.Tuple.Implementation.Tuple6Impl;
 
+import java.util.Objects;
 import java.util.stream.Stream;
 
 @SuppressWarnings("unused")
-public interface Tuple
+public interface Tuple extends Comparable<Tuple>
 {
     byte getNumberOfElements();
 
@@ -25,13 +27,17 @@ public interface Tuple
     Stream<Class<?>> getTypes();
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")
-    default Object getValue(int elementNumber) {
+    default Comparable<?> getValue(int elementNumber) {
         return getValues().skip(elementNumber)
                           .findFirst()
                           .get();
     }
 
-    Stream<Object> getValues();
+    Stream<Comparable<?>> getValues();
+
+    default int compareTo(Tuple o) {
+        return ComparisonHelpers.comparingNullsLast(getValues(), o.getValues());
+    }
 
     interface Tuple0 extends Tuple
     {
@@ -42,7 +48,9 @@ public interface Tuple
         default Stream<Class<?>> getTypes() {return Stream.empty();}
 
         @Override
-        default Stream<Object> getValues() {return Stream.empty();}
+        default Stream<Comparable<?>> getValues() {
+            return Stream.empty();
+        }
     }
 
     interface Tuple1<T> extends Tuple
@@ -115,30 +123,34 @@ public interface Tuple
         return new Tuple0Impl();
     }
 
-    static <T> Tuple1 of(T t) {
+    static <T extends Comparable<?>> Tuple1 of(T t) {
         return new Tuple1Impl<>(t);
     }
 
-    static <T1, T2> Tuple2 of(T1 t1, T2 t2) {
+    static <T1 extends Comparable<?>, T2 extends Comparable<?>>
+    Tuple2 of(T1 t1, T2 t2) {
         return new Tuple2Impl<>(t1, t2);
     }
 
-    static <T1, T2, T3> Tuple3 of(T1 t1, T2 t2, T3 t3) {
+    static <T1 extends Comparable<?>, T2 extends Comparable<?>, T3 extends Comparable<?>>
+    Tuple3 of(T1 t1, T2 t2, T3 t3) {
         return new Tuple3Impl<>(t1, t2, t3);
     }
 
-    static <T1, T2, T3, T4> Tuple4 of(T1 t1, T2 t2, T3 t3, T4 t4) {
+    static <T1 extends Comparable<?>, T2 extends Comparable<?>, T3 extends Comparable<?>, T4 extends Comparable<?>>
+    Tuple4 of(T1 t1, T2 t2, T3 t3, T4 t4) {
         return new Tuple4Impl<>(t1, t2, t3, t4);
     }
 
-    static <T1, T2, T3, T4, T5> Tuple5 of(T1 t1, T2 t2, T3 t3, T4 t4, T5 t5) {
+    static <T1 extends Comparable<?>, T2 extends Comparable<?>, T3 extends Comparable<?>, T4 extends Comparable<?>, T5 extends Comparable<?>>
+    Tuple5 of(T1 t1, T2 t2, T3 t3, T4 t4, T5 t5) {
         return new Tuple5Impl<>(t1, t2, t3, t4, t5);
     }
 
-    static <T1, T2, T3, T4, T5, T6> Tuple5 of(T1 t1, T2 t2, T3 t3, T4 t4, T5 t5, T6 t6) {
+    static <T1 extends Comparable<?>, T2 extends Comparable<?>, T3 extends Comparable<?>, T4 extends Comparable<?>, T5 extends Comparable<?>, T6 extends Comparable<?>>
+    Tuple5 of(T1 t1, T2 t2, T3 t3, T4 t4, T5 t5, T6 t6) {
         return new Tuple6Impl<>(t1, t2, t3, t4, t5, t6);
     }
-
 
     final class Implementation
     {
@@ -146,9 +158,28 @@ public interface Tuple
 
         static class Tuple0Impl implements Tuple0
         {
+            @Override
+            public int hashCode() {
+                return 764839172;
+            }
+
+            @Override
+            public boolean equals(Object obj) {
+                return obj instanceof Tuple0Impl;
+            }
+
+            @Override
+            public String toString() {
+                return "()";
+            }
+
+            @Override
+            public int compareTo(Tuple o) {
+                return 0;
+            }
         }
 
-        static class Tuple1Impl<T> implements Tuple1<T>
+        static class Tuple1Impl<T extends Comparable<?>> implements Tuple1<T>
         {
             private T value;
 
@@ -162,7 +193,7 @@ public interface Tuple
             }
 
             @Override
-            public Stream<Object> getValues() {
+            public Stream<Comparable<?>> getValues() {
                 return Stream.of(value);
             }
 
@@ -170,9 +201,28 @@ public interface Tuple
             public T getFirst() {
                 return value;
             }
+
+            @Override
+            public boolean equals(Object o) {
+                if ( this == o ) return true;
+                if ( o == null || getClass() != o.getClass() ) return false;
+                Tuple1Impl<?> tuple1 = (Tuple1Impl<?>) o;
+                return Objects.equals(value, tuple1.value);
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(value);
+            }
+
+            @Override
+            public String toString() {
+                return "(" + value + ')';
+            }
         }
 
-        static class Tuple2Impl<T1, T2> implements Tuple2<T1, T2>
+        static class Tuple2Impl<T1 extends Comparable<?>, T2 extends Comparable<?>>
+            implements Tuple2<T1, T2>
         {
             private T1 value1;
             private T2 value2;
@@ -189,7 +239,7 @@ public interface Tuple
             }
 
             @Override
-            public Stream<Object> getValues() {
+            public Stream<Comparable<?>> getValues() {
                 return Stream.of(value1,
                                  value2);
             }
@@ -203,9 +253,31 @@ public interface Tuple
             public T2 getSecond() {
                 return value2;
             }
+
+            @Override
+            public boolean equals(Object o) {
+                if ( this == o ) return true;
+                if ( o == null || getClass() != o.getClass() ) return false;
+                Tuple2Impl<?, ?> tuple2 = (Tuple2Impl<?, ?>) o;
+                return Objects.equals(value1, tuple2.value1) &&
+                       Objects.equals(value2, tuple2.value2);
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(value1, value2);
+            }
+
+            @Override
+            public String toString() {
+                return "(" + value1 +
+                       "," + value2 +
+                       ')';
+            }
         }
 
-        static class Tuple3Impl<T1, T2, T3> implements Tuple3<T1, T2, T3>
+        static class Tuple3Impl<T1 extends Comparable<?>, T2 extends Comparable<?>, T3 extends Comparable<?>>
+            implements Tuple3<T1, T2, T3>
         {
             private T1 value1;
             private T2 value2;
@@ -228,7 +300,7 @@ public interface Tuple
             }
 
             @Override
-            public Stream<Object> getValues() {
+            public Stream<Comparable<?>> getValues() {
                 return Stream.of(value1,
                                  value2,
                                  value3);
@@ -248,9 +320,33 @@ public interface Tuple
             public T3 getThird() {
                 return value3;
             }
+
+            @Override
+            public boolean equals(Object o) {
+                if ( this == o ) return true;
+                if ( o == null || getClass() != o.getClass() ) return false;
+                Tuple3Impl<?, ?, ?> tuple3 = (Tuple3Impl<?, ?, ?>) o;
+                return Objects.equals(value1, tuple3.value1) &&
+                       Objects.equals(value2, tuple3.value2) &&
+                       Objects.equals(value3, tuple3.value3);
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(value1, value2, value3);
+            }
+
+            @Override
+            public String toString() {
+                return "(" + value1 +
+                       "," + value2 +
+                       "," + value3 +
+                       ')';
+            }
         }
 
-        static class Tuple4Impl<T1, T2, T3, T4> implements Tuple4<T1, T2, T3, T4>
+        static class Tuple4Impl<T1 extends Comparable<?>, T2 extends Comparable<?>, T3 extends Comparable<?>, T4 extends Comparable<?>>
+            implements Tuple4<T1, T2, T3, T4>
         {
             private T1 value1;
             private T2 value2;
@@ -277,7 +373,7 @@ public interface Tuple
             }
 
             @Override
-            public Stream<Object> getValues() {
+            public Stream<Comparable<?>> getValues() {
                 return Stream.of(value1,
                                  value2,
                                  value3,
@@ -303,9 +399,35 @@ public interface Tuple
             public T4 getForth() {
                 return value4;
             }
+
+            @Override
+            public boolean equals(Object o) {
+                if ( this == o ) return true;
+                if ( o == null || getClass() != o.getClass() ) return false;
+                Tuple4Impl<?, ?, ?, ?> tuple3 = (Tuple4Impl<?, ?, ?, ?>) o;
+                return Objects.equals(value1, tuple3.value1) &&
+                       Objects.equals(value2, tuple3.value2) &&
+                       Objects.equals(value3, tuple3.value3) &&
+                       Objects.equals(value4, tuple3.value4);
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(value1, value2, value3, value4);
+            }
+
+            @Override
+            public String toString() {
+                return "(" + value1 +
+                       "," + value2 +
+                       "," + value3 +
+                       "," + value4 +
+                       ')';
+            }
         }
 
-        static class Tuple5Impl<T1, T2, T3, T4, T5> implements Tuple5<T1, T2, T3, T4, T5>
+        static class Tuple5Impl<T1 extends Comparable<?>, T2 extends Comparable<?>, T3 extends Comparable<?>, T4 extends Comparable<?>, T5 extends Comparable<?>>
+            implements Tuple5<T1, T2, T3, T4, T5>
         {
             private T1 value1;
             private T2 value2;
@@ -336,7 +458,7 @@ public interface Tuple
             }
 
             @Override
-            public Stream<Object> getValues() {
+            public Stream<Comparable<?>> getValues() {
                 return Stream.of(value1,
                                  value2,
                                  value3,
@@ -368,9 +490,37 @@ public interface Tuple
             public T5 getFifth() {
                 return value5;
             }
+
+            @Override
+            public boolean equals(Object o) {
+                if ( this == o ) return true;
+                if ( o == null || getClass() != o.getClass() ) return false;
+                Tuple5Impl<?, ?, ?, ?, ?> tuple3 = (Tuple5Impl<?, ?, ?, ?, ?>) o;
+                return Objects.equals(value1, tuple3.value1) &&
+                       Objects.equals(value2, tuple3.value2) &&
+                       Objects.equals(value3, tuple3.value3) &&
+                       Objects.equals(value4, tuple3.value4) &&
+                       Objects.equals(value5, tuple3.value5);
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(value1, value2, value3, value4, value5);
+            }
+
+            @Override
+            public String toString() {
+                return "(" + value1 +
+                       "," + value2 +
+                       "," + value3 +
+                       "," + value4 +
+                       "," + value5 +
+                       ')';
+            }
         }
 
-        static class Tuple6Impl<T1, T2, T3, T4, T5, T6> implements Tuple6<T1, T2, T3, T4, T5, T6>
+        static class Tuple6Impl<T1 extends Comparable<?>, T2 extends Comparable<?>, T3 extends Comparable<?>, T4 extends Comparable<?>, T5 extends Comparable<?>, T6 extends Comparable<?>>
+            implements Tuple6<T1, T2, T3, T4, T5, T6>
         {
             private T1 value1;
             private T2 value2;
@@ -405,7 +555,7 @@ public interface Tuple
             }
 
             @Override
-            public Stream<Object> getValues() {
+            public Stream<Comparable<?>> getValues() {
                 return Stream.of(value1,
                                  value2,
                                  value3,
@@ -442,6 +592,35 @@ public interface Tuple
             @Override
             public T6 getSixth() {
                 return value6;
+            }
+
+            @Override
+            public boolean equals(Object o) {
+                if ( this == o ) return true;
+                if ( o == null || getClass() != o.getClass() ) return false;
+                Tuple6Impl<?, ?, ?, ?, ?, ?> tuple3 = (Tuple6Impl<?, ?, ?, ?, ?, ?>) o;
+                return Objects.equals(value1, tuple3.value1) &&
+                       Objects.equals(value2, tuple3.value2) &&
+                       Objects.equals(value3, tuple3.value3) &&
+                       Objects.equals(value4, tuple3.value4) &&
+                       Objects.equals(value5, tuple3.value5) &&
+                       Objects.equals(value6, tuple3.value6);
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(value1, value2, value3, value4, value5, value6);
+            }
+
+            @Override
+            public String toString() {
+                return "(" + value1 +
+                       "," + value2 +
+                       "," + value3 +
+                       "," + value4 +
+                       "," + value5 +
+                       "," + value6 +
+                       ')';
             }
         }
     }

@@ -12,7 +12,8 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 @SuppressWarnings({"unused", "WeakerAccess"})
-public final class StreamHelpers {
+public final class StreamHelpers
+{
     private StreamHelpers() {
     }
 
@@ -20,15 +21,17 @@ public final class StreamHelpers {
                                                                                Supplier<C> collectionSupplier,
                                                                                BiFunction<C, R, C> combiner,
                                                                                Function<T, R> mapping,
-                                                                               R endOfStreamSentinel) {
-        return new Function<T, Stream<C>>() {
+                                                                               R endOfStreamSentinel)
+    {
+        return new Function<T, Stream<C>>()
+        {
             private C group = collectionSupplier.get();
 
             @Override
             public Stream<C> apply(T t) {
                 R r = mapping.apply(t);
                 combiner.apply(group, r);
-                if (Objects.equals(r, endOfStreamSentinel) || group.size() >= groupSize) {
+                if ( Objects.equals(r, endOfStreamSentinel) || group.size() >= groupSize ) {
                     C rv = group;
                     group = collectionSupplier.get();
                     return Stream.of(rv);
@@ -40,24 +43,27 @@ public final class StreamHelpers {
 
     public static <T, R> Function<T, Stream<List<R>>> group(int groupSize,
                                                             Function<T, R> mapping,
-                                                            R endOfStreamSentinel) {
+                                                            R endOfStreamSentinel)
+    {
         return group(groupSize,
-                () -> new ArrayList<>(groupSize),
-                (l, r) -> {
-                    l.add(r);
-                    return l;
-                },
-                mapping,
-                endOfStreamSentinel);
+                     () -> new ArrayList<>(groupSize),
+                     (l, r) -> {
+                         l.add(r);
+                         return l;
+                     },
+                     mapping,
+                     endOfStreamSentinel);
     }
 
     public static <T> Function<T, Stream<List<T>>> group(int groupSize,
-                                                         T endOfStreamSentinel) {
+                                                         T endOfStreamSentinel)
+    {
         return group(groupSize, T -> T, endOfStreamSentinel);
     }
 
     public static <T, R> Function<T, Stream<List<R>>> group(int groupSize,
-                                                            Function<T, R> mapping) {
+                                                            Function<T, R> mapping)
+    {
         return group(groupSize, mapping, null);
     }
 
@@ -70,21 +76,21 @@ public final class StreamHelpers {
         ConcurrentMap keysSeen = new ConcurrentHashMap<>();
         return t -> {
             ConcurrentMap keyMap = keysSeen;
-            for (int i = 0; i < fieldSelectors.length - 1; i++) {
+            for ( int i = 0; i < fieldSelectors.length - 1; i++ ) {
                 Function<T, ?> selector = fieldSelectors[i];
                 //noinspection unchecked
                 keyMap = (ConcurrentMap) keyMap.computeIfAbsent
-                        (
-                                selector.apply(t),
-                                k -> new ConcurrentHashMap()
-                        );
+                    (
+                        selector.apply(t),
+                        k -> new ConcurrentHashMap()
+                    );
             }
             @SuppressWarnings("unchecked")
             boolean seen = (boolean) keyMap.compute
-                    (
-                            fieldSelectors[fieldSelectors.length - 1].apply(t),
-                            (k, v) -> v != null
-                    );
+                (
+                    fieldSelectors[fieldSelectors.length - 1].apply(t),
+                    (k, v) -> v != null
+                );
             return seen ? null : Stream.of(t);
         };
     }
