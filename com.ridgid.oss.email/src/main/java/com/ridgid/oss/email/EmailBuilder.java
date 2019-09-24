@@ -100,7 +100,7 @@ public class EmailBuilder {
         try {
             this.fromAddress = new InternetAddress(email);
         } catch (AddressException e) {
-            throw new RuntimeException(e);
+            throw new EmailBuilderException(e);
         }
         return this;
     }
@@ -119,7 +119,7 @@ public class EmailBuilder {
         try {
             fromAddress = new InternetAddress(email, name);
         } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
+            throw new EmailBuilderException(e);
         }
         return this;
     }
@@ -133,7 +133,7 @@ public class EmailBuilder {
         try {
             toAddresses.add(new InternetAddress(email));
         } catch (AddressException e) {
-            throw new RuntimeException(e);
+            throw new EmailBuilderException(e);
         }
         return this;
     }
@@ -152,7 +152,7 @@ public class EmailBuilder {
         try {
             toAddresses.add(new InternetAddress(email, name));
         } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
+            throw new EmailBuilderException(e);
         }
         return this;
     }
@@ -166,7 +166,7 @@ public class EmailBuilder {
         try {
             ccAddresses.add(new InternetAddress(email));
         } catch (AddressException e) {
-            throw new RuntimeException(e);
+            throw new EmailBuilderException(e);
         }
         return this;
     }
@@ -185,7 +185,7 @@ public class EmailBuilder {
         try {
             ccAddresses.add(new InternetAddress(email, name));
         } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
+            throw new EmailBuilderException(e);
         }
         return this;
     }
@@ -199,7 +199,7 @@ public class EmailBuilder {
         try {
             bccAddresses.add(new InternetAddress(email));
         } catch (AddressException e) {
-            throw new RuntimeException(e);
+            throw new EmailBuilderException(e);
         }
         return this;
     }
@@ -218,7 +218,7 @@ public class EmailBuilder {
         try {
             bccAddresses.add(new InternetAddress(email, name));
         } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
+            throw new EmailBuilderException(e);
         }
         return this;
     }
@@ -406,7 +406,7 @@ public class EmailBuilder {
                 setHtmlAndTextBodyFromMarkdown(htmlEmail);
                 htmlEmail.send();
             } catch (EmailException e) {
-                throw new RuntimeException(e);
+                throw new EmailBuilderException(e);
             }
         });
     }

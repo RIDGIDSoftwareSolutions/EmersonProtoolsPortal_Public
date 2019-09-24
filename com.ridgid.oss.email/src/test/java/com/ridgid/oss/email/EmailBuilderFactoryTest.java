@@ -1,10 +1,10 @@
 package com.ridgid.oss.email;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
 import org.junit.jupiter.api.*;
 
-import javax.activation.DataSource;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class EmailBuilderFactoryTest {
     private static final String EXAMPLE_HOST = "mail.example.com";
@@ -28,6 +29,7 @@ class EmailBuilderFactoryTest {
     private List<String> permanentToAddresses;
     private List<String> permanentCcAddresses;
     private List<String> permanentBccAddresses;
+    private EmailException emailException;
 
     @BeforeEach
     void setup() {
@@ -62,7 +64,10 @@ class EmailBuilderFactoryTest {
             private String password;
 
             @Override
-            public String send() {
+            public String send() throws EmailException {
+                if (emailException != null) {
+                    throw emailException;
+                }
                 sentEmailInfo = new HashMap<>();
                 sentEmailInfo.put("smtp host", hostName);
                 sentEmailInfo.put("smtp port", smtpPort);
@@ -731,6 +736,15 @@ class EmailBuilderFactoryTest {
                 .send();
 
         assertThat(sentEmailInfo, hasEntry("bcc", "first@example.com; second@example.com; new@example.com"));
+    }
+
+    @Test
+    void it_sends_EmailBuilderException_when_unknown_error_happens_on_send() {
+        emailException = new EmailException();
+        assertThrows(EmailBuilderException.class, () -> emailBuilderFactory
+                .createBuilder()
+                .setFrom("from@address.com")
+                .send());
     }
 
     @Test
