@@ -376,39 +376,35 @@ public class EmailBuilder {
      */
     public void send() {
         factory.lockWrapper.doInReadLock(() -> {
-            try {
-                HtmlEmail htmlEmail = factory.createEmail();
-                htmlEmail.setHostName(factory.host);
-                htmlEmail.setSmtpPort(factory.port);
-                if (StringUtils.isNotEmpty(factory.username) || StringUtils.isNotEmpty(factory.password)) {
-                    htmlEmail.setAuthentication(factory.username, factory.password);
-                }
-                htmlEmail.setCharset("utf-8");
-                factory.commonDataSources.forEach((cid, dataSource) -> {
-                    try {
-                        htmlEmail.embed(dataSource, cid);
-                    } catch (EmailException e) {
-                        throw new RuntimeException(e);
-                    }
-                });
-                htmlEmail.setSubject(subject);
-                htmlEmail.setFrom(fromAddress.getAddress(), fromAddress.getPersonal());
-                if (isOverridden()) {
-                    htmlEmail.addTo(factory.overrideEmail);
-                } else {
-                    factory.permanentToAddresses.forEach(wrap(htmlEmail::addTo));
-                    factory.permanentCcAddresses.forEach(wrap(htmlEmail::addCc));
-                    factory.permanentBccAddresses.forEach(wrap(htmlEmail::addBcc));
-                    toAddresses.forEach(wrap(address -> htmlEmail.addTo(address.getAddress(), address.getPersonal())));
-                    ccAddresses.forEach(wrap(address -> htmlEmail.addCc(address.getAddress(), address.getPersonal())));
-                    bccAddresses.forEach(wrap(address -> htmlEmail.addBcc(address.getAddress(), address.getPersonal())));
-                }
-                attachments.forEach(wrap(consumer -> consumer.accept(htmlEmail)));
-                setHtmlAndTextBodyFromMarkdown(htmlEmail);
-                send(htmlEmail, factory.retryAttempts);
-            } catch (EmailException e) {
-                throw new EmailBuilderException(e);
+            HtmlEmail htmlEmail = factory.createEmail();
+            htmlEmail.setHostName(factory.host);
+            htmlEmail.setSmtpPort(factory.port);
+            if (StringUtils.isNotEmpty(factory.username) || StringUtils.isNotEmpty(factory.password)) {
+                htmlEmail.setAuthentication(factory.username, factory.password);
             }
+            htmlEmail.setCharset("utf-8");
+            factory.commonDataSources.forEach((cid, dataSource) -> {
+                try {
+                    htmlEmail.embed(dataSource, cid);
+                } catch (EmailException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            htmlEmail.setSubject(subject);
+            throwWithMessage(() -> htmlEmail.setFrom(fromAddress.getAddress(), fromAddress.getPersonal()), "Could not set FROM address");
+            if (isOverridden()) {
+                throwWithMessage(() -> htmlEmail.addTo(factory.overrideEmail), "Could not set TO address");
+            } else {
+                factory.permanentToAddresses.forEach(wrap(htmlEmail::addTo, "Could not set TO address"));
+                factory.permanentCcAddresses.forEach(wrap(htmlEmail::addCc, "Could not set CC address"));
+                factory.permanentBccAddresses.forEach(wrap(htmlEmail::addBcc, "Could not set BCC address"));
+                toAddresses.forEach(wrap(address -> htmlEmail.addTo(address.getAddress(), address.getPersonal()), "Could not set TO address"));
+                ccAddresses.forEach(wrap(address -> htmlEmail.addCc(address.getAddress(), address.getPersonal()), "Could not set CC address"));
+                bccAddresses.forEach(wrap(address -> htmlEmail.addBcc(address.getAddress(), address.getPersonal()), "Could not set BCC address"));
+            }
+            attachments.forEach(wrap(consumer -> consumer.accept(htmlEmail), "Could not add attachment"));
+            setHtmlAndTextBodyFromMarkdown(htmlEmail);
+            send(htmlEmail, factory.retryAttempts);
         });
     }
 
@@ -441,23 +437,19 @@ public class EmailBuilder {
     }
 
     private void setHtmlAndTextBodyFromMarkdown(HtmlEmail htmlEmail) {
-        try {
-            Node document = PARSER.parse(markdown);
-            htmlEmail.setHtmlMsg(parseHtmlTemplate(unescapeEntitiesForInlineCodeAndCodeBlocks(HTML_RENDERER.render(document))));
-            if (StringUtils.isNotEmpty(markdown)) {
-                StringBuilder textBody = new StringBuilder(PLAIN_TEXT_RENDERER.render(document));
-                if (isOverridden()) {
-                    textBody.append("\n\nOriginal To Addresses:\n")
-                            .append(toAddresses.stream().map(address -> " - " + address).collect(Collectors.joining("\n")))
-                            .append("\n\nOriginal CC Addresses:\n")
-                            .append(ccAddresses.stream().map(address -> " - " + address).collect(Collectors.joining("\n")))
-                            .append("\n\nOriginal BCC Addresses:\n")
-                            .append(bccAddresses.stream().map(address -> " - " + address).collect(Collectors.joining("\n")));
-                }
-                htmlEmail.setTextMsg(textBody.toString());
+        Node document = PARSER.parse(markdown);
+        throwWithMessage(() -> htmlEmail.setHtmlMsg(parseHtmlTemplate(unescapeEntitiesForInlineCodeAndCodeBlocks(HTML_RENDERER.render(document)))), "Could not set HTML body");
+        if (StringUtils.isNotEmpty(markdown)) {
+            StringBuilder textBody = new StringBuilder(PLAIN_TEXT_RENDERER.render(document));
+            if (isOverridden()) {
+                textBody.append("\n\nOriginal To Addresses:\n")
+                        .append(toAddresses.stream().map(address -> " - " + address).collect(Collectors.joining("\n")))
+                        .append("\n\nOriginal CC Addresses:\n")
+                        .append(ccAddresses.stream().map(address -> " - " + address).collect(Collectors.joining("\n")))
+                        .append("\n\nOriginal BCC Addresses:\n")
+                        .append(bccAddresses.stream().map(address -> " - " + address).collect(Collectors.joining("\n")));
             }
-        } catch (EmailException e) {
-            throw new RuntimeException(e);
+            throwWithMessage(() -> htmlEmail.setTextMsg(textBody.toString()), "Could not set plain text body");
         }
     }
 
@@ -494,6 +486,14 @@ public class EmailBuilder {
         return writer.toString();
     }
 
+    private void throwWithMessage(CommonsMailRunnable runnable, String errorMessage) {
+        try {
+            runnable.run();
+        } catch (EmailException e) {
+            throw new EmailBuilderException(errorMessage, e);
+        }
+    }
+
     private boolean isOverridden() {
         return StringUtils.isNotEmpty(factory.overrideEmail);
     }
@@ -506,12 +506,16 @@ public class EmailBuilder {
         void accept(T value) throws EmailException;
     }
 
-    private <T> Consumer<T> wrap(CommonsMailConsumerWrapper<T> wrapper) {
+    private interface CommonsMailRunnable {
+        void run() throws EmailException;
+    }
+
+    private <T> Consumer<T> wrap(CommonsMailConsumerWrapper<T> wrapper, String errorMessage) {
         return value -> {
             try {
                 wrapper.accept(value);
             } catch (EmailException e) {
-                throw new RuntimeException(e);
+                throw new EmailBuilderException(errorMessage, e);
             }
         };
     }
