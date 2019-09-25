@@ -27,30 +27,30 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  *
  * And an HTML template located elsewhere:
  * <pre><code>
- *     &lt;html>
- *     &lt;body>
+ *     &lt;html&gt;
+ *     &lt;body&gt;
  *     $html
- *     &lt;/body>
- *     &lt;/html>
+ *     &lt;/body&gt;
+ *     &lt;/html&gt;
  * </code></pre>
  *
  * The HTML body will look something like this:
  * <pre><code>
- *     &lt;html>
- *     &lt;body>
- *     &lt;h1>Order Receipt &lt;code>12345&lt;/code>&lt;/h1>
+ *     &lt;html&gt;
+ *     &lt;body&gt;
+ *     &lt;h1&gt;Order Receipt &lt;code&gt;12345&lt;/code&gt;&lt;/h1&gt;
  *
- *     &lt;table>
- *         &lt;thead>
- *             &lt;tr>&lt;th>Title&lt;/th>&lt;th>ISBN&lt;/th>&lt;th>Unit Price&lt;/th>&lt;th>Quantity&lt;/th>&lt;/tr>
- *         &lt;/thead>
- *         &lt;tbody>
- *             &lt;tr>&lt;td>First Title&lt;/td>&lt;td>1-234-56789&lt;/td>&lt;td>$12.34&lt;/td>&lt;td>1&lt;/td>&lt;/tr>
- *             &lt;tr>&lt;td>Second Title&lt;/td>&lt;td>9-876-54321&lt;/td>&lt;td>$22.99&lt;/td>&lt;td>7&lt;/td>&lt;/tr>
- *         &lt;/tbody>
- *     &lt;/table>
- *     &lt;/body>
- *     &lt;/html>
+ *     &lt;table&gt;
+ *         &lt;thead&gt;
+ *             &lt;tr&gt;&lt;th&gt;Title&lt;/th&gt;&lt;th&gt;ISBN&lt;/th&gt;&lt;th&gt;Unit Price&lt;/th&gt;&lt;th&gt;Quantity&lt;/th&gt;&lt;/tr&gt;
+ *         &lt;/thead&gt;
+ *         &lt;tbody&gt;
+ *             &lt;tr&gt;&lt;td&gt;First Title&lt;/td&gt;&lt;td&gt;1-234-56789&lt;/td&gt;&lt;td&gt;$12.34&lt;/td&gt;&lt;td&gt;1&lt;/td&gt;&lt;/tr&gt;
+ *             &lt;tr&gt;&lt;td&gt;Second Title&lt;/td&gt;&lt;td&gt;9-876-54321&lt;/td&gt;&lt;td&gt;$22.99&lt;/td&gt;&lt;td&gt;7&lt;/td&gt;&lt;/tr&gt;
+ *         &lt;/tbody&gt;
+ *     &lt;/table&gt;
+ *     &lt;/body&gt;
+ *     &lt;/html&gt;
  * </code></pre>
  *
  * The plain-text body will look something like this (assuming the user's client displays plain text in monospace):
@@ -99,6 +99,8 @@ public class EmailBuilderFactory {
 
     /**
      * The host of the email server
+     *
+     * @param host See setter description
      */
     public void setHost(String host) {
         lockWrapper.doInWriteLock(() -> this.host = host);
@@ -106,6 +108,8 @@ public class EmailBuilderFactory {
 
     /**
      * The port of the email server (defaults to 25)
+     *
+     * @param port See setter description
      */
     public void setPort(int port) {
         lockWrapper.doInWriteLock(() -> this.port = port);
@@ -113,6 +117,8 @@ public class EmailBuilderFactory {
 
     /**
      * The username used to authenticate with the email server
+     *
+     * @param username See setter description
      */
     public void setUsername(String username) {
         lockWrapper.doInWriteLock(() -> this.username = username);
@@ -120,6 +126,8 @@ public class EmailBuilderFactory {
 
     /**
      * The username used to authenticate with the email server
+     *
+     * @param password See setter description
      */
     public void setPassword(String password) {
         lockWrapper.doInWriteLock(() -> this.password = password);
@@ -136,6 +144,8 @@ public class EmailBuilderFactory {
      *     <li><code>ccAddresses</code> - The list of CC email addresses.  If overridden, this list will still contain the original email addresses</li>
      *     <li><code>bccAddresses</code> - The list of BCC email addresses.  If overridden, this list will still contain the original email addresses</li>
      * </ul>
+     *
+     * @param defaultHtmlTemplate See setter description
      */
     public void setDefaultHtmlTemplate(String defaultHtmlTemplate) {
         lockWrapper.doInWriteLock(() -> this.defaultHtmlTemplate = defaultHtmlTemplate);
@@ -145,6 +155,8 @@ public class EmailBuilderFactory {
      * The map of theme names to HTML templates
      *
      * Themes allow for a different look and feel depending on circumstance
+     *
+     * @param themes See setter description
      */
     public void setThemes(Map<String, String> themes) {
         lockWrapper.doInWriteLock(() -> this.themes = themes);
@@ -152,6 +164,8 @@ public class EmailBuilderFactory {
 
     /**
      * The map of Content-IDs to data sources that are used in one or more HTML templates
+     *
+     * @param commonDataSources See setter description
      */
     public void setCommonDataSources(Map<String, DataSource> commonDataSources) {
         lockWrapper.doInWriteLock(() -> this.commonDataSources = commonDataSources);
@@ -161,6 +175,8 @@ public class EmailBuilderFactory {
      * When not null or blank, the email will be sent here instead of the to/cc/bcc addresses
      *
      * This option is good for development servers
+     *
+     * @param overrideEmail See setter description
      */
     public void setOverrideEmail(String overrideEmail) {
         lockWrapper.doInWriteLock(() -> this.overrideEmail = overrideEmail);
@@ -168,6 +184,8 @@ public class EmailBuilderFactory {
 
     /**
      * TO-addresses that will always be added, except when {@code overrideEmail} is set
+     *
+     * @param permanentToAddresses See setter description
      */
     public void setPermanentToAddresses(List<String> permanentToAddresses) {
         lockWrapper.doInWriteLock(() -> this.permanentToAddresses = permanentToAddresses);
@@ -175,6 +193,8 @@ public class EmailBuilderFactory {
 
     /**
      * CC-addresses that will always be added, except when {@code overrideEmail} is set
+     *
+     * @param permanentCcAddresses See setter description
      */
     public void setPermanentCcAddresses(List<String> permanentCcAddresses) {
         lockWrapper.doInWriteLock(() -> this.permanentCcAddresses = permanentCcAddresses);
@@ -182,6 +202,8 @@ public class EmailBuilderFactory {
 
     /**
      * BCC-addresses that will always be added, except when {@code overrideEmail} is set
+     *
+     * @param permanentBccAddresses See setter description
      */
     public void setPermanentBccAddresses(List<String> permanentBccAddresses) {
         lockWrapper.doInWriteLock(() -> this.permanentBccAddresses = permanentBccAddresses);
@@ -189,6 +211,8 @@ public class EmailBuilderFactory {
 
     /**
      * The maximum number of unsuccessful attempts before throwing an exception (defaults to 3)
+     *
+     * @param retryAttempts See setter description
      */
     public void setRetryAttempts(int retryAttempts) {
         lockWrapper.doInWriteLock(() -> this.retryAttempts = retryAttempts);
@@ -196,6 +220,8 @@ public class EmailBuilderFactory {
 
     /**
      * The amount of time between retries (defaults to 3 seconds)
+     *
+     * @param durationBetweenRetries See setter description
      */
     public void setDurationBetweenRetries(Duration durationBetweenRetries) {
         this.durationBetweenRetries = durationBetweenRetries;
