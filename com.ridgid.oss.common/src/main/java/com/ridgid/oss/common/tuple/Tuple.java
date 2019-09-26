@@ -8,6 +8,7 @@ import com.ridgid.oss.common.tuple.Tuple.Implementation.Tuple4Impl;
 import com.ridgid.oss.common.tuple.Tuple.Implementation.Tuple5Impl;
 import com.ridgid.oss.common.tuple.Tuple.Implementation.Tuple6Impl;
 
+import java.util.Objects;
 import java.util.stream.Stream;
 
 @SuppressWarnings("unused")
@@ -146,6 +147,20 @@ public interface Tuple
 
         static class Tuple0Impl implements Tuple0
         {
+            @Override
+            public int hashCode() {
+                return 764839172;
+            }
+
+            @Override
+            public boolean equals(Object obj) {
+                return obj instanceof Tuple0Impl;
+            }
+
+            @Override
+            public String toString() {
+                return "()";
+            }
         }
 
         static class Tuple1Impl<T> implements Tuple1<T>
@@ -169,6 +184,24 @@ public interface Tuple
             @Override
             public T getFirst() {
                 return value;
+            }
+
+            @Override
+            public boolean equals(Object o) {
+                if ( this == o ) return true;
+                if ( o == null || getClass() != o.getClass() ) return false;
+                Tuple1Impl<?> tuple1 = (Tuple1Impl<?>) o;
+                return Objects.equals(value, tuple1.value);
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(value);
+            }
+
+            @Override
+            public String toString() {
+                return "(" + value + ')';
             }
         }
 
@@ -202,6 +235,25 @@ public interface Tuple
             @Override
             public T2 getSecond() {
                 return value2;
+            }
+
+            @Override
+            public boolean equals(Object o) {
+                if ( this == o ) return true;
+                if ( o == null || getClass() != o.getClass() ) return false;
+                Tuple2Impl<?, ?> tuple2 = (Tuple2Impl<?, ?>) o;
+                return Objects.equals(value1, tuple2.value1) &&
+                       Objects.equals(value2, tuple2.value2);
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(value1, value2);
+            }
+
+            @Override
+            public String toString() {
+                return "(" + value1 + "," + value2 + ")";
             }
         }
 
@@ -247,6 +299,29 @@ public interface Tuple
             @Override
             public T3 getThird() {
                 return value3;
+            }
+
+            @Override
+            public boolean equals(Object o) {
+                if ( this == o ) return true;
+                if ( o == null || getClass() != o.getClass() ) return false;
+                Tuple3Impl<?, ?, ?> tuple3 = (Tuple3Impl<?, ?, ?>) o;
+                return Objects.equals(value1, tuple3.value1) &&
+                       Objects.equals(value2, tuple3.value2) &&
+                       Objects.equals(value3, tuple3.value3);
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(value1, value2, value3);
+            }
+
+            @Override
+            public String toString() {
+                return "(" + value1 +
+                       "," + value2 +
+                       "," + value3 +
+                       ")";
             }
         }
 
@@ -302,6 +377,31 @@ public interface Tuple
             @Override
             public T4 getForth() {
                 return value4;
+            }
+
+            @Override
+            public boolean equals(Object o) {
+                if ( this == o ) return true;
+                if ( o == null || getClass() != o.getClass() ) return false;
+                Tuple4Impl<?, ?, ?, ?> tuple4 = (Tuple4Impl<?, ?, ?, ?>) o;
+                return Objects.equals(value1, tuple4.value1) &&
+                       Objects.equals(value2, tuple4.value2) &&
+                       Objects.equals(value3, tuple4.value3)&&
+                       Objects.equals(value4, tuple4.value4);
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(value1, value2, value3, value4);
+            }
+
+            @Override
+            public String toString() {
+                return "(" + value1 +
+                       "," + value2 +
+                       "," + value3 +
+                       "," + value4 +
+                       ")";
             }
         }
 
