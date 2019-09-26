@@ -39,7 +39,8 @@ public interface Tuple extends Comparable<Tuple>
         return ComparisonHelpers.comparingNullsLast(getValues(), o.getValues());
     }
 
-    interface Tuple0 extends Tuple
+    interface Tuple0
+        extends Tuple
     {
         @Override
         default byte getNumberOfElements() {return 0;}
@@ -53,7 +54,8 @@ public interface Tuple extends Comparable<Tuple>
         }
     }
 
-    interface Tuple1<T> extends Tuple
+    interface Tuple1<T extends Comparable<? super T>>
+        extends Tuple
     {
         @Override
         default byte getNumberOfElements() { return 1;}
@@ -64,7 +66,8 @@ public interface Tuple extends Comparable<Tuple>
         }
     }
 
-    interface Tuple2<T1, T2> extends Tuple1<T1>
+    interface Tuple2<T1 extends Comparable<? super T1>, T2 extends Comparable<? super T2>>
+        extends Tuple1<T1>
     {
         @Override
         default byte getNumberOfElements() { return 2;}
@@ -75,7 +78,8 @@ public interface Tuple extends Comparable<Tuple>
         }
     }
 
-    interface Tuple3<T1, T2, T3> extends Tuple2<T1, T2>
+    interface Tuple3<T1 extends Comparable<? super T1>, T2 extends Comparable<? super T2>, T3 extends Comparable<? super T3>>
+        extends Tuple2<T1, T2>
     {
         @Override
         default byte getNumberOfElements() { return 3;}
@@ -86,7 +90,8 @@ public interface Tuple extends Comparable<Tuple>
         }
     }
 
-    interface Tuple4<T1, T2, T3, T4> extends Tuple3<T1, T2, T3>
+    interface Tuple4<T1 extends Comparable<? super T1>, T2 extends Comparable<? super T2>, T3 extends Comparable<? super T3>, T4 extends Comparable<? super T4>>
+        extends Tuple3<T1, T2, T3>
     {
         @Override
         default byte getNumberOfElements() { return 4;}
@@ -97,7 +102,8 @@ public interface Tuple extends Comparable<Tuple>
         }
     }
 
-    interface Tuple5<T1, T2, T3, T4, T5> extends Tuple4<T1, T2, T3, T4>
+    interface Tuple5<T1 extends Comparable<? super T1>, T2 extends Comparable<? super T2>, T3 extends Comparable<? super T3>, T4 extends Comparable<? super T4>, T5 extends Comparable<? super T5>>
+        extends Tuple4<T1, T2, T3, T4>
     {
         @Override
         default byte getNumberOfElements() { return 5;}
@@ -108,7 +114,8 @@ public interface Tuple extends Comparable<Tuple>
         }
     }
 
-    interface Tuple6<T1, T2, T3, T4, T5, T6> extends Tuple5<T1, T2, T3, T4, T5>
+    interface Tuple6<T1 extends Comparable<? super T1>, T2 extends Comparable<? super T2>, T3 extends Comparable<? super T3>, T4 extends Comparable<? super T4>, T5 extends Comparable<? super T5>, T6
+        extends Comparable<? super T6>> extends Tuple5<T1, T2, T3, T4, T5>
     {
         @Override
         default byte getNumberOfElements() { return 6;}
@@ -123,31 +130,31 @@ public interface Tuple extends Comparable<Tuple>
         return new Tuple0Impl();
     }
 
-    static <T extends Comparable<?>> Tuple1 of(T t) {
+    static <T extends Comparable<? super T>> Tuple1 of(T t) {
         return new Tuple1Impl<>(t);
     }
 
-    static <T1 extends Comparable<?>, T2 extends Comparable<?>>
+    static <T1 extends Comparable<? super T1>, T2 extends Comparable<? super T2>>
     Tuple2 of(T1 t1, T2 t2) {
         return new Tuple2Impl<>(t1, t2);
     }
 
-    static <T1 extends Comparable<?>, T2 extends Comparable<?>, T3 extends Comparable<?>>
+    static <T1 extends Comparable<? super T1>, T2 extends Comparable<? super T2>, T3 extends Comparable<? super T3>>
     Tuple3 of(T1 t1, T2 t2, T3 t3) {
         return new Tuple3Impl<>(t1, t2, t3);
     }
 
-    static <T1 extends Comparable<?>, T2 extends Comparable<?>, T3 extends Comparable<?>, T4 extends Comparable<?>>
+    static <T1 extends Comparable<? super T1>, T2 extends Comparable<? super T2>, T3 extends Comparable<? super T3>, T4 extends Comparable<? super T4>>
     Tuple4 of(T1 t1, T2 t2, T3 t3, T4 t4) {
         return new Tuple4Impl<>(t1, t2, t3, t4);
     }
 
-    static <T1 extends Comparable<?>, T2 extends Comparable<?>, T3 extends Comparable<?>, T4 extends Comparable<?>, T5 extends Comparable<?>>
+    static <T1 extends Comparable<? super T1>, T2 extends Comparable<? super T2>, T3 extends Comparable<? super T3>, T4 extends Comparable<? super T4>, T5 extends Comparable<? super T5>>
     Tuple5 of(T1 t1, T2 t2, T3 t3, T4 t4, T5 t5) {
         return new Tuple5Impl<>(t1, t2, t3, t4, t5);
     }
 
-    static <T1 extends Comparable<?>, T2 extends Comparable<?>, T3 extends Comparable<?>, T4 extends Comparable<?>, T5 extends Comparable<?>, T6 extends Comparable<?>>
+    static <T1 extends Comparable<? super T1>, T2 extends Comparable<? super T2>, T3 extends Comparable<? super T3>, T4 extends Comparable<? super T4>, T5 extends Comparable<? super T5>, T6 extends Comparable<? super T6>>
     Tuple5 of(T1 t1, T2 t2, T3 t3, T4 t4, T5 t5, T6 t6) {
         return new Tuple6Impl<>(t1, t2, t3, t4, t5, t6);
     }
@@ -179,7 +186,7 @@ public interface Tuple extends Comparable<Tuple>
             }
         }
 
-        static class Tuple1Impl<T extends Comparable<?>> implements Tuple1<T>
+        static class Tuple1Impl<T extends Comparable<? super T>> implements Tuple1<T>
         {
             private T value;
 
@@ -221,7 +228,7 @@ public interface Tuple extends Comparable<Tuple>
             }
         }
 
-        static class Tuple2Impl<T1 extends Comparable<?>, T2 extends Comparable<?>>
+        static class Tuple2Impl<T1 extends Comparable<? super T1>, T2 extends Comparable<? super T2>>
             implements Tuple2<T1, T2>
         {
             private T1 value1;
@@ -276,7 +283,7 @@ public interface Tuple extends Comparable<Tuple>
             }
         }
 
-        static class Tuple3Impl<T1 extends Comparable<?>, T2 extends Comparable<?>, T3 extends Comparable<?>>
+        static class Tuple3Impl<T1 extends Comparable<? super T1>, T2 extends Comparable<? super T2>, T3 extends Comparable<? super T3>>
             implements Tuple3<T1, T2, T3>
         {
             private T1 value1;
@@ -345,7 +352,7 @@ public interface Tuple extends Comparable<Tuple>
             }
         }
 
-        static class Tuple4Impl<T1 extends Comparable<?>, T2 extends Comparable<?>, T3 extends Comparable<?>, T4 extends Comparable<?>>
+        static class Tuple4Impl<T1 extends Comparable<? super T1>, T2 extends Comparable<? super T2>, T3 extends Comparable<? super T3>, T4 extends Comparable<? super T4>>
             implements Tuple4<T1, T2, T3, T4>
         {
             private T1 value1;
@@ -426,7 +433,7 @@ public interface Tuple extends Comparable<Tuple>
             }
         }
 
-        static class Tuple5Impl<T1 extends Comparable<?>, T2 extends Comparable<?>, T3 extends Comparable<?>, T4 extends Comparable<?>, T5 extends Comparable<?>>
+        static class Tuple5Impl<T1 extends Comparable<? super T1>, T2 extends Comparable<? super T2>, T3 extends Comparable<? super T3>, T4 extends Comparable<? super T4>, T5 extends Comparable<? super T5>>
             implements Tuple5<T1, T2, T3, T4, T5>
         {
             private T1 value1;
@@ -519,7 +526,7 @@ public interface Tuple extends Comparable<Tuple>
             }
         }
 
-        static class Tuple6Impl<T1 extends Comparable<?>, T2 extends Comparable<?>, T3 extends Comparable<?>, T4 extends Comparable<?>, T5 extends Comparable<?>, T6 extends Comparable<?>>
+        static class Tuple6Impl<T1 extends Comparable<? super T1>, T2 extends Comparable<? super T2>, T3 extends Comparable<? super T3>, T4 extends Comparable<? super T4>, T5 extends Comparable<? super T5>, T6 extends Comparable<? super T6>>
             implements Tuple6<T1, T2, T3, T4, T5, T6>
         {
             private T1 value1;

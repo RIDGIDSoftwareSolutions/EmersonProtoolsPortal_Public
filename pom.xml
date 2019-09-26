@@ -5,7 +5,7 @@
 
     <groupId>com.ridgid.oss</groupId>
     <artifactId>com.ridgid.oss</artifactId>
-    <version>2.120-SNAPSHOT</version>
+    <version>2.121-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>
