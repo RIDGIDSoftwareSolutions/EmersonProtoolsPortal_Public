@@ -1,0 +1,27 @@
+<html>
+<body>
+    $html
+    #if($overridden)
+        <div>
+            Original To Addresses:
+            <ul>
+            #foreach($address in $toAddresses)
+                <li>$address</li>
+            #end
+            </ul>
+            Original CC Addresses:
+            <ul>
+                #foreach($address in $ccAddresses)
+                    <li>$address</li>
+                #end
+            </ul>
+            Original BCC Addresses:
+            <ul>
+                #foreach($address in $bccAddresses)
+                    <li>$address</li>
+                #end
+            </ul>
+        </div>
+    #end
+</body>
+</html>

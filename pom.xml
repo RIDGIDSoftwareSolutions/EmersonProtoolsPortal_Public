@@ -5,7 +5,7 @@
 
     <groupId>com.ridgid.oss</groupId>
     <artifactId>com.ridgid.oss</artifactId>
-    <version>2.116-SNAPSHOT</version>
+    <version>2.119-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -45,6 +45,8 @@
         <module>com.ridgid.oss.orm.jpa</module>
         <module>com.ridgid.oss.orm.jpa.test</module>
         <module>com.ridgid.oss.common</module>
+        <module>com.ridgid.oss.email</module>
+        <module>com.ridgid.oss.junit5</module>
     </modules>
 
     <!-- Required to publish to Maven Central -->
