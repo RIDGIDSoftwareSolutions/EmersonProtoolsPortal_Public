@@ -1,7 +1,10 @@
 package com.ridgid.oss.common.helper;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.stream.Stream;
+
+import static java.util.function.Function.identity;
 
 /**
  *
@@ -147,4 +150,8 @@ public final class ComparisonHelpers
                  : 0;
     }
 
+    public static <T extends Comparable<? super T>> int comparingNullsLast(List<T> lhs, List<T> rhs) {
+        return comparingNullsLast(lhs.stream().map(identity()),
+                                  rhs.stream().map(identity()));
+    }
 }
