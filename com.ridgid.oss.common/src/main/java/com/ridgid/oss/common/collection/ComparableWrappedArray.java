@@ -15,13 +15,13 @@ public class ComparableWrappedArray<T extends Comparable<T>>
         this.array = array;
     }
 
-    public Stream<T> unwrap() {
+    public Stream<T> stream() {
         return Arrays.stream(array);
     }
 
     @Override
     public int compareTo(ComparableWrappedArray<T> o) {
-        return ComparisonHelpers.comparingNullsLast(unwrap(), o.unwrap());
+        return ComparisonHelpers.comparingNullsLast(stream(), o.stream());
     }
 
     @Override
