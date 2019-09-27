@@ -27,14 +27,15 @@ public interface Tuple extends Comparable<Tuple>
     Stream<Class<?>> getTypes();
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")
-    default Comparable<?> getValue(int elementNumber) {
+    default Comparable getValue(int elementNumber) {
         return getValues().skip(elementNumber)
                           .findFirst()
                           .get();
     }
 
-    Stream<Comparable<?>> getValues();
+    Stream<Comparable> getValues();
 
+    @SuppressWarnings("unchecked")
     default int compareTo(Tuple o) {
         return ComparisonHelpers.comparingNullsLast(getValues(), o.getValues());
     }
@@ -49,7 +50,7 @@ public interface Tuple extends Comparable<Tuple>
         default Stream<Class<?>> getTypes() {return Stream.empty();}
 
         @Override
-        default Stream<Comparable<?>> getValues() {
+        default Stream<Comparable> getValues() {
             return Stream.empty();
         }
     }
@@ -200,7 +201,7 @@ public interface Tuple extends Comparable<Tuple>
             }
 
             @Override
-            public Stream<Comparable<?>> getValues() {
+            public Stream<Comparable> getValues() {
                 return Stream.of(value);
             }
 
@@ -246,7 +247,7 @@ public interface Tuple extends Comparable<Tuple>
             }
 
             @Override
-            public Stream<Comparable<?>> getValues() {
+            public Stream<Comparable> getValues() {
                 return Stream.of(value1,
                                  value2);
             }
@@ -290,6 +291,7 @@ public interface Tuple extends Comparable<Tuple>
             private T2 value2;
             private T3 value3;
 
+            @SuppressWarnings("DuplicatedCode")
             Tuple3Impl(T1 value1,
                        T2 value2,
                        T3 value3)
@@ -307,7 +309,7 @@ public interface Tuple extends Comparable<Tuple>
             }
 
             @Override
-            public Stream<Comparable<?>> getValues() {
+            public Stream<Comparable> getValues() {
                 return Stream.of(value1,
                                  value2,
                                  value3);
@@ -360,6 +362,7 @@ public interface Tuple extends Comparable<Tuple>
             private T3 value3;
             private T4 value4;
 
+            @SuppressWarnings("DuplicatedCode")
             Tuple4Impl(T1 value1,
                        T2 value2,
                        T3 value3,
@@ -380,7 +383,7 @@ public interface Tuple extends Comparable<Tuple>
             }
 
             @Override
-            public Stream<Comparable<?>> getValues() {
+            public Stream<Comparable> getValues() {
                 return Stream.of(value1,
                                  value2,
                                  value3,
@@ -442,6 +445,7 @@ public interface Tuple extends Comparable<Tuple>
             private T4 value4;
             private T5 value5;
 
+            @SuppressWarnings("DuplicatedCode")
             Tuple5Impl(T1 value1,
                        T2 value2,
                        T3 value3,
@@ -465,7 +469,7 @@ public interface Tuple extends Comparable<Tuple>
             }
 
             @Override
-            public Stream<Comparable<?>> getValues() {
+            public Stream<Comparable> getValues() {
                 return Stream.of(value1,
                                  value2,
                                  value3,
@@ -536,6 +540,7 @@ public interface Tuple extends Comparable<Tuple>
             private T5 value5;
             private T6 value6;
 
+            @SuppressWarnings("DuplicatedCode")
             Tuple6Impl(T1 value1,
                        T2 value2,
                        T3 value3,
@@ -562,7 +567,7 @@ public interface Tuple extends Comparable<Tuple>
             }
 
             @Override
-            public Stream<Comparable<?>> getValues() {
+            public Stream<Comparable> getValues() {
                 return Stream.of(value1,
                                  value2,
                                  value3,
