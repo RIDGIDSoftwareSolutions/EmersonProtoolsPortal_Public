@@ -4,7 +4,7 @@ package com.ridgid.oss.common.cache;
  * Wrapper for any object that will add the expirable interface needed by the ExpirableCache interface
  *
  * @param <T> object type to wrap
- * @code {
+ * {@code
  * ExpirableCache<Integer,ExpirableWrapper<String>> cache = new InMemoryExpirableCache<>();
  * ...
  * cache.add( 3, new ExpirableWrapper( "Hello" ) );
