@@ -1,5 +1,6 @@
 package com.ridgid.oss.email;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.mail.HtmlEmail;
 
 import javax.activation.DataSource;
@@ -77,7 +78,7 @@ public class EmailBuilderFactory {
     String defaultHtmlTemplate;
     Map<String, String> themes = new HashMap<>();
     Map<String, DataSource> commonDataSources = new HashMap<>();
-    String overrideEmail;
+    String[] overrideEmail = new String[0];
     List<String> permanentToAddresses = new ArrayList<>();
     List<String> permanentCcAddresses = new ArrayList<>();
     List<String> permanentBccAddresses = new ArrayList<>();
@@ -179,7 +180,13 @@ public class EmailBuilderFactory {
      * @param overrideEmail See setter description
      */
     public void setOverrideEmail(String overrideEmail) {
-        lockWrapper.doInWriteLock(() -> this.overrideEmail = overrideEmail);
+        lockWrapper.doInWriteLock(() -> {
+            if (StringUtils.isNotEmpty(overrideEmail)) {
+                this.overrideEmail = overrideEmail.split(";\\s*");
+            } else {
+                this.overrideEmail = new String[0];
+            }
+        });
     }
 
     /**

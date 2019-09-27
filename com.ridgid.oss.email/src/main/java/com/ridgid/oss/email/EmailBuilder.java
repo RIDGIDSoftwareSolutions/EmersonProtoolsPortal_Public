@@ -495,7 +495,7 @@ public class EmailBuilder {
     }
 
     private boolean isOverridden() {
-        return StringUtils.isNotEmpty(factory.overrideEmail);
+        return factory.overrideEmail.length > 0;
     }
 
     private interface HtmlMailConsumer {

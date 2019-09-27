@@ -646,7 +646,7 @@ class EmailBuilderFactoryTest {
 
     @Test
     void it_overrides_the_email_addresses_when_needed() {
-        emailBuilderFactory.setOverrideEmail("override.email@example.com");
+        emailBuilderFactory.setOverrideEmail("override.email@example.com;other.override@fake.net");
         emailBuilderFactory
                 .createBuilder()
                 .setFrom("from@address.com")
@@ -657,7 +657,7 @@ class EmailBuilderFactoryTest {
                 .addBccAddress("first.bcc@address.net")
                 .send();
 
-        assertThat(sentEmailInfo, hasEntry("to", "override.email@example.com"));
+        assertThat(sentEmailInfo, hasEntry("to", "override.email@example.com; other.override@fake.net"));
         assertThat(sentEmailInfo, not(hasKey("cc")));
         assertThat(sentEmailInfo, not(hasKey("bcc")));
         //@formatter:off
