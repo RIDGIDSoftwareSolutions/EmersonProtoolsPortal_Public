@@ -1,6 +1,7 @@
 package com.ridgid.oss.common.cache;
 
 @SuppressWarnings("unused")
-public interface RecentlUse {
+public interface RecentlyUsed
+{
     long lastUsedSystemTimeMillis();
 }
