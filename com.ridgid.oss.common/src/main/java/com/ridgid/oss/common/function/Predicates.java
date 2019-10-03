@@ -441,6 +441,15 @@ public final class Predicates
                                    forthValueSelector.applyAsDouble(t));
     }
 
+    // from (single)
+    public static <T, FT, SFT>
+    Predicate<T> with(Function<T, FT> valueSelector,
+                      Function<FT, SFT> subValueSelector,
+                      Predicate<SFT> predicate)
+    {
+        return t -> predicate.test(subValueSelector.apply(valueSelector.apply(t)));
+    }
+
 
     // where (single)
     public static <T, FT>
