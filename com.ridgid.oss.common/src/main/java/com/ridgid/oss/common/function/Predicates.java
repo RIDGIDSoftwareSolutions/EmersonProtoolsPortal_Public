@@ -450,6 +450,30 @@ public final class Predicates
         return t -> predicate.test(subValueSelector.apply(valueSelector.apply(t)));
     }
 
+    public static <T, FT>
+    Predicate<T> with(Function<T, FT> valueSelector,
+                      ToIntFunction<FT> subValueSelector,
+                      IntPredicate predicate)
+    {
+        return t -> predicate.test(subValueSelector.applyAsInt(valueSelector.apply(t)));
+    }
+
+    public static <T, FT>
+    Predicate<T> with(Function<T, FT> valueSelector,
+                      ToLongFunction<FT> subValueSelector,
+                      LongPredicate predicate)
+    {
+        return t -> predicate.test(subValueSelector.applyAsLong(valueSelector.apply(t)));
+    }
+
+    public static <T, FT>
+    Predicate<T> with(Function<T, FT> valueSelector,
+                      ToDoubleFunction<FT> subValueSelector,
+                      DoublePredicate predicate)
+    {
+        return t -> predicate.test(subValueSelector.applyAsDouble(valueSelector.apply(t)));
+    }
+
 
     // where (single)
     public static <T, FT>
