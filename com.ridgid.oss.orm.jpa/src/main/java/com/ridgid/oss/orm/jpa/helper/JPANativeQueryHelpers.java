@@ -4,17 +4,30 @@ import com.ridgid.oss.common.helper.FieldReflectionHelpers;
 import com.ridgid.oss.common.helper.PrimaryKeyAutoGenerationType;
 import com.ridgid.oss.orm.entity.CreateModifyTracking;
 
-import javax.persistence.*;
+import javax.persistence.AttributeConverter;
+import javax.persistence.Column;
+import javax.persistence.Convert;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.Query;
+import javax.persistence.TemporalType;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.ridgid.oss.common.function.Function.replaceWith;
-import static com.ridgid.oss.common.function.Predicate.whereGreaterThan;
+import static com.ridgid.oss.common.function.Functions.replaceWith;
+import static com.ridgid.oss.common.function.Predicates.whereGreaterThan;
 import static com.ridgid.oss.common.helper.FieldReflectionHelpers.getFieldValueOrThrowRuntimeException;
 import static com.ridgid.oss.common.helper.PrimaryKeyAutoGenerationType.IDENTITY;
 import static javax.persistence.EnumType.ORDINAL;
@@ -281,10 +294,10 @@ public final class JPANativeQueryHelpers {
                 .map(Enumerated::value)
                 .orElseGet(
                         () -> Optional.ofNullable(f.getAnnotation(Column.class))
-                                .map(Column::precision)
-                                .filter(whereGreaterThan(0))
-                                .map(replaceWith(ORDINAL))
-                                .orElse(STRING)
+                                      .map(Column::precision)
+                                      .filter(whereGreaterThan((Integer) 0))
+                                      .map(replaceWith(ORDINAL))
+                                      .orElse(STRING)
                 );
         q.setParameter
                 (

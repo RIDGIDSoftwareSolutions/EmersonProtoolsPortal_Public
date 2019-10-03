@@ -5,7 +5,7 @@ import com.ridgid.oss.common.helper.ComparisonHelpers;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
-@SuppressWarnings({"WeakerAccess", "unused"})
+@SuppressWarnings({"unused"})
 public class ComparableWrappedArray<T extends Comparable<T>>
     implements Comparable<ComparableWrappedArray<T>>
 {

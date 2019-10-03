@@ -1,6 +1,13 @@
 package com.ridgid.oss.common.callback;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Optional;
+import java.util.Spliterator;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
@@ -18,14 +25,14 @@ public class BiHandlerList<T1, T2, R> implements List<BiHandler<T1, T2, R>> {
                 if (returnIf.test(r)) return Optional.ofNullable(r);
             } catch (Exception ex) {
                 throw new RuntimeException(
-                        "Predicate Test through Exception for: "
-                                + t1 + ", " + t2
-                                + " and mapped value from visit handler "
-                                + handler.getClass().getEnclosingClass()
-                                + "::" + handler.getClass().getEnclosingMethod()
-                                + " value = "
-                                + (r == null ? "(nul)" : r),
-                        ex);
+                    "Predicates Test through Exception for: "
+                    + t1 + ", " + t2
+                    + " and mapped value from visit handler "
+                    + handler.getClass().getEnclosingClass()
+                    + "::" + handler.getClass().getEnclosingMethod()
+                    + " value = "
+                    + (r == null ? "(nul)" : r),
+                    ex);
             }
         }
         return Optional.empty();

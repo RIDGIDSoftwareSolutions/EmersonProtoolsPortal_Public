@@ -115,5 +115,4 @@ public class InMemoryUnmanagedCache<K, V> implements Cache<K, V> {
     public V merge(K key, V value, BiFunction<? super V, ? super V, ? extends V> remappingFunction) {
         return cache.merge(key, value, remappingFunction);
     }
-
 }
