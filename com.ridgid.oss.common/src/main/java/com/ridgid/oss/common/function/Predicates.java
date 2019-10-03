@@ -277,6 +277,171 @@ public final class Predicates
     }
 
 
+    // from (single)
+    public static <T, FT>
+    Predicate<T> from(Function<T, FT> valueSelector,
+                      Predicate<FT> predicate)
+    {
+        return t -> predicate.test(valueSelector.apply(t));
+    }
+
+    public static <T>
+    Predicate<T> from(ToIntFunction<T> valueSelector,
+                      IntPredicate predicate)
+    {
+        return i -> predicate.test(valueSelector.applyAsInt(i));
+    }
+
+    public static <T>
+    Predicate<T> from(ToLongFunction<T> valueSelector,
+                      LongPredicate predicate)
+    {
+        return i -> predicate.test(valueSelector.applyAsLong(i));
+    }
+
+    public static <T>
+    Predicate<T> from(ToDoubleFunction<T> valueSelector,
+                      DoublePredicate predicate)
+    {
+        return i -> predicate.test(valueSelector.applyAsDouble(i));
+    }
+
+    // from (bi)
+    public static <T, FT1, FT2>
+    Predicate<T> from(Function<T, FT1> firstValueSelector,
+                      Function<T, FT2> secondValueSelector,
+                      BiPredicate<FT1, FT2> predicate)
+    {
+        return t -> predicate.test(firstValueSelector.apply(t),
+                                   secondValueSelector.apply(t));
+    }
+
+    public static <T>
+    Predicate<T> from(ToIntFunction<T> firstValueSelector,
+                      ToIntFunction<T> secondValueSelector,
+                      IntBiPredicate predicate)
+    {
+        return t -> predicate.test(firstValueSelector.applyAsInt(t),
+                                   secondValueSelector.applyAsInt(t));
+    }
+
+    public static <T>
+    Predicate<T> from(ToLongFunction<T> firstValueSelector,
+                      ToLongFunction<T> secondValueSelector,
+                      LongBiPredicate predicate)
+    {
+        return t -> predicate.test(firstValueSelector.applyAsLong(t),
+                                   secondValueSelector.applyAsLong(t));
+    }
+
+    public static <T>
+    Predicate<T> from(ToDoubleFunction<T> firstValueSelector,
+                      ToDoubleFunction<T> secondValueSelector,
+                      DoubleBiPredicate predicate)
+    {
+        return t -> predicate.test(firstValueSelector.applyAsDouble(t),
+                                   secondValueSelector.applyAsDouble(t));
+    }
+
+
+    public static <T, FT1, FT2, FT3>
+    Predicate<T> from(Function<T, FT1> firstValueSelector,
+                      Function<T, FT2> secondValueSelector,
+                      Function<T, FT3> thirdValueSelector,
+                      TriPredicate<FT1, FT2, FT3> predicate)
+    {
+        return t -> predicate.test(firstValueSelector.apply(t),
+                                   secondValueSelector.apply(t),
+                                   thirdValueSelector.apply(t));
+    }
+
+    public static <T>
+    Predicate<T> from(ToIntFunction<T> firstValueSelector,
+                      ToIntFunction<T> secondValueSelector,
+                      ToIntFunction<T> thirdValueSelector,
+                      IntTriPredicate predicate)
+    {
+        return t -> predicate.test(firstValueSelector.applyAsInt(t),
+                                   secondValueSelector.applyAsInt(t),
+                                   thirdValueSelector.applyAsInt(t));
+    }
+
+    public static <T>
+    Predicate<T> from(ToLongFunction<T> firstValueSelector,
+                      ToLongFunction<T> secondValueSelector,
+                      ToLongFunction<T> thirdValueSelector,
+                      LongTriPredicate predicate)
+    {
+        return t -> predicate.test(firstValueSelector.applyAsLong(t),
+                                   secondValueSelector.applyAsLong(t),
+                                   thirdValueSelector.applyAsLong(t));
+    }
+
+    public static <T>
+    Predicate<T> from(ToDoubleFunction<T> firstValueSelector,
+                      ToDoubleFunction<T> secondValueSelector,
+                      ToDoubleFunction<T> thirdValueSelector,
+                      DoubleTriPredicate predicate)
+    {
+        return t -> predicate.test(firstValueSelector.applyAsDouble(t),
+                                   secondValueSelector.applyAsDouble(t),
+                                   thirdValueSelector.applyAsDouble(t));
+    }
+
+
+    public static <T, FT1, FT2, FT3, FT4>
+    Predicate<T> from(Function<T, FT1> firstValueSelector,
+                      Function<T, FT2> secondValueSelector,
+                      Function<T, FT3> thirdValueSelector,
+                      Function<T, FT4> forthValueSelector,
+                      QuadPredicate<FT1, FT2, FT3, FT4> predicate)
+    {
+        return t -> predicate.test(firstValueSelector.apply(t),
+                                   secondValueSelector.apply(t),
+                                   thirdValueSelector.apply(t),
+                                   forthValueSelector.apply(t));
+    }
+
+    public static <T>
+    Predicate<T> from(ToIntFunction<T> firstValueSelector,
+                      ToIntFunction<T> secondValueSelector,
+                      ToIntFunction<T> thirdValueSelector,
+                      ToIntFunction<T> forthValueSelector,
+                      IntQuadPredicate predicate)
+    {
+        return t -> predicate.test(firstValueSelector.applyAsInt(t),
+                                   secondValueSelector.applyAsInt(t),
+                                   thirdValueSelector.applyAsInt(t),
+                                   forthValueSelector.applyAsInt(t));
+    }
+
+    public static <T>
+    Predicate<T> from(ToLongFunction<T> firstValueSelector,
+                      ToLongFunction<T> secondValueSelector,
+                      ToLongFunction<T> thirdValueSelector,
+                      ToLongFunction<T> forthValueSelector,
+                      LongQuadPredicate predicate)
+    {
+        return t -> predicate.test(firstValueSelector.applyAsLong(t),
+                                   secondValueSelector.applyAsLong(t),
+                                   thirdValueSelector.applyAsLong(t),
+                                   forthValueSelector.applyAsLong(t));
+    }
+
+    public static <T>
+    Predicate<T> from(ToDoubleFunction<T> firstValueSelector,
+                      ToDoubleFunction<T> secondValueSelector,
+                      ToDoubleFunction<T> thirdValueSelector,
+                      ToDoubleFunction<T> forthValueSelector,
+                      DoubleQuadPredicate predicate)
+    {
+        return t -> predicate.test(firstValueSelector.applyAsDouble(t),
+                                   secondValueSelector.applyAsDouble(t),
+                                   thirdValueSelector.applyAsDouble(t),
+                                   forthValueSelector.applyAsDouble(t));
+    }
+
+
     // where (single)
     public static <T, FT>
     Predicate<T> where(Function<T, FT> valueSelector,
@@ -443,36 +608,36 @@ public final class Predicates
 
 
     public static <T1, T2, FT1, FT2>
-    BiPredicate<T1, T2> wherePairOf(Function<T1, FT1> firstValueSelector,
-                                    Function<T2, FT2> secondValueSelector,
-                                    BiPredicate<FT1, FT2> predicate)
+    BiPredicate<T1, T2> whereBothMatchBy(Function<T1, FT1> firstValueSelector,
+                                         Function<T2, FT2> secondValueSelector,
+                                         BiPredicate<FT1, FT2> predicate)
     {
         return (t1, t2) -> predicate.test(firstValueSelector.apply(t1),
                                           secondValueSelector.apply(t2));
     }
 
     public static <T1, T2>
-    BiPredicate<T1, T2> wherePairOf(ToIntFunction<T1> firstValueSelector,
-                                    ToIntFunction<T2> secondValueSelector,
-                                    IntBiPredicate predicate)
+    BiPredicate<T1, T2> whereBothMatchBy(ToIntFunction<T1> firstValueSelector,
+                                         ToIntFunction<T2> secondValueSelector,
+                                         IntBiPredicate predicate)
     {
         return (t1, t2) -> predicate.test(firstValueSelector.applyAsInt(t1),
                                           secondValueSelector.applyAsInt(t2));
     }
 
     public static <T1, T2>
-    BiPredicate<T1, T2> wherePairOf(ToLongFunction<T1> firstValueSelector,
-                                    ToLongFunction<T2> secondValueSelector,
-                                    LongBiPredicate predicate)
+    BiPredicate<T1, T2> whereBothMatchBy(ToLongFunction<T1> firstValueSelector,
+                                         ToLongFunction<T2> secondValueSelector,
+                                         LongBiPredicate predicate)
     {
         return (t1, t2) -> predicate.test(firstValueSelector.applyAsLong(t1),
                                           secondValueSelector.applyAsLong(t2));
     }
 
     public static <T1, T2>
-    BiPredicate<T1, T2> wherePairOf(ToDoubleFunction<T1> firstValueSelector,
-                                    ToDoubleFunction<T2> secondValueSelector,
-                                    DoubleBiPredicate predicate)
+    BiPredicate<T1, T2> whereAllMatchBy(ToDoubleFunction<T1> firstValueSelector,
+                                        ToDoubleFunction<T2> secondValueSelector,
+                                        DoubleBiPredicate predicate)
     {
         return (t1, t2) -> predicate.test(firstValueSelector.applyAsDouble(t1),
                                           secondValueSelector.applyAsDouble(t2));
@@ -480,10 +645,10 @@ public final class Predicates
 
 
     public static <T1, T2, T3, FT1, FT2, FT3>
-    TriPredicate<T1, T2, T3> whereTripleOf(Function<T1, FT1> firstValueSelector,
-                                           Function<T2, FT2> secondValueSelector,
-                                           Function<T3, FT3> thirdValueSelector,
-                                           TriPredicate<FT1, FT2, FT3> predicate)
+    TriPredicate<T1, T2, T3> whereAllMatchBy(Function<T1, FT1> firstValueSelector,
+                                             Function<T2, FT2> secondValueSelector,
+                                             Function<T3, FT3> thirdValueSelector,
+                                             TriPredicate<FT1, FT2, FT3> predicate)
     {
         return (t1, t2, t3) -> predicate.test(firstValueSelector.apply(t1),
                                               secondValueSelector.apply(t2),
@@ -491,10 +656,10 @@ public final class Predicates
     }
 
     public static <T1, T2, T3>
-    TriPredicate<T1, T2, T3> whereTripleOf(ToIntFunction<T1> firstValueSelector,
-                                           ToIntFunction<T2> secondValueSelector,
-                                           ToIntFunction<T3> thirdValueSelector,
-                                           IntTriPredicate predicate)
+    TriPredicate<T1, T2, T3> whereAllMatchBy(ToIntFunction<T1> firstValueSelector,
+                                             ToIntFunction<T2> secondValueSelector,
+                                             ToIntFunction<T3> thirdValueSelector,
+                                             IntTriPredicate predicate)
     {
         return (t1, t2, t3) -> predicate.test(firstValueSelector.applyAsInt(t1),
                                               secondValueSelector.applyAsInt(t2),
@@ -502,10 +667,10 @@ public final class Predicates
     }
 
     public static <T1, T2, T3>
-    TriPredicate<T1, T2, T3> whereTripleOf(ToLongFunction<T1> firstValueSelector,
-                                           ToLongFunction<T2> secondValueSelector,
-                                           ToLongFunction<T3> thirdValueSelector,
-                                           LongTriPredicate predicate)
+    TriPredicate<T1, T2, T3> whereAllMatchBy(ToLongFunction<T1> firstValueSelector,
+                                             ToLongFunction<T2> secondValueSelector,
+                                             ToLongFunction<T3> thirdValueSelector,
+                                             LongTriPredicate predicate)
     {
         return (t1, t2, t3) -> predicate.test(firstValueSelector.applyAsLong(t1),
                                               secondValueSelector.applyAsLong(t2),
@@ -513,10 +678,10 @@ public final class Predicates
     }
 
     public static <T1, T2, T3>
-    TriPredicate<T1, T2, T3> whereTripleOf(ToDoubleFunction<T1> firstValueSelector,
-                                           ToDoubleFunction<T2> secondValueSelector,
-                                           ToDoubleFunction<T3> thirdValueSelector,
-                                           DoubleTriPredicate predicate)
+    TriPredicate<T1, T2, T3> whereAllMatchBy(ToDoubleFunction<T1> firstValueSelector,
+                                             ToDoubleFunction<T2> secondValueSelector,
+                                             ToDoubleFunction<T3> thirdValueSelector,
+                                             DoubleTriPredicate predicate)
     {
         return (t1, t2, t3) -> predicate.test(firstValueSelector.applyAsDouble(t1),
                                               secondValueSelector.applyAsDouble(t2),
@@ -525,11 +690,11 @@ public final class Predicates
 
 
     public static <T1, T2, T3, T4, FT1, FT2, FT3, FT4>
-    QuadPredicate<T1, T2, T3, T4> whereQuadOf(Function<T1, FT1> firstValueSelector,
-                                              Function<T2, FT2> secondValueSelector,
-                                              Function<T3, FT3> thirdValueSelector,
-                                              Function<T4, FT4> forthValueSelector,
-                                              QuadPredicate<FT1, FT2, FT3, FT4> predicate)
+    QuadPredicate<T1, T2, T3, T4> whereAllMatchBy(Function<T1, FT1> firstValueSelector,
+                                                  Function<T2, FT2> secondValueSelector,
+                                                  Function<T3, FT3> thirdValueSelector,
+                                                  Function<T4, FT4> forthValueSelector,
+                                                  QuadPredicate<FT1, FT2, FT3, FT4> predicate)
     {
         return (t1, t2, t3, t4) -> predicate.test(firstValueSelector.apply(t1),
                                                   secondValueSelector.apply(t2),
@@ -538,11 +703,11 @@ public final class Predicates
     }
 
     public static <T1, T2, T3, T4>
-    QuadPredicate<T1, T2, T3, T4> whereQuadOf(ToIntFunction<T1> firstValueSelector,
-                                              ToIntFunction<T2> secondValueSelector,
-                                              ToIntFunction<T3> thirdValueSelector,
-                                              ToIntFunction<T4> forthValueSelector,
-                                              IntQuadPredicate predicate)
+    QuadPredicate<T1, T2, T3, T4> whereAllMatchBy(ToIntFunction<T1> firstValueSelector,
+                                                  ToIntFunction<T2> secondValueSelector,
+                                                  ToIntFunction<T3> thirdValueSelector,
+                                                  ToIntFunction<T4> forthValueSelector,
+                                                  IntQuadPredicate predicate)
     {
         return (t1, t2, t3, t4) -> predicate.test(firstValueSelector.applyAsInt(t1),
                                                   secondValueSelector.applyAsInt(t2),
@@ -551,11 +716,11 @@ public final class Predicates
     }
 
     public static <T1, T2, T3, T4>
-    QuadPredicate<T1, T2, T3, T4> whereQuadOf(ToLongFunction<T1> firstValueSelector,
-                                              ToLongFunction<T2> secondValueSelector,
-                                              ToLongFunction<T3> thirdValueSelector,
-                                              ToLongFunction<T4> forthValueSelector,
-                                              LongQuadPredicate predicate)
+    QuadPredicate<T1, T2, T3, T4> whereAllMatchBy(ToLongFunction<T1> firstValueSelector,
+                                                  ToLongFunction<T2> secondValueSelector,
+                                                  ToLongFunction<T3> thirdValueSelector,
+                                                  ToLongFunction<T4> forthValueSelector,
+                                                  LongQuadPredicate predicate)
     {
         return (t1, t2, t3, t4) -> predicate.test(firstValueSelector.applyAsLong(t1),
                                                   secondValueSelector.applyAsLong(t2),
@@ -564,11 +729,11 @@ public final class Predicates
     }
 
     public static <T1, T2, T3, T4>
-    QuadPredicate<T1, T2, T3, T4> whereQuadOf(ToDoubleFunction<T1> firstValueSelector,
-                                              ToDoubleFunction<T2> secondValueSelector,
-                                              ToDoubleFunction<T3> thirdValueSelector,
-                                              ToDoubleFunction<T4> forthValueSelector,
-                                              DoubleQuadPredicate predicate)
+    QuadPredicate<T1, T2, T3, T4> whereAllMatchBy(ToDoubleFunction<T1> firstValueSelector,
+                                                  ToDoubleFunction<T2> secondValueSelector,
+                                                  ToDoubleFunction<T3> thirdValueSelector,
+                                                  ToDoubleFunction<T4> forthValueSelector,
+                                                  DoubleQuadPredicate predicate)
     {
         return (t1, t2, t3, t4) -> predicate.test(firstValueSelector.applyAsDouble(t1),
                                                   secondValueSelector.applyAsDouble(t2),
@@ -576,6 +741,132 @@ public final class Predicates
                                                   forthValueSelector.applyAsDouble(t4));
     }
 
+
+    public static <T>
+    Predicate<T> where(Predicate<T> predicate)
+    {
+        return predicate;
+    }
+
+    public static <T1, T2>
+    BiPredicate<T1, T2> whereBothOf(Predicate<T1> predicate1,
+                                    Predicate<T2> predicate2)
+    {
+        return (t1, t2) -> predicate1.test(t1)
+                           && predicate2.test(t2);
+    }
+
+    public static <T1, T2, T3>
+    TriPredicate<T1, T2, T3> whereAllOf(Predicate<T1> predicate1,
+                                        Predicate<T2> predicate2,
+                                        Predicate<T3> predicate3)
+    {
+        return (t1, t2, t3) -> predicate1.test(t1)
+                               && predicate2.test(t2)
+                               && predicate3.test(t3);
+    }
+
+    public static <T1, T2, T3, T4>
+    QuadPredicate<T1, T2, T3, T4> whereAllOf(Predicate<T1> predicate1,
+                                             Predicate<T2> predicate2,
+                                             Predicate<T3> predicate3,
+                                             Predicate<T4> predicate4)
+    {
+        return (t1, t2, t3, t4) -> predicate1.test(t1)
+                                   && predicate2.test(t2)
+                                   && predicate3.test(t3)
+                                   && predicate4.test(t4);
+    }
+
+    public static <T1, T2>
+    BiPredicate<T1, T2> whereEitherOf(Predicate<T1> predicate1,
+                                      Predicate<T2> predicate2)
+    {
+        return (t1, t2) -> predicate1.test(t1)
+                           && predicate2.test(t2);
+    }
+
+    public static <T1, T2, T3>
+    TriPredicate<T1, T2, T3> whereAnyOf(Predicate<T1> predicate1,
+                                        Predicate<T2> predicate2,
+                                        Predicate<T3> predicate3)
+    {
+        return (t1, t2, t3) -> predicate1.test(t1)
+                               && predicate2.test(t2)
+                               && predicate3.test(t3);
+    }
+
+    public static <T1, T2, T3, T4>
+    QuadPredicate<T1, T2, T3, T4> whereAnyOf(Predicate<T1> predicate1,
+                                             Predicate<T2> predicate2,
+                                             Predicate<T3> predicate3,
+                                             Predicate<T4> predicate4)
+    {
+        return (t1, t2, t3, t4) -> predicate1.test(t1)
+                                   && predicate2.test(t2)
+                                   && predicate3.test(t3)
+                                   && predicate4.test(t4);
+    }
+
+    public static <T>
+    Predicate<T> whereBoth(Predicate<T> predicate1,
+                           Predicate<T> predicate2)
+    {
+        return (t) -> predicate1.test(t)
+                      && predicate2.test(t);
+    }
+
+    public static <T>
+    Predicate<T> whereAll(Predicate<T> predicate1,
+                          Predicate<T> predicate2,
+                          Predicate<T> predicate3)
+    {
+        return (t) -> predicate1.test(t)
+                      && predicate2.test(t)
+                      && predicate3.test(t);
+    }
+
+    public static <T>
+    Predicate<T> whereAll(Predicate<T> predicate1,
+                          Predicate<T> predicate2,
+                          Predicate<T> predicate3,
+                          Predicate<T> predicate4)
+    {
+        return (t) -> predicate1.test(t)
+                      && predicate2.test(t)
+                      && predicate3.test(t)
+                      && predicate4.test(t);
+    }
+
+    public static <T>
+    Predicate<T> whereEither(Predicate<T> predicate1,
+                             Predicate<T> predicate2)
+    {
+        return (t) -> predicate1.test(t)
+                      || predicate2.test(t);
+    }
+
+    public static <T>
+    Predicate<T> whereAny(Predicate<T> predicate1,
+                          Predicate<T> predicate2,
+                          Predicate<T> predicate3)
+    {
+        return (t) -> predicate1.test(t)
+                      || predicate2.test(t)
+                      || predicate3.test(t);
+    }
+
+    public static <T>
+    Predicate<T> whereAny(Predicate<T> predicate1,
+                          Predicate<T> predicate2,
+                          Predicate<T> predicate3,
+                          Predicate<T> predicate4)
+    {
+        return (t) -> predicate1.test(t)
+                      || predicate2.test(t)
+                      || predicate3.test(t)
+                      || predicate4.test(t);
+    }
 
     // equals
     public static <T>
