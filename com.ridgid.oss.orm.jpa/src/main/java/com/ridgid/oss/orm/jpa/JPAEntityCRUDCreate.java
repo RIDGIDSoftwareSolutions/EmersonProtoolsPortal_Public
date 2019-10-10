@@ -92,14 +92,16 @@ public class JPAEntityCRUDCreate<ET extends PrimaryKeyedEntity<PKT>, PKT extends
         return baseDelegate.initializeAndDetach(entity, hierarchy);
     }
 
+    @SuppressWarnings("TypeParameterHidesVisibleType")
     @Override
-    public ET initialize(ET entity, HierarchyProcessor<ET> hierarchy) {
-        return baseDelegate.initialize(entity, hierarchy);
+    public <ET> ET initializeEntity(ET entity, HierarchyProcessor<ET> hierarchy) {
+        return baseDelegate.initializeEntity(entity, hierarchy);
     }
 
+    @SuppressWarnings("TypeParameterHidesVisibleType")
     @Override
-    public ET detach(ET entity, HierarchyProcessor<ET> hierarchy) {
-        return baseDelegate.detach(entity, hierarchy);
+    public <ET> ET detachEntity(ET entity, HierarchyProcessor<ET> hierarchy) {
+        return baseDelegate.detachEntity(entity, hierarchy);
     }
 
     @Override

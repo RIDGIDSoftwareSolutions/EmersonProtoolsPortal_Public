@@ -13,25 +13,23 @@ public class UUIDStandardJDBCAuthenticationStorage
     extends StandardJDBCAuthenticationStorage<Integer, Integer, UUID, LocalDateTime, String>
 {
     private static final String namedParameterUpsertStatement
-            = "merge into Security.UserSessionAuthentication usa "
-            + "using ( "
-            + "    values ( :userId, :realmId, :clientNetworkAddress, :authenticationToken, :expires ) "
-            + ") "
-            + "    v ( UserId, RealmId, ClientNetworkAddress, AuthenticationToken, Expires ) "
-            + "on "
-            + "    v.UserId = usa.UserId "
-            + "    and v.RealmId = usa.RealmId "
-            + "    and v.ClientNetworkAddress = usa.ClientNetworkAddress "
-            + "    and v.AuthenticationToken = usa.AuthenticationToken "
-            + "when matched then update "
-            + "set "
-            + "    ClientNetworkAddress = v.ClientNetworkAddress, "
-            + "    AuthenticationToken = v.AuthenticationToken, "
-            + "    Expires = v.Expires "
-            + "when not matched then insert "
-            + "    ( UserId, RealmId, ClientNetworkAddress, AuthenticationToken, Expires ) "
-            + "    values "
-            + "    ( v.UserId, v.RealmId, v.ClientNetworkAddress, v.AuthenticationToken, v.Expires ); ";
+        = "merge into Security.UserSessionAuthentication usa "
+          + "using ( "
+          + "    values ( :userId, :realmId, :clientNetworkAddress, :authenticationToken, :expires ) "
+          + ") "
+          + "    v ( UserId, RealmId, ClientNetworkAddress, AuthenticationToken, Expires ) "
+          + "on "
+          + "    v.UserId = usa.UserId "
+          + "    and v.RealmId = usa.RealmId "
+          + "    and v.ClientNetworkAddress = usa.ClientNetworkAddress "
+          + "    and v.AuthenticationToken = usa.AuthenticationToken "
+          + "when matched then update "
+          + "set "
+          + "    Expires = v.Expires "
+          + "when not matched then insert "
+          + "    ( UserId, RealmId, ClientNetworkAddress, AuthenticationToken, Expires ) "
+          + "    values "
+          + "    ( v.UserId, v.RealmId, v.ClientNetworkAddress, v.AuthenticationToken, v.Expires ); ";
 
     private static final String namedParameterSelectStatement
         = "select UserId, RealmId, ClientNetworkAddress, AuthenticationToken, Expires "
@@ -66,7 +64,7 @@ public class UUIDStandardJDBCAuthenticationStorage
         super
             (
                 dataSource,
-                    namedParameterUpsertStatement,
+                namedParameterUpsertStatement,
                 namedParameterSelectStatement,
                 namedParameterDeleteStatement,
                 expiresColumnName,

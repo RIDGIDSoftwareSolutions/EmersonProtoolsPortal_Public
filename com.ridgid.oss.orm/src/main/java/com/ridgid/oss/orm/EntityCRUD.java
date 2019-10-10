@@ -129,13 +129,23 @@ public interface EntityCRUD<ET extends PrimaryKeyedEntity<PKT>, PKT extends Comp
 
     short getLoadBatchSize();
 
-    ET initialize(ET entity, HierarchyProcessor<ET> hierarchy);
+    default ET initialize(ET entity, HierarchyProcessor<ET> hierarchy) {
+        return initializeEntity(entity, hierarchy);
+    }
+
+    @SuppressWarnings("TypeParameterHidesVisibleType")
+    <ET> ET initializeEntity(ET entity, HierarchyProcessor<ET> hierarchy);
 
     default ET initialize(ET entity) {
         return initialize(entity, null);
     }
 
-    ET detach(ET entity, HierarchyProcessor<ET> hierarchy);
+    default ET detach(ET entity, HierarchyProcessor<ET> hierarchy) {
+        return detachEntity(entity, hierarchy);
+    }
+
+    @SuppressWarnings("TypeParameterHidesVisibleType")
+    <ET> ET detachEntity(ET entity, HierarchyProcessor<ET> hierarchy);
 
     default ET detach(ET entity) {
         return detach(entity, null);

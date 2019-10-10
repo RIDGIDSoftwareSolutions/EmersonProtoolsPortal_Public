@@ -13,10 +13,11 @@ import java.util.stream.Stream;
 
 @SuppressWarnings("unused")
 final class JPAEntityCRUDCreateDelegate<ET extends PrimaryKeyedEntity<PKT>, PKT extends Comparable<PKT>>
-        implements
-        JPAEntityCRUDDelegateRequired<ET, PKT>,
-        JPAEntityCRUDCreateDelegateRequired<ET, PKT>,
-        EntityCRUDCreate<ET, PKT> {
+    implements
+    JPAEntityCRUDDelegateRequired<ET, PKT>,
+    JPAEntityCRUDCreateDelegateRequired<ET, PKT>,
+    EntityCRUDCreate<ET, PKT>
+{
 
     private final JPAEntityCRUDDelegate<ET, PKT> baseDelegate;
 
@@ -25,26 +26,30 @@ final class JPAEntityCRUDCreateDelegate<ET extends PrimaryKeyedEntity<PKT>, PKT 
     }
 
     JPAEntityCRUDCreateDelegate(Class<ET> classType,
-                                Class<PKT> pkType) {
+                                Class<PKT> pkType)
+    {
         this.baseDelegate = new JPAEntityCRUDDelegate<>(classType, pkType);
     }
 
     JPAEntityCRUDCreateDelegate(Class<ET> classType,
                                 Class<PKT> pkType,
-                                String pkName) {
+                                String pkName)
+    {
         this.baseDelegate = new JPAEntityCRUDDelegate<>(classType, pkType, pkName);
     }
 
     JPAEntityCRUDCreateDelegate(Class<ET> classType,
                                 Class<PKT> pkType,
-                                short loadBatchSize) {
+                                short loadBatchSize)
+    {
         this.baseDelegate = new JPAEntityCRUDDelegate<>(classType, pkType, loadBatchSize);
     }
 
     JPAEntityCRUDCreateDelegate(Class<ET> classType,
                                 Class<PKT> pkType,
                                 String pkName,
-                                short loadBatchSize) {
+                                short loadBatchSize)
+    {
         this.baseDelegate = new JPAEntityCRUDDelegate<>(classType, pkType, pkName, loadBatchSize);
     }
 
@@ -88,14 +93,17 @@ final class JPAEntityCRUDCreateDelegate<ET extends PrimaryKeyedEntity<PKT>, PKT 
         return baseDelegate.initializeAndDetach(entity, hierarchy);
     }
 
+    @SuppressWarnings("TypeParameterHidesVisibleType")
     @Override
-    public ET initialize(ET entity, HierarchyProcessor<ET> hierarchy) {
-        return baseDelegate.initialize(entity, hierarchy);
+    public <ET> ET initializeEntity(ET entity, HierarchyProcessor<ET> hierarchy)
+    {
+        return baseDelegate.initializeEntity(entity, hierarchy);
     }
 
+    @SuppressWarnings("TypeParameterHidesVisibleType")
     @Override
-    public ET detach(ET entity, HierarchyProcessor<ET> hierarchy) {
-        return baseDelegate.detach(entity, hierarchy);
+    public <ET> ET detachEntity(ET entity, HierarchyProcessor<ET> hierarchy) {
+        return baseDelegate.detachEntity(entity, hierarchy);
     }
 
     @Override
@@ -117,13 +125,15 @@ final class JPAEntityCRUDCreateDelegate<ET extends PrimaryKeyedEntity<PKT>, PKT 
      * @throws EntityCRUDExceptionAlreadyExists if and entity one the same primary key of the given entity already exists in the persistent storage
      */
     @Override
-    public ET add(ET entity, HierarchyProcessor<ET> hierarchy) throws EntityCRUDExceptionError, EntityCRUDExceptionAlreadyExists {
+    public ET add(ET entity, HierarchyProcessor<ET> hierarchy)
+        throws EntityCRUDExceptionError, EntityCRUDExceptionAlreadyExists
+    {
         try {
             baseDelegate.getEntityManager().persist(entity);
             baseDelegate.getEntityManager().flush();
             baseDelegate.getEntityManager().refresh(entity);
             return entity;
-        } catch (RuntimeException e) {
+        } catch ( RuntimeException e ) {
             throw baseDelegate.enhanceExceptionWithEntityManagerNullCheck(e);
         }
     }

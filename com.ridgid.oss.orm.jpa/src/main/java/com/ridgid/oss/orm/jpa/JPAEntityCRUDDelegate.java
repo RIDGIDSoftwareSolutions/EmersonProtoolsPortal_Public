@@ -139,9 +139,9 @@ final class JPAEntityCRUDDelegate<ET extends PrimaryKeyedEntity<PKT>, PKT extend
         return loadBatchSize;
     }
 
-    @Override
-    public final ET initialize(ET entity,
-                               HierarchyProcessor<ET> hierarchy)
+    @SuppressWarnings("TypeParameterHidesVisibleType")
+    public final <ET> ET initializeEntity(ET entity,
+                                          HierarchyProcessor<ET> hierarchy)
     {
         visitEntityHierarchy
             (
@@ -154,9 +154,9 @@ final class JPAEntityCRUDDelegate<ET extends PrimaryKeyedEntity<PKT>, PKT extend
         return entity;
     }
 
-    @Override
-    public final ET detach(ET entity,
-                           HierarchyProcessor<ET> hierarchy)
+    @SuppressWarnings("TypeParameterHidesVisibleType")
+    public final <ET> ET detachEntity(ET entity,
+                                      HierarchyProcessor<ET> hierarchy)
     {
         visitEntityHierarchy
             (
@@ -186,11 +186,12 @@ final class JPAEntityCRUDDelegate<ET extends PrimaryKeyedEntity<PKT>, PKT extend
             return new EntityCRUDExceptionError(e);
     }
 
-    private void visitEntityHierarchy(ET entity,
-                                      HierarchyProcessor<ET> hierarchy,
-                                      GeneralVisitHandler visitor,
-                                      GeneralVisitHandler afterChildrenVisitor,
-                                      Traversal traversal)
+    @SuppressWarnings("TypeParameterHidesVisibleType")
+    private <ET> void visitEntityHierarchy(ET entity,
+                                           HierarchyProcessor<ET> hierarchy,
+                                           GeneralVisitHandler visitor,
+                                           GeneralVisitHandler afterChildrenVisitor,
+                                           Traversal traversal)
     {
         try {
             if ( hierarchy == null ) {
@@ -214,9 +215,10 @@ final class JPAEntityCRUDDelegate<ET extends PrimaryKeyedEntity<PKT>, PKT extend
         }
     }
 
-    private void visitEntity(ET entity,
-                             GeneralVisitHandler visitor,
-                             GeneralVisitHandler afterChildrenVisitor)
+    @SuppressWarnings("TypeParameterHidesVisibleType")
+    private <ET> void visitEntity(ET entity,
+                                  GeneralVisitHandler visitor,
+                                  GeneralVisitHandler afterChildrenVisitor)
     {
         visitor.handle(null, entity);
         if ( afterChildrenVisitor != null )

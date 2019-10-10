@@ -11,7 +11,8 @@ import java.util.stream.Stream;
 
 @SuppressWarnings("unused")
 public interface JPAEntityCRUDDelegateRequired<ET extends PrimaryKeyedEntity<PKT>, PKT extends Comparable<PKT>>
-        extends EntityCRUD<ET, PKT> {
+    extends EntityCRUD<ET, PKT>
+{
     /**
      * Sets the JPA entity manager used by the DAO
      *
@@ -43,11 +44,13 @@ public interface JPAEntityCRUDDelegateRequired<ET extends PrimaryKeyedEntity<PKT
     @Override
     short getLoadBatchSize();
 
+    @SuppressWarnings("TypeParameterHidesVisibleType")
     @Override
-    ET initialize(ET entity,
-                  HierarchyProcessor<ET> hierarchy);
+    <ET> ET initializeEntity(ET entity,
+                             HierarchyProcessor<ET> hierarchy);
 
+    @SuppressWarnings("TypeParameterHidesVisibleType")
     @Override
-    ET detach(ET entity,
-              HierarchyProcessor<ET> hierarchy);
+    <ET> ET detachEntity(ET entity,
+                         HierarchyProcessor<ET> hierarchy);
 }
