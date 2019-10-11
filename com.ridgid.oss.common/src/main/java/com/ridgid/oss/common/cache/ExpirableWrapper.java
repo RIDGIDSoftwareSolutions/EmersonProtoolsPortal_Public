@@ -1,5 +1,7 @@
 package com.ridgid.oss.common.cache;
 
+import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 
 /**
@@ -38,14 +40,21 @@ public class ExpirableWrapper<T> implements Expirable
         return expirationTimeMillis < System.currentTimeMillis();
     }
 
+    public boolean isEmpty() { return wrapped == null; }
+
     /**
      * Unwraps and returns the wrapped object
      *
      * @return the object of type T that was wrapped
+     * @throws NullPointerException when the value that is wrapped is null
      */
     public T unwrap()
     {
-        return wrapped;
+        return Objects.requireNonNull(wrapped, "Empty Wrapper - No Value Present");
+    }
+
+    public Optional<T> asOptional() {
+        return Optional.ofNullable(wrapped);
     }
 
     public static <T> ExpirableWrapper<T> expiringSecondsFromNow(T t, int seconds) {
@@ -70,5 +79,17 @@ public class ExpirableWrapper<T> implements Expirable
 
     public static <T> Function<T, ExpirableWrapper<T>> expiringHoursFromNow(int hours) {
         return t -> expiringHoursFromNow(t, hours);
+    }
+
+    public static <T> ExpirableWrapper<T> emptyExpiringSecondsFromNow(int seconds) {
+        return expiringSecondsFromNow(null, seconds);
+    }
+
+    public static <T> ExpirableWrapper<T> emptyExpiringMinutesFromNow(int minutes) {
+        return expiringMinutesFromNow(null, minutes);
+    }
+
+    public static <T> ExpirableWrapper<T> emptyExpiringHoursFromNow(int hours) {
+        return expiringHoursFromNow(null, hours);
     }
 }
