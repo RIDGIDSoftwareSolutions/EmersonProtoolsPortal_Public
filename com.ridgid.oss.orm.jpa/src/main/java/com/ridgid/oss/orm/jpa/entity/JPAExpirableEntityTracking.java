@@ -6,15 +6,21 @@ import javax.persistence.Embeddable;
 import javax.persistence.Transient;
 import java.time.Duration;
 
+@SuppressWarnings({"unused", "JavaDoc"})
 @Embeddable
-public class JPAExpirableEntityTracking implements ExpirableEntityTracking {
+public class JPAExpirableEntityTracking
+    implements
+    ExpirableEntityTracking
+{
+    @SuppressWarnings("FieldHasSetterButNoGetter")
     @Transient
     private long loadTimeMillis;
+
     @Transient
-    private long timeUntilExpirationMillis;
+    private final long timeUntilExpirationMillis;
 
     public JPAExpirableEntityTracking(Duration timeUntilExpiration) {
-        this.timeUntilExpirationMillis = timeUntilExpiration.toMillis();
+        timeUntilExpirationMillis = timeUntilExpiration.toMillis();
     }
 
     @Override
@@ -25,5 +31,13 @@ public class JPAExpirableEntityTracking implements ExpirableEntityTracking {
     @Override
     public boolean isExpired() {
         return System.currentTimeMillis() > (loadTimeMillis + timeUntilExpirationMillis);
+    }
+
+    @Override
+    public String toString() {
+        return "JPAExpirableEntityTracking{" +
+               "loadTimeMillis=" + loadTimeMillis +
+               ", timeUntilExpirationMillis=" + timeUntilExpirationMillis +
+               '}';
     }
 }
