@@ -14,7 +14,7 @@ import java.util.function.Function;
  *            cache.add( 3, new ExpirableWrapper( "Hello" ) );
  *            }
  */
-@SuppressWarnings({"unused", "SpellCheckingInspection", "WeakerAccess"})
+@SuppressWarnings({"unused", "SpellCheckingInspection", "WeakerAccess", "OptionalUsedAsFieldOrParameterType"})
 public class ExpirableWrapper<T> implements Expirable
 {
     private final T    wrapped;
@@ -69,6 +69,18 @@ public class ExpirableWrapper<T> implements Expirable
         return new ExpirableWrapper<>(t, System.currentTimeMillis() + hours * 3_600_000);
     }
 
+    public static <T> ExpirableWrapper<T> expiringSecondsFromNow(Optional<T> t, int seconds) {
+        return new ExpirableWrapper<>(t.orElse(null), System.currentTimeMillis() + seconds * 1_000);
+    }
+
+    public static <T> ExpirableWrapper<T> expiringMinutesFromNow(Optional<T> t, int minutes) {
+        return new ExpirableWrapper<>(t.orElse(null), System.currentTimeMillis() + minutes * 60_000);
+    }
+
+    public static <T> ExpirableWrapper<T> expiringHoursFromNow(Optional<T> t, int hours) {
+        return new ExpirableWrapper<>(t.orElse(null), System.currentTimeMillis() + hours * 3_600_000);
+    }
+
     public static <T> Function<T, ExpirableWrapper<T>> expiringSecondsFromNow(int seconds) {
         return t -> expiringSecondsFromNow(t, seconds);
     }
@@ -81,15 +93,27 @@ public class ExpirableWrapper<T> implements Expirable
         return t -> expiringHoursFromNow(t, hours);
     }
 
+    public static <T> Function<Optional<T>, ExpirableWrapper<T>> expiringSecondsFromNowFromOptional(int seconds) {
+        return t -> expiringSecondsFromNow(t, seconds);
+    }
+
+    public static <T> Function<Optional<T>, ExpirableWrapper<T>> expiringMinutesFromNowFromOptional(int minutes) {
+        return t -> expiringMinutesFromNow(t, minutes);
+    }
+
+    public static <T> Function<Optional<T>, ExpirableWrapper<T>> expiringHoursFromNowFromOptional(int hours) {
+        return t -> expiringHoursFromNow(t, hours);
+    }
+
     public static <T> ExpirableWrapper<T> emptyExpiringSecondsFromNow(int seconds) {
-        return expiringSecondsFromNow(null, seconds);
+        return expiringSecondsFromNow((T)null, seconds);
     }
 
     public static <T> ExpirableWrapper<T> emptyExpiringMinutesFromNow(int minutes) {
-        return expiringMinutesFromNow(null, minutes);
+        return expiringMinutesFromNow((T)null, minutes);
     }
 
     public static <T> ExpirableWrapper<T> emptyExpiringHoursFromNow(int hours) {
-        return expiringHoursFromNow(null, hours);
+        return expiringHoursFromNow((T)null, hours);
     }
 }
