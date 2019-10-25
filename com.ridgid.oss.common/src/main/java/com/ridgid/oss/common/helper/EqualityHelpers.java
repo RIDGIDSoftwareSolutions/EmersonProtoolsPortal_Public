@@ -5,7 +5,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.*;
 
-@SuppressWarnings({"WeakerAccess", "JavaDoc"})
+@SuppressWarnings({"WeakerAccess", "JavaDoc", "unused"})
 public final class EqualityHelpers
 {
 
@@ -27,10 +27,10 @@ public final class EqualityHelpers
         for (String fieldName : entityFieldNames) {
 
             Optional<Map.Entry<Object, Field>> objectField
-                                                         = FieldReflectionHelpers.determineObjectAndFieldForPathIntoObject(
+                = FieldReflectionHelpers.determineObjectAndFieldForPathIntoObject(
                 obj1, fieldName);
-            Optional<Object>                   valueObj1 = objectField.map(Map.Entry::getKey);
-            Optional<Field>                    field     = objectField.map(Map.Entry::getValue);
+            Optional<Object> valueObj1 = objectField.map(Map.Entry::getKey);
+            Optional<Field>  field     = objectField.map(Map.Entry::getValue);
 
             objectField = FieldReflectionHelpers.determineObjectAndFieldForPathIntoObject(obj2, fieldName);
             Optional<Object> valueObj2 = objectField.map(Map.Entry::getKey);
@@ -53,18 +53,6 @@ public final class EqualityHelpers
                        );
         }
         return areEqual;
-    }
-
-    public static <T> Optional<String> fieldsAreEqual(List<String> entityFieldNames,
-                                             Collection<T> obj1,
-                                             Collection<T> obj2)
-    {
-        if ( obj1.size() != obj2.size() ) {
-            outErrors.add("...");
-            return false;
-        }
-
-
     }
 
     /**
@@ -279,4 +267,32 @@ public final class EqualityHelpers
         return areEqual;
     }
 
+    /**
+     * @param entityFieldNames
+     * @param coll1
+     * @param coll2
+     * @return
+     */
+    public static <T> Optional<String> collectionElementFieldsAreEqual(List<String> entityFieldNames,
+                                                                       Collection<T> coll1,
+                                                                       Collection<T> coll2)
+    {
+        if (coll1.size() != coll2.size()) return Optional.of("Collection sizes do not match");
+        StringBuilder errors = new StringBuilder();
+
+        for (Iterator<T> item1 = coll1.iterator(), item2 = coll2.iterator();
+             item1.hasNext(); ) {
+            List<String> errorList = new ArrayList<>();
+            EqualityHelpers.fieldsAreEqual(
+                entityFieldNames,
+                item1.next(),
+                item2.next(),
+                errorList);
+            errorList.forEach(error -> errors.append(error).append("\n"));
+        }
+
+        return errors.length() > 0
+               ? Optional.of(errors.toString())
+               : Optional.empty();
+    }
 }
