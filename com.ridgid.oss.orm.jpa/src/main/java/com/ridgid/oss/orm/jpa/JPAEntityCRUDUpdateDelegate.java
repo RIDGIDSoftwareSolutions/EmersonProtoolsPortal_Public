@@ -12,10 +12,11 @@ import java.util.stream.Stream;
 
 @SuppressWarnings({"unused", "WeakerAccess"})
 public class JPAEntityCRUDUpdateDelegate<ET extends PrimaryKeyedEntity<PKT>, PKT extends Comparable<PKT>>
-        implements
-        JPAEntityCRUDDelegateRequired<ET, PKT>,
-        JPAEntityCRUDUpdateDelegateRequired<ET, PKT>,
-        EntityCRUDUpdate<ET, PKT> {
+    implements
+    JPAEntityCRUDDelegateRequired<ET, PKT>,
+    JPAEntityCRUDUpdateDelegateRequired<ET, PKT>,
+    EntityCRUDUpdate<ET, PKT>
+{
 
     private final JPAEntityCRUDDelegate<ET, PKT> baseDelegate;
 
@@ -24,26 +25,30 @@ public class JPAEntityCRUDUpdateDelegate<ET extends PrimaryKeyedEntity<PKT>, PKT
     }
 
     public JPAEntityCRUDUpdateDelegate(Class<ET> classType,
-                                       Class<PKT> pkType) {
+                                       Class<PKT> pkType)
+    {
         this.baseDelegate = new JPAEntityCRUDDelegate<>(classType, pkType);
     }
 
     public JPAEntityCRUDUpdateDelegate(Class<ET> classType,
                                        Class<PKT> pkType,
-                                       String pkName) {
+                                       String pkName)
+    {
         this.baseDelegate = new JPAEntityCRUDDelegate<>(classType, pkType, pkName);
     }
 
     public JPAEntityCRUDUpdateDelegate(Class<ET> classType,
                                        Class<PKT> pkType,
-                                       short loadBatchSize) {
+                                       short loadBatchSize)
+    {
         this.baseDelegate = new JPAEntityCRUDDelegate<>(classType, pkType, loadBatchSize);
     }
 
     public JPAEntityCRUDUpdateDelegate(Class<ET> classType,
                                        Class<PKT> pkType,
                                        String pkName,
-                                       short loadBatchSize) {
+                                       short loadBatchSize)
+    {
         this.baseDelegate = new JPAEntityCRUDDelegate<>(classType, pkType, pkName, loadBatchSize);
     }
 
@@ -119,15 +124,14 @@ public class JPAEntityCRUDUpdateDelegate<ET extends PrimaryKeyedEntity<PKT>, PKT
     @Override
     public Optional<ET> optionalUpdate(ET entity, HierarchyProcessor<ET> hierarchy) throws EntityCRUDExceptionError {
         try {
-            if (!baseDelegate.getEntityManager().contains(entity)) {
-                if (baseDelegate.getEntityManager().find(baseDelegate.classType, entity.getPk()) == null)
+            if ( !baseDelegate.getEntityManager().contains(entity) ) {
+                if ( baseDelegate.getEntityManager().find(baseDelegate.classType, entity.getPk()) == null )
                     return Optional.empty();
+                baseDelegate.getEntityManager().merge(entity);
             }
-            baseDelegate.getEntityManager().merge(entity);
             baseDelegate.getEntityManager().flush();
-            baseDelegate.getEntityManager().refresh(entity);
             return Optional.of(entity);
-        } catch (Exception ex) {
+        } catch ( Exception ex ) {
             throw baseDelegate.enhanceExceptionWithEntityManagerNullCheck(ex);
         }
     }
