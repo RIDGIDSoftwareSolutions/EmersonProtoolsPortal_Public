@@ -11,6 +11,34 @@
 
     <artifactId>com.ridgid.oss.cache.redis</artifactId>
 
+    <!-- Required to publish to Maven Central -->
+    <name>RIDGID (Emerson Professional Tools) Redis</name>
+    <description>Redis-backed cache implementation</description>
+    <url>
+        https://github.com/RIDGIDSoftwareSolutions/EmersonProtoolsPortal_Public/tree/master/com.ridgid.oss.cache.redis
+    </url>
+
+    <!-- Required to publish to Maven Central -->
+    <licenses>
+        <license>
+            <name>BSD 3-Clause License</name>
+            <url>
+                https://github.com/RIDGIDSoftwareSolutions/EmersonProtoolsPortal_Public/blob/master/LICENSE
+            </url>
+        </license>
+    </licenses>
+
+    <!-- Required for publishing to Maven Central -->
+    <scm>
+        <connection>scm:git:https://github.com/RIDGIDSoftwareSolutions/EmersonProtoolsPortal_Public.git</connection>
+        <developerConnection>scm:git:https://github.com/RIDGIDSoftwareSolutions/EmersonProtoolsPortal_Public.git
+        </developerConnection>
+        <url>
+            https://github.com/RIDGIDSoftwareSolutions/EmersonProtoolsPortal_Public/tree/master/com.ridgid.oss.cache.redis
+        </url>
+        <tag>com.ridgid.oss-2.72</tag>
+    </scm>
+
     <dependencies>
         <dependency>
             <groupId>com.ridgid.oss</groupId>
