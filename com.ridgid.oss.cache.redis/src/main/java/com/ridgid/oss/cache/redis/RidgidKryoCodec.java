@@ -81,13 +81,18 @@ public class RidgidKryoCodec extends BaseCodec {
             kryo.register(Collections.singletonMap("", "").getClass(), new CollectionsSingletonMapSerializer());
             kryo.register(GregorianCalendar.class, new GregorianCalendarSerializer());
             kryo.register(InvocationHandler.class, new JdkProxySerializer());
-            kryo.register(InetAddress.class, new InetAddressSerializer());
             kryo.register(Inet4Address.class, new InetAddressSerializer());
             kryo.register(Inet6Address.class, new InetAddressSerializer());
             UnmodifiableCollectionsSerializer.registerSerializers(kryo);
             SynchronizedCollectionsSerializer.registerSerializers(kryo);
 
+            if (classLoader != null) {
+                kryo.setClassLoader(classLoader);
+            }
             kryo.setReferences(true);
+            for (Class<?> clazz : classes) {
+                kryo.register(clazz);
+            }
             return kryo;
         }
 
