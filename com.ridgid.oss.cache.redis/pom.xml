@@ -47,20 +47,23 @@
             <groupId>org.redisson</groupId>
             <artifactId>redisson</artifactId>
             <version>3.11.5</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.esotericsoftware</groupId>
+                    <artifactId>kryo</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <!-- Using a stable version of kryo instead of a release candidate: https://github.com/EsotericSoftware/kryo/issues/654  -->
+        <dependency>
+            <groupId>com.esotericsoftware</groupId>
+            <artifactId>kryo</artifactId>
+            <version>4.0.2</version>
         </dependency>
         <dependency>
             <groupId>de.javakaffee</groupId>
             <artifactId>kryo-serializers</artifactId>
-            <version>0.45</version>
-        </dependency>
-
-        <!-- Provided by redisson - needed to build custom codec -->
-        <dependency>
-            <groupId>com.esotericsoftware</groupId>
-            <artifactId>kryo</artifactId>
-            <version>5.0.0-RC4</version>
-            <scope>provided</scope>
-            <optional>true</optional>
+            <version>0.43</version>
         </dependency>
     </dependencies>
 </project>
