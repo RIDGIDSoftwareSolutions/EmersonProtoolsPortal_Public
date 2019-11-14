@@ -1,7 +1,5 @@
 package com.ridgid.oss.message.bus;
 
-import com.ridgid.oss.message.WireFormat;
-
 import java.io.Serializable;
 import java.util.stream.Stream;
 

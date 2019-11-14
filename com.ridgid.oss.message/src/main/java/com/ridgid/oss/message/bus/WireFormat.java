@@ -1,4 +1,4 @@
-package com.ridgid.oss.message;
+package com.ridgid.oss.message.bus;
 
 /**
  * Message Wire Formats
