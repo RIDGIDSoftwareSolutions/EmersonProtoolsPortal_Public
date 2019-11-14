@@ -16,7 +16,7 @@
     <name>RIDGID (Emerson Professional Tools) Java REST Service Doclet</name>
     <description>JavaDoc Doclet for REST Services</description>
     <url>
-        https://github.com/RIDGIDSoftwareSolutions/EmersonProtoolsPortal_Public/tree/master/com.ridgid.oss.restwebservices.apiversion
+        https://github.com/RIDGIDSoftwareSolutions/EmersonProtoolsPortal_Public/tree/master/com.ridgid.oss.restwebservices.doclet
     </url>
 
     <!-- Required to publish to Maven Central -->
