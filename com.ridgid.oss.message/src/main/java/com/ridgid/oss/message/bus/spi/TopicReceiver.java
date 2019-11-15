@@ -3,6 +3,7 @@ package com.ridgid.oss.message.bus.spi;
 import com.ridgid.oss.message.bus.TopicEnum;
 import com.ridgid.oss.message.bus.TopicReceiverListener;
 
+import java.time.Duration;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -50,9 +51,12 @@ public interface TopicReceiver<Topic extends Enum<Topic> & TopicEnum<Topic>>
      * @return Optional Object representing the received message; empty Optional if timed-out before message received
      * @throws TopicReceiverException if the Topic has been unsubscribed or there is an internal, unrecoverable error.
      */
-    Optional<Object>
+    default Optional<Object>
     poll(long maxWaitMilliseconds)
-        throws TopicReceiverException;
+        throws TopicReceiverException
+    {
+        return poll(Object.class, maxWaitMilliseconds);
+    }
 
     /**
      * {@code maxWaitMilliseconds} defaults to 0.
@@ -73,12 +77,12 @@ public interface TopicReceiver<Topic extends Enum<Topic> & TopicEnum<Topic>>
      * @param maxWait maximum time to wait in seconds
      * @see #poll(long)
      */
-    @SuppressWarnings({"MagicNumber", "JavaDoc"})
+    @SuppressWarnings("JavaDoc")
     default Optional<Object>
     pollWaitSeconds(int maxWait)
         throws TopicReceiverException
     {
-        return poll(maxWait * 1_000L);
+        return poll(Duration.ofSeconds(maxWait).toMillis());
     }
 
     /**
@@ -87,12 +91,12 @@ public interface TopicReceiver<Topic extends Enum<Topic> & TopicEnum<Topic>>
      * @param maxWait maximum time to wait in minutes
      * @see #poll(long)
      */
-    @SuppressWarnings({"MagicNumber", "JavaDoc"})
+    @SuppressWarnings("JavaDoc")
     default Optional<Object>
     pollWaitMinutes(short maxWait)
         throws TopicReceiverException
     {
-        return poll(maxWait * 60_000);
+        return poll(Duration.ofMinutes(maxWait).toMillis());
     }
 
     /**
@@ -101,18 +105,22 @@ public interface TopicReceiver<Topic extends Enum<Topic> & TopicEnum<Topic>>
      * @param maxWait maximum time to wait in hours
      * @see #poll(long)
      */
-    @SuppressWarnings({"MagicNumber", "JavaDoc"})
+    @SuppressWarnings("JavaDoc")
     default Optional<Object>
     pollWaitHours(byte maxWait)
         throws TopicReceiverException
     {
-        return poll(maxWait * 3_600_000);
+        return poll(Duration.ofHours(maxWait).toMillis());
     }
 
     /**
+     * Poll for a specific message type. Only messages of the requested type should be processed.
+     * Any messages not of the requested type must remain in the undelivered queue managed by the implementation
+     * of the message bus.
+     * <p>
      * {@code maxWaitMilliseconds} defaults to 0.
      *
-     * @param <MessageType> that is expected to be returned from poll
+     * @param <MessageType> that is expected to be returned from poll. The MessageType must be one of the Message Types supported by the Topic or a Superclass thereof.
      * @param messageType   Class type of message to return
      * @see #poll(long)
      */
@@ -121,26 +129,34 @@ public interface TopicReceiver<Topic extends Enum<Topic> & TopicEnum<Topic>>
     poll(Class<? extends MessageType> messageType)
         throws TopicReceiverException
     {
-        return poll().map(messageType::cast);
+        return poll(messageType, 0);
     }
 
     /**
-     * @param <MessageType> that is expected to be returned from poll
+     * Poll for a specific message type. Only messages of the requested type should be processed.
+     * Any messages not of the requested type must remain in the undelivered queue managed by the implementation
+     * of the message bus.
+     * <p>
+     * NOTE: Implementations of this interface MUST implement this method properly. It must only remove messages from the delivery queue
+     * that are of the requested type or sub-class thereof. Messages awaiting deliver not of the requested type, must remain in the queue undelivered.
+     *
+     * @param <MessageType> that is expected to be returned from poll. The MessageType must be one of the Message Types supported by the Topic or a Superclass thereof.
      * @param messageType   Class type of message to return
      * @see #poll(long)
      */
     @SuppressWarnings("JavaDoc")
-    default <MessageType> Optional<MessageType>
+    <MessageType> Optional<MessageType>
     poll(Class<? extends MessageType> messageType, long maxWaitMilliSeconds)
-        throws TopicReceiverException
-    {
-        return poll(maxWaitMilliSeconds).map(messageType::cast);
-    }
+        throws TopicReceiverException;
 
     /**
+     * Poll for a specific message type. Only messages of the requested type should be processed.
+     * Any messages not of the requested type must remain in the undelivered queue managed by the implementation
+     * of the message bus.
+     * <p>
      * {@code maxWaitMilliseconds} is maxWait * 1,000 milliseconds.
      *
-     * @param <MessageType> that is expected to be returned from poll
+     * @param <MessageType> that is expected to be returned from poll. The MessageType must be one of the Message Types supported by the Topic or a Superclass thereof.
      * @param messageType   Class type of message to return
      * @param maxWait       in seconds
      * @see #poll(long)
@@ -150,13 +166,17 @@ public interface TopicReceiver<Topic extends Enum<Topic> & TopicEnum<Topic>>
     pollWaitSeconds(Class<? extends MessageType> messageType, int maxWait)
         throws TopicReceiverException
     {
-        return pollWaitSeconds(maxWait).map(messageType::cast);
+        return poll(messageType, Duration.ofSeconds(maxWait).toMillis());
     }
 
     /**
+     * Poll for a specific message type. Only messages of the requested type should be processed.
+     * Any messages not of the requested type must remain in the undelivered queue managed by the implementation
+     * of the message bus.
+     * <p>
      * {@code maxWaitMilliseconds} is maxWait * 60,000 milliseconds.
      *
-     * @param <MessageType> that is expected to be returned from poll
+     * @param <MessageType> that is expected to be returned from poll. The MessageType must be one of the Message Types supported by the Topic or a Superclass thereof.
      * @param messageType   Class type of message to return
      * @param maxWait       in minutes
      * @see #poll(long)
@@ -166,13 +186,17 @@ public interface TopicReceiver<Topic extends Enum<Topic> & TopicEnum<Topic>>
     pollWaitMinutes(Class<? extends MessageType> messageType, short maxWait)
         throws TopicReceiverException
     {
-        return pollWaitMinutes(maxWait).map(messageType::cast);
+        return poll(messageType, Duration.ofMinutes(maxWait).toMillis());
     }
 
     /**
+     * Poll for a specific message type. Only messages of the requested type should be processed.
+     * Any messages not of the requested type must remain in the undelivered queue managed by the implementation
+     * of the message bus.
+     * <p>
      * {@code maxWaitMilliseconds} is maxWait * 3,600,000 milliseconds.
      *
-     * @param <MessageType> that is expected to be returned from poll
+     * @param <MessageType> that is expected to be returned from poll. The MessageType must be one of the Message Types supported by the Topic or a Superclass thereof.
      * @param messageType   Class type of message to return
      * @param maxWait       in hours
      * @see #poll(long)
@@ -182,16 +206,20 @@ public interface TopicReceiver<Topic extends Enum<Topic> & TopicEnum<Topic>>
     pollWaitHours(Class<? extends MessageType> messageType, byte maxWait)
         throws TopicReceiverException
     {
-        return pollWaitHours(maxWait).map(messageType::cast);
+        return poll(messageType, Duration.ofHours(maxWait).toMillis());
     }
 
     /**
+     * Listen for a specific message type. Only messages of the requested type should be processed by this listener.
+     * Any messages not of the requested type must remain in the undelivered queue managed by the implementation
+     * of the message bus.
+     * <p>
      * Listen for messages asynchronously from the topic. The returned listener can be closed which does not directly
      * cancel/close the subscription to the topic for this TopicReceiver.
      *
-     * @param messageType   expected class type for the message
+     * @param <MessageType> that is expected to be returned from poll. The MessageType must be one of the Message Types supported by the Topic or a Superclass thereof.
      * @param handler       to invoke when a message is received
-     * @param <MessageType> of the expected message
+     * @param messageType   class of the expected message
      * @return closeable listener
      */
     default <MessageType> TopicReceiverListener<Topic, MessageType> listen(Class<? extends MessageType> messageType,
