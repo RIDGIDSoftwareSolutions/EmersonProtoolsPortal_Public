@@ -49,6 +49,7 @@
         <module>com.ridgid.oss.junit5</module>
         <module>com.ridgid.oss.cache.redis</module>
         <module>com.ridgid.oss.message</module>
+        <module>com.ridgid.oss.message.redis</module>
     </modules>
 
     <!-- Required to publish to Maven Central -->
