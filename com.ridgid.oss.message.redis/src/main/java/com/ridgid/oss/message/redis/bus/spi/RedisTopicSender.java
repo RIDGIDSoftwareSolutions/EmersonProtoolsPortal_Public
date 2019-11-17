@@ -28,7 +28,7 @@ public class RedisTopicSender<Topic extends Enum<Topic> & TopicEnum<Topic>> impl
     }
 
     private void guardAgainstMultipleMessageTypes(Topic topic) {
-        if (topic.getMessageTypes().count() > 1) {
+        if (topic.getMessageTypes().count() != 1) {
             throw new IllegalArgumentException("Only supports one message type at this time");
         }
     }
