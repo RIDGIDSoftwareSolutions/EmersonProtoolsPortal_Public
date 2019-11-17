@@ -2,12 +2,24 @@ package com.ridgid.oss.message.bus.spi;
 
 import com.ridgid.oss.message.bus.TopicEnum;
 
+import java.util.Map;
+
 /**
  * SPI to create and subscribe to topics on the implementation of the Message Bus
  */
 @SuppressWarnings("InterfaceNeverImplemented")
 public interface MessageBus
 {
+    /**
+     * Configure the message bus (if needed)
+     *
+     * @param configuration map containing implementation-specific configuration parameters
+     * @throws MessageBusException if the MessageBus implementation does not support configuration or if invalid configuration parameters or combinations of parameters are given
+     */
+    default void config(Map<String, Object> configuration) throws MessageBusException {
+        throw new MessageBusException("Configuration of this MessageBus Type not supported");
+    }
+
     /**
      * Create a topic on the message bus and obtain the TopicSender for the Topic.
      * If the topic already exists and the topic is not required to be single-producer, then the returned
@@ -25,8 +37,11 @@ public interface MessageBus
 
     /**
      * Subscribe to a topic on the message bus and return the TopicReceiver.
-     * If the topic already exists and is required to have only a single subscriber/consumer and a subsriber/consuer
-     * is already registered for the topic, then throws the MessageBusException.
+     * If the topic already exists and is required to have only a single subscriber/consumer and a subscriber/consumer
+     * is already registered for the topic, then throws the MessageBusException. If the topic has not already been
+     * created on the back-end, it is created without a designated sender and a sender may then register as the first
+     * (or additional if permitted) sender at a later time. Until a sender registers and begins sending messages,
+     * the Topic will simply always return nothing available to deliver until a Sender registers and sends some messages.
      *
      * @param topic   to subscribe to an obtain a TopicReceiver for
      * @param <Topic> enumeration that implements the TopicEnum interface (Names the Topic to subscribe to)
@@ -40,7 +55,7 @@ public interface MessageBus
     /**
      * Thrown by the MessageBus SPI interface when there is a failure to create or subscribe to a topic.
      */
-    @SuppressWarnings({"PublicInnerClass", "JavaDoc", "WeakerAccess"})
+    @SuppressWarnings({"PublicInnerClass", "JavaDoc", "ClassWithTooManyConstructors"})
     class MessageBusException extends Exception
     {
         private static final long serialVersionUID = 20526990285999056L;
@@ -91,6 +106,12 @@ public interface MessageBus
         {
             super(message, cause, enableSuppression, writableStackTrace);
             this.topic = topic;
+        }
+
+        @SuppressWarnings({"WeakerAccess", "AssignmentToNull"})
+        public MessageBusException(String message) {
+            super(message);
+            topic = null;
         }
     }
 }

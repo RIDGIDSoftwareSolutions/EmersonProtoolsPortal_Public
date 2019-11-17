@@ -1,6 +1,7 @@
 package com.ridgid.oss.message.bus;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -32,6 +33,16 @@ public interface TopicEnum<E extends Enum<E>>
      */
     default Stream<WireFormat> getSupportedWireFormats() {
         return Stream.of(WireFormat.JAVA_SERIALIZED);
+    }
+
+    /**
+     * @param formats supported by the implementation
+     * @return first format supported by the messages of the topic compatible with an implementation supported format or an empty optional if none are supported
+     */
+    default Optional<WireFormat> getFirstSupported(WireFormat... formats) {
+        return getSupportedWireFormats().filter(wf1 -> Arrays.stream(formats)
+                                                             .anyMatch(wf2 -> wf1 == wf2))
+                                        .findFirst();
     }
 
     /**
