@@ -4,13 +4,14 @@ import com.ridgid.oss.message.bus.TopicEnum;
 import com.ridgid.oss.message.bus.spi.MessageBus;
 import com.ridgid.oss.message.bus.spi.TopicReceiver;
 import com.ridgid.oss.message.bus.spi.TopicSender;
+import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 
 public class RedisMessageBus implements MessageBus {
     private final RedissonClient redissonClient;
 
-    public RedisMessageBus(RedissonClient redissonClient) {
-        this.redissonClient = redissonClient;
+    public RedisMessageBus() {
+        this.redissonClient = Redisson.create();
     }
 
     @Override
