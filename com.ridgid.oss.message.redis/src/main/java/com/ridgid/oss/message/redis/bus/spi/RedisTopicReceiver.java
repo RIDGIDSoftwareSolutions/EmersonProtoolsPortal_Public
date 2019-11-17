@@ -1,13 +1,13 @@
 package com.ridgid.oss.message.redis.bus.spi;
 
 import com.ridgid.oss.message.bus.TopicEnum;
+import com.ridgid.oss.message.bus.TopicReceiverListener;
 import com.ridgid.oss.message.bus.spi.TopicReceiver;
 import org.redisson.api.RTopic;
 import org.redisson.api.RedissonClient;
 
-import java.util.ArrayDeque;
 import java.util.Optional;
-import java.util.Queue;
+import java.util.function.BiConsumer;
 
 public class RedisTopicReceiver<Topic extends Enum<Topic> & TopicEnum<Topic>> implements TopicReceiver<Topic> {
     private final Topic topic;
@@ -16,7 +16,7 @@ public class RedisTopicReceiver<Topic extends Enum<Topic> & TopicEnum<Topic>> im
 
     // Keeps a hold of all incoming messages during the polling period
     // TODO: Only supports one MessageType for now
-    private final Queue<Object> messageQueue;
+    //private final Queue<Object> messageQueue;
 
     /*
     TODO: Features that aren't implemented yet, but not critical for functionality:
@@ -29,18 +29,15 @@ public class RedisTopicReceiver<Topic extends Enum<Topic> & TopicEnum<Topic>> im
     public RedisTopicReceiver(Topic topic,
                               RedissonClient redissonClient) {
         this.topic = topic;
-        this.messageQueue = new ArrayDeque<>();
         redisTopic = redissonClient.getTopic(topic.getTopicName());
 
-        redisTopic.addListenerAsync(Object.class, (channel, msg) -> messageQueue.add(msg))
-                .onComplete((integer, throwable) -> {
-                    if (throwable != null) {
-                        throw new RuntimeException(throwable);
-                    }
+        guardAgainstMultipleMessageTypes(topic);
+    }
 
-                    listenerId = integer;
-                });
-
+    private void guardAgainstMultipleMessageTypes(Topic topic) {
+        if (topic.getMessageTypes().count() > 1) {
+            throw new IllegalArgumentException("Only supports one message type at this time");
+        }
     }
 
     @Override
@@ -50,23 +47,25 @@ public class RedisTopicReceiver<Topic extends Enum<Topic> & TopicEnum<Topic>> im
 
     @Override
     public <MessageType> Optional<MessageType> poll(Class<? extends MessageType> messageType, long maxWaitMilliSeconds) throws TopicReceiverException {
-        try {
-            long currentTime = System.currentTimeMillis();
-            long timeoutTime = currentTime + maxWaitMilliSeconds;
+        throw new UnsupportedOperationException("This receiver does not support polling.");
+    }
 
-            while (currentTime < timeoutTime) {
-                if (!messageQueue.isEmpty() && messageType.isAssignableFrom(messageQueue.peek().getClass())) {
-                    //noinspection unchecked
-                    return Optional.of((MessageType) messageQueue.poll());
-                }
-
-                currentTime = System.currentTimeMillis();
+    @Override
+    public <MessageType> TopicReceiverListener<Topic, MessageType> listen(Class<? extends MessageType> messageType, BiConsumer<? super Topic, ? super MessageType> handler) {
+        redisTopic.addListenerAsync(topic.getMessageTypes().findFirst().get(), (channel, msg) -> {
+            if (messageType.isAssignableFrom(msg.getClass())) {
+                //noinspection unchecked
+                handler.accept(getTopic(), (MessageType) msg);
+            }
+        }).onComplete((integer, throwable) -> {
+            if (throwable != null) {
+                throw new RuntimeException(throwable);
             }
 
-            return Optional.empty();
-        } catch (Exception e) {
-            throw new TopicReceiverException(topic, e);
-        }
+            listenerId = integer;
+        });
+
+        return () -> redisTopic.removeListener(listenerId);
     }
 
     @Override
