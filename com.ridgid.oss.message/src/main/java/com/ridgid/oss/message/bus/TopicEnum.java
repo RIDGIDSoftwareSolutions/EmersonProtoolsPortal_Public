@@ -26,7 +26,7 @@ public interface TopicEnum<E extends Enum<E>>
     /**
      * @return stream of Class entries for Serializable classes that represent the Message Types permitted to send/receive on this Topic
      */
-    Stream<Class<? super Serializable>> getMessageTypes();
+    Stream<Class<? extends Serializable>> getMessageTypes();
 
     /**
      * @return stream of Wire Formats that all the Message Type classes will work for
