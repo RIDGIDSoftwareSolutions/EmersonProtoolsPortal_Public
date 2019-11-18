@@ -5,6 +5,7 @@ import com.ridgid.oss.message.bus.TopicReceiverListener;
 import com.ridgid.oss.message.bus.spi.TopicReceiver;
 import org.redisson.api.RTopic;
 import org.redisson.api.RedissonClient;
+import org.redisson.api.listener.MessageListener;
 
 import java.util.Optional;
 import java.util.function.BiConsumer;
@@ -12,7 +13,6 @@ import java.util.function.BiConsumer;
 public class RedisTopicReceiver<Topic extends Enum<Topic> & TopicEnum<Topic>> implements TopicReceiver<Topic> {
     private final Topic topic;
     private final RTopic redisTopic;
-    private int listenerId;
 
     // Keeps a hold of all incoming messages during the polling period
     // TODO: Only supports one MessageType for now
@@ -29,9 +29,21 @@ public class RedisTopicReceiver<Topic extends Enum<Topic> & TopicEnum<Topic>> im
     public RedisTopicReceiver(Topic topic,
                               RedissonClient redissonClient) {
         this.topic = topic;
-        redisTopic = redissonClient.getTopic(topic.getTopicName());
+        this.redisTopic = redissonClient.getTopic(topic.getTopicName());
 
         guardAgainstMultipleMessageTypes(topic);
+    }
+
+    @Override
+    public <MessageType> TopicReceiverListener<Topic, MessageType> listen(Class<? extends MessageType> messageType, BiConsumer<? super Topic, ? super MessageType> handler) {
+        MessageListener listener = (channel, msg) -> {
+            //noinspection unchecked
+            handler.accept(getTopic(), (MessageType) msg);
+        };
+        //noinspection unchecked
+        redisTopic.addListenerAsync(messageType, listener);
+
+        return () -> redisTopic.removeListener(listener);
     }
 
     private void guardAgainstMultipleMessageTypes(Topic topic) {
@@ -51,25 +63,6 @@ public class RedisTopicReceiver<Topic extends Enum<Topic> & TopicEnum<Topic>> im
     }
 
     @Override
-    public <MessageType> TopicReceiverListener<Topic, MessageType> listen(Class<? extends MessageType> messageType, BiConsumer<? super Topic, ? super MessageType> handler) {
-        redisTopic.addListenerAsync(topic.getMessageTypes().findFirst().get(), (channel, msg) -> {
-            if (messageType.isAssignableFrom(msg.getClass())) {
-                //noinspection unchecked
-                handler.accept(getTopic(), (MessageType) msg);
-            }
-        }).onComplete((integer, throwable) -> {
-            if (throwable != null) {
-                throw new RuntimeException(throwable);
-            }
-
-            listenerId = integer;
-        });
-
-        return () -> redisTopic.removeListener(listenerId);
-    }
-
-    @Override
     public void close() throws Exception {
-        redisTopic.removeListener(listenerId);
     }
 }

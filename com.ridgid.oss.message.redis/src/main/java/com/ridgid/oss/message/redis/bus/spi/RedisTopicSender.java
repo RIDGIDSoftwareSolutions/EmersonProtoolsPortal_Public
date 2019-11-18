@@ -5,8 +5,6 @@ import com.ridgid.oss.message.bus.spi.TopicSender;
 import org.redisson.api.RTopic;
 import org.redisson.api.RedissonClient;
 
-import java.util.function.BiConsumer;
-
 
 public class RedisTopicSender<Topic extends Enum<Topic> & TopicEnum<Topic>> implements TopicSender<Topic> {
     private final Topic topic;
@@ -55,6 +53,5 @@ public class RedisTopicSender<Topic extends Enum<Topic> & TopicEnum<Topic>> impl
 
     @Override
     public void close() throws Exception {
-        redisTopic = null;
     }
 }
