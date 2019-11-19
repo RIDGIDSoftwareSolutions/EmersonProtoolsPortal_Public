@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
@@ -10,15 +11,15 @@
         <version>2.142-SNAPSHOT</version>
     </parent>
 
-    <artifactId>com.ridgid.oss.common</artifactId>
+    <artifactId>com.ridgid.oss.queue</artifactId>
     <packaging>jar</packaging>
     <version>2.142-SNAPSHOT</version>
 
     <!-- Required to publish to Maven Central -->
-    <name>RIDGID (Emerson Professional Tools) Java Common</name>
-    <description>Common Java Helpers</description>
+    <name>RIDGID (Emerson Professional Tools) Java Queue</name>
+    <description>In-Memory Queue (Multplexed and Ordered)</description>
     <url>
-        https://github.com/RIDGIDSoftwareSolutions/EmersonProtoolsPortal_Public/tree/master/com.ridgid.oss.common
+        https://github.com/RIDGIDSoftwareSolutions/EmersonProtoolsPortal_Public/tree/master/com.ridgid.oss.queue
     </url>
 
     <!-- Required to publish to Maven Central -->
@@ -26,7 +27,7 @@
         <license>
             <name>BSD 3-Clause License</name>
             <url>
-                https://github.com/RIDGIDSoftwareSolutions/EmersonProtoolsPortal_Public/tree/master/com.ridgid.oss.common/LICENSE
+                https://github.com/RIDGIDSoftwareSolutions/EmersonProtoolsPortal_Public/tree/master/com.ridgid.oss.queue/LICENSE
             </url>
         </license>
     </licenses>
@@ -37,28 +38,16 @@
         <developerConnection>scm:git:https://github.com/RIDGIDSoftwareSolutions/EmersonProtoolsPortal_Public.git
         </developerConnection>
         <url>
-            https://github.com/RIDGIDSoftwareSolutions/EmersonProtoolsPortal_Public/tree/master/com.ridgid.oss.common
+            https://github.com/RIDGIDSoftwareSolutions/EmersonProtoolsPortal_Public/tree/master/com.ridgid.oss.queue
         </url>
     </scm>
 
     <dependencies>
-
-        <!--com.ridgid.oss dependencies -->
         <dependency>
             <groupId>com.ridgid.oss</groupId>
             <artifactId>com.ridgid.oss.common.function</artifactId>
             <version>2.142-SNAPSHOT</version>
-            <scope>compile</scope>
         </dependency>
-
-        <!-- External 3rd Party Test Dependencies -->
-        <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <version>${h2database.version}</version>
-            <scope>test</scope>
-        </dependency>
-
     </dependencies>
 
 </project>

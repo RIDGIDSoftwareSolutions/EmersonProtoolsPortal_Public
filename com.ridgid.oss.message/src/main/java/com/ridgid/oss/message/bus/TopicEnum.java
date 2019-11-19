@@ -11,7 +11,7 @@ import java.util.stream.Stream;
  * @param <E> enum type that implements this interface
  */
 @SuppressWarnings("InterfaceNeverImplemented")
-public interface TopicEnum<E extends Enum<E>>
+public interface TopicEnum<E extends Enum<E> & TopicEnum<E>>
 {
     /**
      * @return name of the tooic group, if any, for this topic

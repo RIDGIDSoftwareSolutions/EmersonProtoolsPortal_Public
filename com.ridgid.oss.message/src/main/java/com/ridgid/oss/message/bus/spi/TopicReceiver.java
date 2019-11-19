@@ -3,6 +3,7 @@ package com.ridgid.oss.message.bus.spi;
 import com.ridgid.oss.message.bus.TopicEnum;
 import com.ridgid.oss.message.bus.TopicReceiverListener;
 
+import java.io.Serializable;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.function.BiConsumer;
@@ -15,12 +16,12 @@ import java.util.logging.Logger;
  *
  * @param <Topic> {@code TopicEnum<Topic>} for this instance
  */
-@SuppressWarnings("InterfaceNeverImplemented")
 public interface TopicReceiver<Topic extends Enum<Topic> & TopicEnum<Topic>>
     extends AutoCloseable
 {
     /**
      * Gets the Topic {@code Topic extends Enum<Topic> & TopicEnum<Topic>}
+     * S
      *
      * @return TopicEnum instance for the Topic
      */
@@ -51,11 +52,10 @@ public interface TopicReceiver<Topic extends Enum<Topic> & TopicEnum<Topic>>
      * @return Optional Object representing the received message; empty Optional if timed-out before message received
      * @throws TopicReceiverException if the Topic has been unsubscribed or there is an internal, unrecoverable error.
      */
-    default Optional<Object>
-    poll(long maxWaitMilliseconds)
+    default Optional<? extends Serializable> poll(long maxWaitMilliseconds)
         throws TopicReceiverException
     {
-        return poll(Object.class, maxWaitMilliseconds);
+        return poll(Serializable.class, maxWaitMilliseconds);
     }
 
     /**
@@ -64,8 +64,7 @@ public interface TopicReceiver<Topic extends Enum<Topic> & TopicEnum<Topic>>
      * @see #poll(long)
      */
     @SuppressWarnings("JavaDoc")
-    default Optional<Object>
-    poll()
+    default Optional<? extends Serializable> poll()
         throws TopicReceiverException
     {
         return poll(0);
@@ -78,8 +77,7 @@ public interface TopicReceiver<Topic extends Enum<Topic> & TopicEnum<Topic>>
      * @see #poll(long)
      */
     @SuppressWarnings("JavaDoc")
-    default Optional<Object>
-    pollWaitSeconds(int maxWait)
+    default Optional<? extends Serializable> pollWaitSeconds(int maxWait)
         throws TopicReceiverException
     {
         return poll(Duration.ofSeconds(maxWait).toMillis());
@@ -92,8 +90,7 @@ public interface TopicReceiver<Topic extends Enum<Topic> & TopicEnum<Topic>>
      * @see #poll(long)
      */
     @SuppressWarnings("JavaDoc")
-    default Optional<Object>
-    pollWaitMinutes(short maxWait)
+    default Optional<? extends Serializable> pollWaitMinutes(short maxWait)
         throws TopicReceiverException
     {
         return poll(Duration.ofMinutes(maxWait).toMillis());
@@ -106,8 +103,7 @@ public interface TopicReceiver<Topic extends Enum<Topic> & TopicEnum<Topic>>
      * @see #poll(long)
      */
     @SuppressWarnings("JavaDoc")
-    default Optional<Object>
-    pollWaitHours(byte maxWait)
+    default Optional<? extends Serializable> pollWaitHours(byte maxWait)
         throws TopicReceiverException
     {
         return poll(Duration.ofHours(maxWait).toMillis());
@@ -125,8 +121,8 @@ public interface TopicReceiver<Topic extends Enum<Topic> & TopicEnum<Topic>>
      * @see #poll(long)
      */
     @SuppressWarnings("JavaDoc")
-    default <MessageType> Optional<MessageType>
-    poll(Class<? extends MessageType> messageType)
+    default <MessageType extends Serializable>
+    Optional<? extends MessageType> poll(Class<? extends MessageType> messageType)
         throws TopicReceiverException
     {
         return poll(messageType, 0);
@@ -145,8 +141,9 @@ public interface TopicReceiver<Topic extends Enum<Topic> & TopicEnum<Topic>>
      * @see #poll(long)
      */
     @SuppressWarnings("JavaDoc")
-    <MessageType> Optional<MessageType>
-    poll(Class<? extends MessageType> messageType, long maxWaitMilliSeconds)
+    <MessageType extends Serializable>
+    Optional<? extends MessageType> poll(Class<? extends MessageType> messageType,
+                                         long maxWaitMilliSeconds)
         throws TopicReceiverException;
 
     /**
@@ -162,8 +159,9 @@ public interface TopicReceiver<Topic extends Enum<Topic> & TopicEnum<Topic>>
      * @see #poll(long)
      */
     @SuppressWarnings("JavaDoc")
-    default <MessageType> Optional<MessageType>
-    pollWaitSeconds(Class<? extends MessageType> messageType, int maxWait)
+    default <MessageType extends Serializable>
+    Optional<? extends MessageType> pollWaitSeconds(Class<? extends MessageType> messageType,
+                                                    int maxWait)
         throws TopicReceiverException
     {
         return poll(messageType, Duration.ofSeconds(maxWait).toMillis());
@@ -182,8 +180,9 @@ public interface TopicReceiver<Topic extends Enum<Topic> & TopicEnum<Topic>>
      * @see #poll(long)
      */
     @SuppressWarnings("JavaDoc")
-    default <MessageType> Optional<MessageType>
-    pollWaitMinutes(Class<? extends MessageType> messageType, short maxWait)
+    default <MessageType extends Serializable>
+    Optional<? extends MessageType> pollWaitMinutes(Class<? extends MessageType> messageType,
+                                                    short maxWait)
         throws TopicReceiverException
     {
         return poll(messageType, Duration.ofMinutes(maxWait).toMillis());
@@ -202,8 +201,9 @@ public interface TopicReceiver<Topic extends Enum<Topic> & TopicEnum<Topic>>
      * @see #poll(long)
      */
     @SuppressWarnings("JavaDoc")
-    default <MessageType> Optional<MessageType>
-    pollWaitHours(Class<? extends MessageType> messageType, byte maxWait)
+    default <MessageType extends Serializable>
+    Optional<? extends MessageType> pollWaitHours(Class<? extends MessageType> messageType,
+                                                  byte maxWait)
         throws TopicReceiverException
     {
         return poll(messageType, Duration.ofHours(maxWait).toMillis());
@@ -222,8 +222,9 @@ public interface TopicReceiver<Topic extends Enum<Topic> & TopicEnum<Topic>>
      * @param messageType   class of the expected message
      * @return closeable listener
      */
-    default <MessageType> TopicReceiverListener<Topic, MessageType> listen(Class<? extends MessageType> messageType,
-                                                                           BiConsumer<? super Topic, ? super MessageType> handler)
+    default <MessageType extends Serializable>
+    TopicReceiverListener<Topic, ? super MessageType> listen(Class<? extends MessageType> messageType,
+                                                             BiConsumer<? super Topic, ? super MessageType> handler)
     {
         return new TopicReceiverListenerImpl<>(this, messageType, handler);
     }
@@ -231,7 +232,7 @@ public interface TopicReceiver<Topic extends Enum<Topic> & TopicEnum<Topic>>
     /**
      * Thrown by the MessageBus SPI interface when there is a failure to create or subscribe to a topic.
      */
-    @SuppressWarnings({"PublicInnerClass", "JavaDoc", "WeakerAccess"})
+    @SuppressWarnings({"PublicInnerClass", "JavaDoc"})
     class TopicReceiverException extends Exception
     {
         private static final long serialVersionUID = 20526990285999056L;
@@ -240,15 +241,15 @@ public interface TopicReceiver<Topic extends Enum<Topic> & TopicEnum<Topic>>
          * The topic on which the exception was raised.
          */
         @SuppressWarnings("PublicField")
-        public final TopicEnum<? extends Enum<?>> topic;
+        public final Enum<? extends TopicEnum<?>> topic;
 
-        public <Topic extends Enum<Topic> & TopicEnum<Topic>>
+        public <Topic extends Enum<Topic> & TopicEnum<? super Topic>>
         TopicReceiverException(Topic topic) {
             super();
             this.topic = topic;
         }
 
-        public <Topic extends Enum<Topic> & TopicEnum<Topic>>
+        public <Topic extends Enum<Topic> & TopicEnum<? super Topic>>
         TopicReceiverException(Topic topic,
                                String message)
         {
@@ -256,7 +257,7 @@ public interface TopicReceiver<Topic extends Enum<Topic> & TopicEnum<Topic>>
             this.topic = topic;
         }
 
-        public <Topic extends Enum<Topic> & TopicEnum<Topic>>
+        public <Topic extends Enum<Topic> & TopicEnum<? super Topic>>
         TopicReceiverException(Topic topic,
                                String message,
                                Throwable cause)
@@ -265,7 +266,7 @@ public interface TopicReceiver<Topic extends Enum<Topic> & TopicEnum<Topic>>
             this.topic = topic;
         }
 
-        public <Topic extends Enum<Topic> & TopicEnum<Topic>>
+        public <Topic extends Enum<Topic> & TopicEnum<? super Topic>>
         TopicReceiverException(Topic topic,
                                Throwable cause)
         {
@@ -273,7 +274,7 @@ public interface TopicReceiver<Topic extends Enum<Topic> & TopicEnum<Topic>>
             this.topic = topic;
         }
 
-        public <Topic extends Enum<Topic> & TopicEnum<Topic>>
+        public <Topic extends Enum<Topic> & TopicEnum<? super Topic>>
         TopicReceiverException(Topic topic,
                                String message,
                                Throwable cause,
@@ -300,7 +301,7 @@ public interface TopicReceiver<Topic extends Enum<Topic> & TopicEnum<Topic>>
                           "CallToThreadStartDuringObjectConstruction",
                           "WeakerAccess"
                       })
-    class TopicReceiverListenerImpl<Topic extends Enum<Topic> & TopicEnum<Topic>, MessageType>
+    class TopicReceiverListenerImpl<Topic extends Enum<Topic> & TopicEnum<? super Topic>, MessageType extends Serializable>
         implements TopicReceiverListener<Topic, MessageType>
     {
         private final TopicReceiver<? extends Topic>                 topicReceiver;
@@ -329,8 +330,8 @@ public interface TopicReceiver<Topic extends Enum<Topic> & TopicEnum<Topic>>
         }
 
         private void poll() {
-            Consumer<MessageType> process        = msg -> handler.accept(topicReceiver.getTopic(), msg);
-            int                   exceptionCount = 0;
+            Consumer<? super MessageType> process        = msg -> handler.accept(topicReceiver.getTopic(), msg);
+            int                           exceptionCount = 0;
             while ( true )
                 try {
                     if ( cancel ) return;

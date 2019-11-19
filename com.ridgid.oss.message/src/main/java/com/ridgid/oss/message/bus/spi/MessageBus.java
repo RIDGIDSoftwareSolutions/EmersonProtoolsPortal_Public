@@ -6,8 +6,12 @@ import java.util.Map;
 
 /**
  * SPI to create and subscribe to topics on the implementation of the Message Bus
+ *
+ * NOTE: Implementations must have and work correctly with a no argument constructor. Implementations
+ * should perform whatever configuration they need completely independently of the client using the
+ * MessageBus interface. The client should have NO KNOWLEDGE of the implementation details of the
+ * implementation.
  */
-@SuppressWarnings("InterfaceNeverImplemented")
 public interface MessageBus
 {
     /**

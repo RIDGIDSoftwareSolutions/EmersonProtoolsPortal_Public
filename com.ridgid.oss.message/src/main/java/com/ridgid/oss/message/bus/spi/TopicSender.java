@@ -2,12 +2,13 @@ package com.ridgid.oss.message.bus.spi;
 
 import com.ridgid.oss.message.bus.TopicEnum;
 
+import java.io.Serializable;
+
 /**
  * Topic Sender that permits sending messages to a topic.
  *
- * @param <Topic> that the Sender will send messages to
+ * @param <Topic> class that the Sender will send messages to
  */
-@SuppressWarnings("InterfaceNeverImplemented")
 public interface TopicSender<Topic extends Enum<Topic> & TopicEnum<Topic>>
     extends AutoCloseable
 {
@@ -31,12 +32,12 @@ public interface TopicSender<Topic extends Enum<Topic> & TopicEnum<Topic>>
      * @param <MessageType> of message
      * @throws TopicSenderException if the MessageType is not compatible/sendable for the Topic or if there is an internal error.
      */
-    <MessageType> void send(MessageType message) throws TopicSenderException;
+    <MessageType extends Serializable> void send(MessageType message) throws TopicSenderException;
 
     /**
      * Thrown by the MessageBus SPI interface when there is a failure to create or subscribe to a topic.
      */
-    @SuppressWarnings({"PublicInnerClass", "JavaDoc", "WeakerAccess"})
+    @SuppressWarnings({"PublicInnerClass", "JavaDoc"})
     class TopicSenderException extends Exception
     {
         private static final long serialVersionUID = 20526990285999056L;
