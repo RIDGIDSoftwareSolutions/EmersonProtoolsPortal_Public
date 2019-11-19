@@ -2,7 +2,7 @@ package com.ridgid.oss.queue;
 
 import com.ridgid.oss.queue.spi.MultiChannelFIFOQueue;
 import com.ridgid.oss.queue.spi.MultiChannelFIFOQueue.MultiChannelFIFOQueueException;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.Serializable;
@@ -10,6 +10,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import static com.ridgid.oss.common.function.Consumers.uncheck;
+import static java.lang.System.out;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.Comparator.comparing;
@@ -22,13 +24,15 @@ import static org.junit.jupiter.api.Assertions.*;
                       "StaticVariableMayNotBeInitialized",
                       "StaticCollection"
                       , "StaticVariableOfConcreteClass"
+                      , "CallToSuspiciousStringMethod"
+                      , "LiteralAsArgToStringEquals"
                   })
 class InMemoryMultiChannelFIFOQueue_Test
 {
-    private static MultiChannelFIFOQueue<DummyBase> fifoSingle;
-    private static MultiChannelFIFOQueue<DummyBase> fifoFromCollection;
-    private static MultiChannelFIFOQueue<DummyBase> fifoFromArray;
-    private static MultiChannelFIFOQueue<DummyBase> fifoFromStream;
+    private MultiChannelFIFOQueue<DummyBase> fifoSingle;
+    private MultiChannelFIFOQueue<DummyBase> fifoFromCollection;
+    private MultiChannelFIFOQueue<DummyBase> fifoFromArray;
+    private MultiChannelFIFOQueue<DummyBase> fifoFromStream;
 
     @SuppressWarnings("unchecked")
     private static final Class<? extends DummyBase>[]
@@ -41,8 +45,8 @@ class InMemoryMultiChannelFIFOQueue_Test
             DummyChild_2.class,
             DummyChild_3_2.class,
             DummyChild_2_1_1.class,
-            DummyChild_3_1.class,
-            };
+            DummyChild_3_1.class
+        };
 
     private static final List<Class<? extends DummyBase>>
         testListOfChildTypes = asList
@@ -71,27 +75,28 @@ class InMemoryMultiChannelFIFOQueue_Test
         );
 
     private static final DummyBase[]
-        testMessages = {
-        new DummyChild_1(),
-        new DummyChild_2(),
-        new DummyChild_3(),
-        new DummyChild_2_1(),
-        new DummyChild_2_2(),
-        new DummyChild_3_1(),
-        new DummyChild_3_2(),
-        new DummyChild_2_1_1(),
-        new DummyChild_1(),
-        new DummyChild_2(),
-        new DummyChild_2_1(),
-        new DummyChild_2_1_1(),
-        new DummyChild_2_2(),
-        new DummyChild_3(),
-        new DummyChild_3_1(),
-        new DummyChild_3_2()
-    };
+        testMessages =
+        {
+            new DummyChild_1(),
+            new DummyChild_2(),
+            new DummyChild_3(),
+            new DummyChild_2_1(),
+            new DummyChild_2_2(),
+            new DummyChild_3_1(),
+            new DummyChild_3_2(),
+            new DummyChild_2_1_1(),
+            new DummyChild_1(),
+            new DummyChild_2(),
+            new DummyChild_2_1(),
+            new DummyChild_2_1_1(),
+            new DummyChild_2_2(),
+            new DummyChild_3(),
+            new DummyChild_3_1(),
+            new DummyChild_3_2()
+        };
 
-    @BeforeAll
-    static void setup() {
+    @BeforeEach
+    void setup() {
         fifoSingle         = new InMemoryMultiChannelFIFOQueue<>
             (
                 DummyBase.class
@@ -265,15 +270,53 @@ class InMemoryMultiChannelFIFOQueue_Test
             );
     }
 
-    @SuppressWarnings("MessageMissingOnJUnitAssertion")
     @Test
     void it_sends_and_polls_correctly_when_done_consecutively() throws MultiChannelFIFOQueueException {
         for ( DummyBase msg : testMessages ) {
             fifoFromStream.send(msg);
             Optional<? extends DummyBase> actualReceived = fifoFromStream.poll(DummyBase.class);
-            assertTrue(actualReceived.isPresent());
-            assertSame(msg, actualReceived.get());
+            assertTrue(actualReceived.isPresent(), "No Message Received");
+            assertSame(msg, actualReceived.get(), "Incorrect Message Received");
         }
+    }
+
+    @Test
+    void it_sends_and_polls_correctly_when_done_all_are_sent_first_then_all_are_consumed_by_specific_message_type()
+        throws MultiChannelFIFOQueueException
+    {
+        Arrays.stream(testMessages)
+              .forEach(uncheck(MultiChannelFIFOQueueException.class,
+                               fifoFromStream::send));
+        for ( DummyBase msg : testMessages )
+            assertSame(msg,
+                       fifoFromStream.poll(msg.getClass()).orElse(null),
+                       "Different message received than what was expected based on order sent");
+        assertNull(fifoFromStream.poll(DummyBase.class).orElse(null),
+                   "Should have already consumed all messages");
+    }
+
+    @Test
+    void it_sends_and_polls_correctly_when_done_all_are_sent_first_then_batches_are_consumed_by_super_type()
+        throws MultiChannelFIFOQueueException
+    {
+        Arrays.stream(testMessages)
+              .forEach(uncheck(MultiChannelFIFOQueueException.class,
+                               fifoFromStream::send));
+
+        for ( DummyBase msg : (Iterable<DummyBase>) Arrays.stream(testMessages)
+                                                          .filter(DummyChild_2.class::isInstance)
+                                                          .sorted(comparing(msg -> msg.getClass()
+                                                                                      .getSimpleName()
+                                                                                      .equals("DummyChild_2"))
+                                                                      .reversed())
+                                                          .peek(out::println)::iterator )
+            assertSame(msg,
+                       fifoFromStream.poll(DummyChild_2.class).orElse(null),
+                       "Different message received than what was expected based on order sent");
+
+        assertNull(fifoFromStream.poll(DummyChild_2.class)
+                                 .orElse(null),
+                   "Should have already consumed all messages");
     }
 
     @Test
@@ -313,14 +356,6 @@ class InMemoryMultiChannelFIFOQueue_Test
             (
                 () -> {fifoFromStream.poll(DummyChild_2_1_1_IndirectlyUsed.class, 0);}
             );
-    }
-
-    @Test
-    void send() {
-    }
-
-    @Test
-    void testToString() {
     }
 
     private static class DummyBase implements Serializable

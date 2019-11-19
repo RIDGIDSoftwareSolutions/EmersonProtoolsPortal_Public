@@ -11,7 +11,7 @@
         <version>2.142-SNAPSHOT</version>
     </parent>
 
-    <artifactId>com.ridgid.oss.common.function</artifactId>
+    <artifactId>com.ridgid.oss.common.exception</artifactId>
     <packaging>jar</packaging>
     <version>2.142-SNAPSHOT</version>
 
@@ -19,7 +19,7 @@
     <name>RIDGID (Emerson Professional Tools) Java Common - Functional Inferface Helpers</name>
     <description>Common Java Functional Interface Helpers</description>
     <url>
-        https://github.com/RIDGIDSoftwareSolutions/EmersonProtoolsPortal_Public/tree/master/com.ridgid.oss.common.function
+        https://github.com/RIDGIDSoftwareSolutions/EmersonProtoolsPortal_Public/tree/master/com.ridgid.oss.common.exception
     </url>
 
     <!-- Required to publish to Maven Central -->
@@ -27,7 +27,7 @@
         <license>
             <name>BSD 3-Clause License</name>
             <url>
-                https://github.com/RIDGIDSoftwareSolutions/EmersonProtoolsPortal_Public/tree/master/com.ridgid.oss.common.function/LICENSE
+                https://github.com/RIDGIDSoftwareSolutions/EmersonProtoolsPortal_Public/tree/master/com.ridgid.oss.common.exception/LICENSE
             </url>
         </license>
     </licenses>
@@ -38,16 +38,11 @@
         <developerConnection>scm:git:https://github.com/RIDGIDSoftwareSolutions/EmersonProtoolsPortal_Public.git
         </developerConnection>
         <url>
-            https://github.com/RIDGIDSoftwareSolutions/EmersonProtoolsPortal_Public/tree/master/com.ridgid.oss.common.function
+            https://github.com/RIDGIDSoftwareSolutions/EmersonProtoolsPortal_Public/tree/master/com.ridgid.oss.common.exception
         </url>
     </scm>
 
     <dependencies>
-        <dependency>
-            <groupId>com.ridgid.oss</groupId>
-            <artifactId>com.ridgid.oss.common.exception</artifactId>
-            <version>2.142-SNAPSHOT</version>
-        </dependency>
     </dependencies>
 
 </project>

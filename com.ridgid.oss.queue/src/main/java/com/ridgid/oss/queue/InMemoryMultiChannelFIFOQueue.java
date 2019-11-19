@@ -17,6 +17,7 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static java.lang.System.currentTimeMillis;
+import static java.util.Comparator.comparingLong;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toConcurrentMap;
 
@@ -119,28 +120,105 @@ public class InMemoryMultiChannelFIFOQueue<BaseMessageType extends Serializable>
         return queues.keySet().stream();
     }
 
-    @SuppressWarnings("OverlyBroadCatchBlock")
     @Override
     public <MessageType extends BaseMessageType>
     Optional<? extends MessageType> pollUnchecked(Class<? extends MessageType> messageType,
                                                   long maxWaitMillis)
         throws MultiChannelFIFOQueueException
     {
-        long        endTimeMillis = currentTimeMillis() + maxWaitMillis;
-        MessageType available;
+        return Optional.ofNullable
+            (
+                waitForNextAvailable
+                    (
+                        messageType,
+                        currentTimeMillis() + maxWaitMillis
+                    )
+            );
+    }
+
+    @SuppressWarnings("OverlyBroadCatchBlock")
+    private <MessageType extends BaseMessageType>
+    MessageType waitForNextAvailable(Class<? extends MessageType> messageType,
+                                     long endTimeMillis)
+        throws MultiChannelFIFOQueueException
+    {
         try {
-            do
-                available = nextAvailableMessageForRequestedMessageType(messageType);
+            MessageType available;
+            do available = nextAvailableMessageForRequestedMessageType(messageType);
             while
             (
                 available == null
                 &&
                 waitingForMessagesUntil(endTimeMillis)
             );
+            return available;
         } catch ( Exception e ) {
             throw new MultiChannelFIFOQueueException(e);
         }
-        return Optional.ofNullable(available);
+    }
+
+    @SuppressWarnings("NakedNotify")
+    @Override
+    public <MessageType extends BaseMessageType>
+    void sendUnchecked(MessageType message)
+        throws MultiChannelFIFOQueueException
+    {
+        queueMessageToMostAppropriateQueue(message);
+        synchronized ( queues ) {
+            queues.notifyAll();
+        }
+    }
+
+    private <MessageType extends BaseMessageType>
+    void queueMessageToMostAppropriateQueue(MessageType message)
+        throws MultiChannelFIFOQueueException
+    {
+        Stream.concat(exactQueueForMessageType(message),
+                      acceptableQueuesForMessageType(message))
+              .findFirst()
+              .map(Entry::getValue)
+              .filter(messageQueued(message))
+              .orElseThrow
+                  (
+                      () -> new MultiChannelFIFOQueueException
+                          (
+                              String.format("Message not supported on any channel: %s, %s",
+                                            message.getClass().getName(),
+                                            message)
+                          )
+                  );
+    }
+
+    private <MessageType extends BaseMessageType>
+    Stream<Entry<Class<? extends BaseMessageType>, ConcurrentLinkedQueue<Timestamped<? extends BaseMessageType>>>>
+    acceptableQueuesForMessageType(MessageType message)
+    {
+        return queues
+            .entrySet()
+            .stream()
+            .filter(entry -> entry.getKey().isAssignableFrom(message.getClass()));
+    }
+
+    private <MessageType extends BaseMessageType>
+    Stream<Entry<Class<? extends BaseMessageType>, ConcurrentLinkedQueue<Timestamped<? extends BaseMessageType>>>>
+    exactQueueForMessageType(MessageType message)
+    {
+        return queues
+            .entrySet()
+            .stream()
+            .filter(entry -> entry.getKey()
+                                  .isAssignableFrom(message.getClass())
+                             && message.getClass()
+                                       .isAssignableFrom(entry.getKey()));
+    }
+
+    @SuppressWarnings("LocalVariableOfConcreteClass")
+    private <MessageType extends BaseMessageType>
+    Predicate<ConcurrentLinkedQueue<Timestamped<? extends BaseMessageType>>>
+    messageQueued(MessageType message)
+    {
+        Timestamped<MessageType> msg = new Timestamped<>(message, nextTimestamp);
+        return queue -> queue.offer(msg);
     }
 
     private <MessageType extends BaseMessageType>
@@ -180,7 +258,7 @@ public class InMemoryMultiChannelFIFOQueue<BaseMessageType extends Serializable>
         for
         (
             Entry<Timestamped<? extends BaseMessageType>, ConcurrentLinkedQueue<Timestamped<? extends BaseMessageType>>>
-                nextApplicableQueue : headsOfQueuesSortedByFIFOOrder(queuesForBaseMessageType(messageType))
+                nextApplicableQueue : headsOfQueuesSortedByFIFOOrder(messageType)
         ) {
             Timestamped<? extends BaseMessageType> val = nextApplicableQueue.getValue().poll();
             if ( val != null ) return messageType.cast(val.unwrap());
@@ -190,18 +268,19 @@ public class InMemoryMultiChannelFIFOQueue<BaseMessageType extends Serializable>
 
     private <MessageType extends BaseMessageType>
     Iterable<SimpleEntry<Timestamped<? extends BaseMessageType>, ConcurrentLinkedQueue<Timestamped<? extends BaseMessageType>>>>
-    headsOfQueuesSortedByFIFOOrder
-        (
-            Stream<? extends Entry<Class<? extends BaseMessageType>, ConcurrentLinkedQueue<Timestamped<? extends BaseMessageType>>>> queues
-        )
+    headsOfQueuesSortedByFIFOOrder(Class<? extends MessageType> messageType)
     {
-        return queues.map(Entry::getValue)
-                     .map(toHeadOfQueueAndQueue())
-                     .filter(whereNonNullHeadOfQueue())
-                     .sorted()::iterator;
+        return
+            queuesForBaseMessageType(messageType)
+                .map(Entry::getValue)
+                .map(toHeadOfQueueAndQueue())
+                .filter(whereNonNullHeadOfQueue())
+                .sorted(comparingLong(entry -> entry.getKey().getTimestamp()))
+                ::iterator;
     }
 
-    private <MessageType extends BaseMessageType> Stream<Entry<Class<? extends BaseMessageType>, ConcurrentLinkedQueue<Timestamped<? extends BaseMessageType>>>>
+    private <MessageType extends BaseMessageType>
+    Stream<? extends Entry<Class<? extends BaseMessageType>, ConcurrentLinkedQueue<Timestamped<? extends BaseMessageType>>>>
     queuesForBaseMessageType(Class<? extends MessageType> messageType)
     {
         return queues.entrySet()
@@ -226,39 +305,6 @@ public class InMemoryMultiChannelFIFOQueue<BaseMessageType extends Serializable>
     toHeadOfQueueAndQueue()
     {
         return queue -> new SimpleEntry<>(queue.peek(), queue);
-    }
-
-    @Override
-    public <MessageType extends BaseMessageType>
-    void sendUnchecked(MessageType message)
-        throws MultiChannelFIFOQueueException
-    {
-        Stream.concat
-            (
-                queues
-                    .entrySet()
-                    .stream()
-                    .filter(entry -> entry.getKey() == message.getClass()),
-                queues
-                    .entrySet()
-                    .stream()
-                    .filter(entry -> entry.getKey().isAssignableFrom(message.getClass())))
-              .findFirst()
-              .map(Entry::getValue)
-              .filter(queue -> queue.offer(new Timestamped<>(message, nextTimestamp)))
-              .orElseThrow
-                  (
-                      () -> new MultiChannelFIFOQueueException
-                          (
-                              String.format("Message not supported on any channel: %s, %s",
-                                            message.getClass().getName(),
-                                            message)
-                          )
-                  );
-        synchronized ( queues ) {
-            //noinspection NakedNotify
-            queues.notifyAll();
-        }
     }
 
     /**
