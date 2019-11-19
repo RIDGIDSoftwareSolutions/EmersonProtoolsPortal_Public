@@ -1,4 +1,4 @@
-package com.ridgid.oss.message.redis.bus.spi;
+package com.ridgid.oss.message.redis.bus;
 
 import com.ridgid.oss.message.bus.TopicEnum;
 import com.ridgid.oss.message.bus.spi.MessageBus;

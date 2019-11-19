@@ -77,8 +77,7 @@ public final class MessageBusService
                                   (
                                       () -> loaderStream().findFirst()
                                                           .orElseThrow(MessageBusServiceException::new)
-                                  )
-                ;
+                                  );
             return defaultBus;
         }
     }

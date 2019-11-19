@@ -1,4 +1,4 @@
-package com.ridgid.oss.message.redis.bus.spi;
+package com.ridgid.oss.message.redis.bus;
 
 import com.ridgid.oss.message.bus.TopicEnum;
 import com.ridgid.oss.message.bus.TopicReceiverListener;
@@ -7,11 +7,22 @@ import org.redisson.api.RTopic;
 import org.redisson.api.RedissonClient;
 import org.redisson.api.listener.MessageListener;
 
+import java.io.Serializable;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 
-public class RedisTopicReceiver<Topic extends Enum<Topic> & TopicEnum<Topic>> implements TopicReceiver<Topic> {
-    private final Topic topic;
+@SuppressWarnings({
+                      "RedundantThrows",
+                      "DuplicateStringLiteralInspection",
+                      "rawtypes",
+                      "WeakerAccess",
+                      "JavaDoc",
+                      "ClassHasNoToStringMethod"
+                      , "CallToSimpleGetterFromWithinClass"
+                  })
+public class RedisTopicReceiver<Topic extends Enum<Topic> & TopicEnum<Topic>> implements TopicReceiver<Topic>
+{
+    private final Topic  topic;
     private final RTopic redisTopic;
 
     // Keeps a hold of all incoming messages during the polling period
@@ -27,29 +38,30 @@ public class RedisTopicReceiver<Topic extends Enum<Topic> & TopicEnum<Topic>> im
       - ReliabilityRequirement: Currently will always behave as NONDURABLE_GUARANTEED
      */
     public RedisTopicReceiver(Topic topic,
-                              RedissonClient redissonClient) {
+                              RedissonClient redissonClient)
+    {
         this.topic = topic;
-        this.redisTopic = redissonClient.getTopic(topic.getTopicName());
-
+        redisTopic = redissonClient.getTopic(topic.getTopicName());
         guardAgainstMultipleMessageTypes(topic);
     }
 
     @Override
-    public <MessageType> TopicReceiverListener<Topic, MessageType> listen(Class<? extends MessageType> messageType, BiConsumer<? super Topic, ? super MessageType> handler) {
+    public <MessageType extends Serializable>
+    TopicReceiverListener<Topic, ? super MessageType> listen(Class<? extends MessageType> messageType,
+                                                             BiConsumer<? super Topic, ? super MessageType> handler)
+    {
         MessageListener listener = (channel, msg) -> {
             //noinspection unchecked
             handler.accept(getTopic(), (MessageType) msg);
         };
         //noinspection unchecked
         redisTopic.addListenerAsync(messageType, listener);
-
         return () -> redisTopic.removeListener(listener);
     }
 
     private void guardAgainstMultipleMessageTypes(Topic topic) {
-        if (topic.getMessageTypes().count() > 1) {
+        if ( topic.getMessageTypes().count() > 1 )
             throw new IllegalArgumentException("Only supports one message type at this time");
-        }
     }
 
     @Override
@@ -58,7 +70,11 @@ public class RedisTopicReceiver<Topic extends Enum<Topic> & TopicEnum<Topic>> im
     }
 
     @Override
-    public <MessageType> Optional<MessageType> poll(Class<? extends MessageType> messageType, long maxWaitMilliSeconds) throws TopicReceiverException {
+    public <MessageType extends Serializable>
+    Optional<? extends MessageType> poll(Class<? extends MessageType> messageType,
+                                         long maxWaitMilliSeconds)
+        throws TopicReceiverException
+    {
         throw new UnsupportedOperationException("This receiver does not support polling.");
     }
 
