@@ -12,7 +12,7 @@
     </parent>
 
     <artifactId>com.ridgid.oss.message</artifactId>
-    <packaging>pom</packaging>
+    <packaging>jar</packaging>
     <version>2.142-SNAPSHOT</version>
 
     <!-- Required to publish to Maven Central -->
