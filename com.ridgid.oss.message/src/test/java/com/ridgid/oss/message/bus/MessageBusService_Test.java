@@ -1,6 +1,6 @@
 package com.ridgid.oss.message.bus;
 
-import com.ridgid.oss.message.bus.impl.inmemory.InMemoryMessageBus;
+import com.ridgid.oss.message.inmemory.bus.InMemoryMessageBus;
 import com.ridgid.oss.message.test.mock.MessageBusMock;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

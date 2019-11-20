@@ -1,4 +1,4 @@
-package com.ridgid.oss.message.bus.impl.inmemory;
+package com.ridgid.oss.message.inmemory.bus;
 
 import com.ridgid.oss.message.bus.ReceiverCardinality;
 import com.ridgid.oss.message.bus.SenderCardinality;
