@@ -4,22 +4,21 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-
     <parent>
         <artifactId>com.ridgid.oss</artifactId>
         <groupId>com.ridgid.oss</groupId>
         <version>2.142-SNAPSHOT</version>
     </parent>
 
-    <artifactId>com.ridgid.oss.queue</artifactId>
+    <artifactId>com.ridgid.oss.spi</artifactId>
     <packaging>jar</packaging>
     <version>2.142-SNAPSHOT</version>
 
     <!-- Required to publish to Maven Central -->
-    <name>RIDGID (Emerson Professional Tools) Java Queue</name>
-    <description>In-Memory Queue (Multplexed and Ordered)</description>
+    <name>RIDGID (Emerson Professional Tools) Java SPI</name>
+    <description>SPI (Service Provider Inteface) Helpers</description>
     <url>
-        https://github.com/RIDGIDSoftwareSolutions/EmersonProtoolsPortal_Public/tree/master/com.ridgid.oss.queue
+        https://github.com/RIDGIDSoftwareSolutions/EmersonProtoolsPortal_Public/tree/master/com.ridgid.oss.spi
     </url>
 
     <!-- Required to publish to Maven Central -->
@@ -27,7 +26,7 @@
         <license>
             <name>BSD 3-Clause License</name>
             <url>
-                https://github.com/RIDGIDSoftwareSolutions/EmersonProtoolsPortal_Public/tree/master/com.ridgid.oss.queue/LICENSE
+                https://github.com/RIDGIDSoftwareSolutions/EmersonProtoolsPortal_Public/tree/master/com.ridgid.oss.spi/LICENSE
             </url>
         </license>
     </licenses>
@@ -38,7 +37,7 @@
         <developerConnection>scm:git:https://github.com/RIDGIDSoftwareSolutions/EmersonProtoolsPortal_Public.git
         </developerConnection>
         <url>
-            https://github.com/RIDGIDSoftwareSolutions/EmersonProtoolsPortal_Public/tree/master/com.ridgid.oss.queue
+            https://github.com/RIDGIDSoftwareSolutions/EmersonProtoolsPortal_Public/tree/master/com.ridgid.oss.spi
         </url>
     </scm>
 
@@ -47,11 +46,7 @@
             <groupId>com.ridgid.oss</groupId>
             <artifactId>com.ridgid.oss.common.function</artifactId>
             <version>2.142-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>com.ridgid.oss</groupId>
-            <artifactId>com.ridgid.oss.spi</artifactId>
-            <version>2.142-SNAPSHOT</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 

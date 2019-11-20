@@ -12,7 +12,7 @@
     </parent>
 
     <artifactId>com.ridgid.oss.message</artifactId>
-    <packaging>jar</packaging>
+    <packaging>pom</packaging>
     <version>2.142-SNAPSHOT</version>
 
     <!-- Required to publish to Maven Central -->
@@ -44,6 +44,26 @@
     </scm>
 
     <dependencies>
+        <dependency>
+            <groupId>com.ridgid.oss</groupId>
+            <artifactId>com.ridgid.oss.spi</artifactId>
+            <version>2.142-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.ridgid.oss</groupId>
+            <artifactId>com.ridgid.oss.queue</artifactId>
+            <version>2.142-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+        <!--
+                <dependency>
+                    <groupId>com.ridgid.oss</groupId>
+                    <artifactId>com.ridgid.oss.message.test</artifactId>
+                    <version>2.142-SNAPSHOT</version>
+                    <scope>test</scope>
+                </dependency>
+        -->
     </dependencies>
 
 </project>

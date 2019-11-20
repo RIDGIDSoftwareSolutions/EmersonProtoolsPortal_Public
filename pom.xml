@@ -52,8 +52,11 @@
         <module>com.ridgid.oss.cache.redis</module>
         <module>com.ridgid.oss.message</module>
         <module>com.ridgid.oss.message.redis</module>
-        <module>com.ridgid.oss.message.inmemory</module>
+        <!--
+                <module>com.ridgid.oss.message.test</module>
+        -->
         <module>com.ridgid.oss.queue</module>
+        <module>com.ridgid.oss.spi</module>
     </modules>
 
     <!-- Required to publish to Maven Central -->

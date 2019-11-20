@@ -1,104 +1,119 @@
 package com.ridgid.oss.message.bus;
 
+import com.ridgid.oss.message.bus.MessageBusService.MessageBusServiceException;
 import com.ridgid.oss.message.bus.spi.MessageBus;
-
-import java.util.Optional;
-import java.util.ServiceLoader;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
+import com.ridgid.oss.spi.SPIService;
+import com.ridgid.oss.spi.SPIServiceBase;
 
 /**
  * Loads the configured or available MessageBus Service Provider and returns and instance of the Bus.
  */
 @SuppressWarnings({
-                      "PublicMethodNotExposedInInterface",
-                      "ClassHasNoToStringMethod",
                       "Singleton",
-                      "CallToSuspiciousStringMethod"
+                      "WeakerAccess"
                   })
 public final class MessageBusService
+    extends SPIServiceBase<MessageBus, MessageBusServiceException>
 {
-    private static final Object initLock = new Object();
-
-    @SuppressWarnings("StaticCollection")
-    private static final ConcurrentMap<Class<MessageBus>, MessageBus> buses = new ConcurrentHashMap<>(10);
-
-    @SuppressWarnings("StaticVariableOfConcreteClass")
-    private static MessageBusService service = null;
-
-    private final    ServiceLoader<MessageBus> loader;
-    private volatile MessageBus                defaultBus;
-
-    private MessageBusService() {
-        loader = ServiceLoader.load(MessageBus.class);
+    /**
+     * Obtain a non-singleton instance of the MessageBusService.
+     * <p>
+     * Prefer calling {@code instance} to obtain a thread-safe singleton instance instead
+     */
+    public MessageBusService() {
+        super(MessageBus.class,
+              MessageBusServiceException.class);
     }
 
     /**
-     * Obtain thread-safe MessageBusService instance
-     *
-     * @return instance of the MessageBusService (likely Singleton)
+     * @return singleton instance of service loader from MessageBus
      */
-    @SuppressWarnings({
-                          "SynchronizationOnStaticField",
-                          "MethodReturnOfConcreteClass"
-                      })
+    @SuppressWarnings("MethodReturnOfConcreteClass")
     public static MessageBusService instance() {
-        synchronized ( initLock ) {
-            if ( service == null ) service = new MessageBusService();
-            return service;
-        }
+        return SPIService.instance(MessageBusService.class);
     }
 
-
-    /**
-     * @return the implementation of the MessageBus interface as given by the Class Name in the 'com.ridgid.oss.message.bus.service.class' system property, or,
-     * if the system property is not defined, then it returns the first available implementation of the MessageBus interface that is found.
-     * @throws MessageBusServiceException if either the system property does not point to a valid implementation of the ServiceBus interface, or, if there is
-     *                                    no available implementation found when the system property is not given.
-     */
-    public MessageBus ofBus() throws MessageBusServiceException {
-        synchronized ( loader ) {
-            if ( defaultBus == null )
-                //noinspection LambdaParameterNamingConvention
-                defaultBus
-                    = Optional.ofNullable(System.getProperty("com.ridgid.oss.message.bus.service.class"))
-                              .map
-                                  (
-                                      configuredServiceClassName ->
-                                          loaderStream().filter(lc -> lc.getClass()
-                                                                        .getName()
-                                                                        .equals(configuredServiceClassName))
-                                                        .findFirst()
-                                                        .orElseThrow(MessageBusServiceException::new)
-                                  )
-                              .orElseGet
-                                  (
-                                      () -> loaderStream().findFirst()
-                                                          .orElseThrow(MessageBusServiceException::new)
-                                  );
-            return defaultBus;
-        }
-    }
-
-//    public MessageBus ofBus(Class<? extends MessageBus> busClass) {
-//    }
-//
-//    public MessageBus ofBus(Class<? extends MessageBus> busClass, Map<String, Object> config) {
-//    }
-
-    private Stream<MessageBus> loaderStream() {
-        return StreamSupport.stream(loader.spliterator(),
-                                    false);
-    }
-
-    /**
-     * Exception thrown if unable to locate a suitable implementation of the MessageBus interface
-     */
-    @SuppressWarnings({"WeakerAccess", "PublicInnerClass"})
-    public static class MessageBusServiceException extends RuntimeException
+    @SuppressWarnings({"JavaDoc", "PublicInnerClass"})
+    public static class MessageBusServiceException extends SPIServiceException
     {
-        private static final long serialVersionUID = 2074092232499183526L;
+        private static final long serialVersionUID = -1139401520129659844L;
+
+        /**
+         * Constructs a new runtime exception with {@code null} as its
+         * detail message.  The cause is not initialized, and may subsequently be
+         * initialized by a call to {@link #initCause}.
+         */
+        public MessageBusServiceException() {
+            super();
+        }
+
+        /**
+         * Constructs a new runtime exception with the specified detail message.
+         * The cause is not initialized, and may subsequently be initialized by a
+         * call to {@link #initCause}.
+         *
+         * @param message the detail message. The detail message is saved for
+         *                later retrieval by the {@link #getMessage()} method.
+         */
+        public MessageBusServiceException(String message) {
+            super(message);
+        }
+
+        /**
+         * Constructs a new runtime exception with the specified detail message and
+         * cause.  <p>Note that the detail message associated with
+         * {@code cause} is <i>not</i> automatically incorporated in
+         * this runtime exception's detail message.
+         *
+         * @param message the detail message (which is saved for later retrieval
+         *                by the {@link #getMessage()} method).
+         * @param cause   the cause (which is saved for later retrieval by the
+         *                {@link #getCause()} method).  (A <tt>null</tt> value is
+         *                permitted, and indicates that the cause is nonexistent or
+         *                unknown.)
+         * @since 1.4
+         */
+        public MessageBusServiceException(String message, Throwable cause) {
+            super(message, cause);
+        }
+
+        /**
+         * Constructs a new runtime exception with the specified cause and a
+         * detail message of <tt>(cause==null ? null : cause.toString())</tt>
+         * (which typically contains the class and detail message of
+         * <tt>cause</tt>).  This constructor is useful for runtime exceptions
+         * that are little more than wrappers for other throwables.
+         *
+         * @param cause the cause (which is saved for later retrieval by the
+         *              {@link #getCause()} method).  (A <tt>null</tt> value is
+         *              permitted, and indicates that the cause is nonexistent or
+         *              unknown.)
+         * @since 1.4
+         */
+        public MessageBusServiceException(Throwable cause) {
+            super(cause);
+        }
+
+        /**
+         * Constructs a new runtime exception with the specified detail
+         * message, cause, suppression enabled or disabled, and writable
+         * stack trace enabled or disabled.
+         *
+         * @param message            the detail message.
+         * @param cause              the cause.  (A {@code null} value is permitted,
+         *                           and indicates that the cause is nonexistent or unknown.)
+         * @param enableSuppression  whether or not suppression is enabled
+         *                           or disabled
+         * @param writableStackTrace whether or not the stack trace should
+         *                           be writable
+         * @since 1.7
+         */
+        public MessageBusServiceException(String message,
+                                          Throwable cause,
+                                          boolean enableSuppression,
+                                          boolean writableStackTrace)
+        {
+            super(message, cause, enableSuppression, writableStackTrace);
+        }
     }
 }

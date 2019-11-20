@@ -1,5 +1,6 @@
 package com.ridgid.oss.queue;
 
+import com.ridgid.oss.queue.impl.inmemory.InMemoryMultiChannelFIFOQueue;
 import com.ridgid.oss.queue.spi.MultiChannelFIFOQueue;
 import com.ridgid.oss.queue.spi.MultiChannelFIFOQueue.MultiChannelFIFOQueueException;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,7 +22,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @SuppressWarnings({
                       "DuplicateStringLiteralInspection",
                       "FieldCanBeLocal",
-                      "StaticVariableMayNotBeInitialized",
                       "StaticCollection"
                       , "StaticVariableOfConcreteClass"
                       , "CallToSuspiciousStringMethod"
