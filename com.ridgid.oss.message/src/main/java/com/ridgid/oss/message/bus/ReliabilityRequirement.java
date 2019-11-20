@@ -15,7 +15,7 @@ public interface ReliabilityRequirement
     }
 
     /**
-     * @return how many failed delivery attempts the implementation should allow within a time interval. The implementation should make a "Best Effort" to ensure no more than this number of messages are discarded within the configured interval @see {@code #getReliablityInterval()}
+     * @return how many failed delivery attempts the implementation should allow within a time interval. The implementation should make a "Best Effort" to ensure no more than this number of messages are discarded within the configured interval @see #getReliablityInterval()
      */
     @SuppressWarnings("NewMethodNamingConvention")
     default int getMaximumFailedDeliveryCountPerTimeInterval() {

@@ -15,8 +15,8 @@ public class CapturedCheckedException extends RuntimeException
 
     /**
      * @param captureExceptionType class for type of checked exception that was caught
-     * @param message              @see {@code RuntimeException}
-     * @param cause                @see {@code RuntimeException}
+     * @param message              @see RuntimeException
+     * @param cause                @see RuntimeException
      * @param <CET>                type of checked exception to catch
      */
     public <CET extends Exception> CapturedCheckedException(Class<? extends CET> captureExceptionType,
@@ -29,7 +29,7 @@ public class CapturedCheckedException extends RuntimeException
 
     /**
      * @param captureExceptionType class for type of checked exception that was caught
-     * @param cause                @see {@code RuntimeException}
+     * @param cause                @see RuntimeException
      * @param <CET>                type of checked exception to catch
      */
     public <CET extends Exception> CapturedCheckedException(Class<? extends CET> captureExceptionType,
@@ -41,10 +41,10 @@ public class CapturedCheckedException extends RuntimeException
 
     /**
      * @param captureExceptionType class for type of checked exception that was caught
-     * @param message              @see {@code RuntimeException}
-     * @param cause                @see {@code RuntimeException}
-     * @param enableSuppression    @see {@code RuntimeException}
-     * @param writableStackTrace   @see {@code RuntimeException}
+     * @param message              @see RuntimeException
+     * @param cause                @see RuntimeException
+     * @param enableSuppression    @see RuntimeException
+     * @param writableStackTrace   @see RuntimeException
      * @param <CET>                type of checked exception to catch
      */
     protected <CET extends Exception> CapturedCheckedException(Class<? extends CET> captureExceptionType,

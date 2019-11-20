@@ -9,17 +9,19 @@ public class UnexpectedCapturedCheckedException extends CapturedCheckedException
     private static final long serialVersionUID = -683877372865267265L;
 
     /**
-     * @see {@code CapturedCheckedException}
+     * @param captureExceptionType class for type of checked exception that was caught
+     * @param message              @see RuntimeException
+     * @param cause                @see RuntimeException
      */
     public <CET extends Exception> UnexpectedCapturedCheckedException(Class<? extends CET> captureExceptionType,
-                                                                      String message,
-                                                                      CET cause)
+                                                                      String message, CET cause)
     {
         super(captureExceptionType, message, cause);
     }
 
     /**
-     * @see {@code CapturedCheckedException}
+     * @param captureExceptionType class for type of checked exception that was caught
+     * @param cause                @see RuntimeException
      */
     public <CET extends Exception> UnexpectedCapturedCheckedException(Class<? extends CET> captureExceptionType,
                                                                       CET cause)
@@ -28,7 +30,11 @@ public class UnexpectedCapturedCheckedException extends CapturedCheckedException
     }
 
     /**
-     * @see {@code CapturedCheckedException}
+     * @param captureExceptionType class for type of checked exception that was caught
+     * @param message              @see RuntimeException
+     * @param cause                @see RuntimeException
+     * @param enableSuppression    @see RuntimeException
+     * @param writableStackTrace   @see RuntimeException
      */
     protected <CET extends Exception> UnexpectedCapturedCheckedException(Class<? extends CET> captureExceptionType,
                                                                          String message,
