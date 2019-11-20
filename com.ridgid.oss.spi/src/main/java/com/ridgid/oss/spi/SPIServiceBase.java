@@ -1,5 +1,6 @@
 package com.ridgid.oss.spi;
 
+import java.util.Optional;
 import java.util.ServiceLoader;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -50,11 +51,20 @@ public class SPIServiceBase<SI, SE extends SPIServiceException>
     }
 
     @Override
+    public void clearDefaultProvider() throws SE {
+        synchronized ( loader ) {
+            //noinspection AssignmentToNull
+            defaultProvider = null;
+        }
+    }
+
+    @Override
     public SI defaultProvider() throws SE {
         synchronized ( loader ) {
-            if ( defaultProvider == null )
+            Optional<String> requestedImplementation = defaultProviderPropertyValue();
+            if ( defaultProviderEmptyOrDifferentFrom(requestedImplementation) )
                 defaultProvider
-                    = defaultProviderPropertyValue()
+                    = requestedImplementation
                     .map
                         (
                             className -> streamProviders()
@@ -73,6 +83,21 @@ public class SPIServiceBase<SI, SE extends SPIServiceException>
         }
     }
 
+    @SuppressWarnings({
+                          "OptionalUsedAsFieldOrParameterType",
+                          "BooleanMethodNameMustStartWithQuestion",
+                          "NewMethodNamingConvention"
+                      })
+    private boolean defaultProviderEmptyOrDifferentFrom(Optional<String> defaultProviderPropertyValue) {
+        return
+            defaultProvider == null
+            ||
+            (
+                defaultProviderPropertyValue.isPresent()
+                &&
+                defaultProviderPropertyValue.get().equals(defaultProvider.getClass().getName())
+            );
+    }
 
     @Override
     public Class<SI> serviceInterface() {

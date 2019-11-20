@@ -11,6 +11,7 @@ import java.util.concurrent.ConcurrentMap;
 /**
  * In-Memory Implementation (In-Process/Single JVM)of the InMemoryMessageBus
  */
+@SuppressWarnings("ClassNamePrefixedWithPackageName")
 public class InMemoryMessageBus implements MessageBus
 {
     @SuppressWarnings("StaticCollection")

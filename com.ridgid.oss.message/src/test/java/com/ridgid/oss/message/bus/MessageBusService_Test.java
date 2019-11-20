@@ -1,8 +1,7 @@
 package com.ridgid.oss.message.bus;
 
-//import com.ridgid.oss.message.bus.test.MessageBusMock;
-
 import com.ridgid.oss.message.bus.impl.inmemory.InMemoryMessageBus;
+import com.ridgid.oss.message.test.mock.MessageBusMock;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,7 +11,8 @@ import static org.junit.jupiter.api.Assertions.*;
 @SuppressWarnings("LocalVariableOfConcreteClass")
 class MessageBusService_Test
 {
-    private static final String COM_RIDGID_OSS_MESSAGE_BUS_SERVICE_CLASS = "com.ridgid.oss.message.bus.service.class";
+    private static final String COM_RIDGID_OSS_MESSAGE_BUS_SERVICE_CLASS
+        = "com.ridgid.oss.message.bus.spi.MessageBus.service.class";
 
     @BeforeEach
     void setUp() {
@@ -40,19 +40,25 @@ class MessageBusService_Test
     @SuppressWarnings("MessageMissingOnJUnitAssertion")
     @Test
     void it_gives_the_inmemory_implementation_by_default() {
+        MessageBusService.instance().clearDefaultProvider();
         System.clearProperty(COM_RIDGID_OSS_MESSAGE_BUS_SERVICE_CLASS);
-        assertNull(System.clearProperty(COM_RIDGID_OSS_MESSAGE_BUS_SERVICE_CLASS));
+        assertNull(System.getProperty(COM_RIDGID_OSS_MESSAGE_BUS_SERVICE_CLASS));
         assertSame(InMemoryMessageBus.class,
                    MessageBusService.instance().defaultProvider().getClass(),
                    "Did not get the In-Memory implementation by default");
     }
 
-//    @Test
-//    void it_gives_the_specific_implementation_if_configured() {
-//        System.setProperty(COM_RIDGID_OSS_MESSAGE_BUS_SERVICE_CLASS, MessageBusMock.class.getName());
-//        assertSame(MessageBusMock.class,
-//                   MessageBusService.instance().defaultProvider().getClass(),
-//                   "Did not get the configured implementation");
-//        System.clearProperty(COM_RIDGID_OSS_MESSAGE_BUS_SERVICE_CLASS);
-//    }
+    @Test
+    void it_gives_the_specific_implementation_if_configured() {
+        MessageBusService.instance().clearDefaultProvider();
+        System.setProperty(COM_RIDGID_OSS_MESSAGE_BUS_SERVICE_CLASS, MessageBusMock.class.getName());
+        //noinspection ConstantExpression,HardCodedStringLiteral,StringConcatenation
+        assertEquals(MessageBusMock.class.getName(),
+                     System.getProperty(COM_RIDGID_OSS_MESSAGE_BUS_SERVICE_CLASS),
+                     COM_RIDGID_OSS_MESSAGE_BUS_SERVICE_CLASS + " Property Not Set to Test Mock Service");
+        assertSame(MessageBusMock.class,
+                   MessageBusService.instance().defaultProvider().getClass(),
+                   "Did not get the configured implementation");
+        System.clearProperty(COM_RIDGID_OSS_MESSAGE_BUS_SERVICE_CLASS);
+    }
 }

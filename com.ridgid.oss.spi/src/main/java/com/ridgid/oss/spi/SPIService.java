@@ -42,13 +42,24 @@ public interface SPIService<SI, SE extends SPIServiceException>
     }
 
     /**
-     * @return the implementation of the MessageBus interface as given by the Class Name in the 'com.ridgid.oss.message.
-     * bus.service.class' system property, or, if the system property is not defined, then it returns the first available
-     * implementation of the MessageBus interface that is found.
+     * @return the implementation of the SPI  interface as given by the Class Name in the 'system property' corresponding
+     * to {@code defaultProviderPropertyName()} , or, if the system property is not defined, then it returns the first available
+     * implementation of the MessageBus interface that is found on the class-path that follows the Java SPI specification
+     * for providing an implementation of the SPI Service via the META-INF/services/ meta-data.
      * @throws SE if either the system property does not point to a valid implementation of the ServiceBus interface, or,
      *            if there is no available implementation found when the system property is not given.
      */
     SI defaultProvider() throws SE;
+
+    /**
+     * Clears the currently set default provider. If {@code defaultProvider()} is called, then, the system property
+     * is changed and {@code defaultProvider()} will still return the same provider as originally returned.
+     * If this method is called, the currently loaded default is discarded, and then subsequent calls to
+     * {@code defaultProvider()} will return the provider corresponding to the system property value.
+     *
+     * @throws SE when it cannot clear the default provider
+     */
+    void clearDefaultProvider() throws SE;
 
     /**
      * @return the {@code Class<SI>} of the interface for this service
@@ -64,8 +75,8 @@ public interface SPIService<SI, SE extends SPIServiceException>
      * @return the property (System.Properties) for configuring the default implementation for this service
      */
     default String defaultProviderPropertyName() {
+        //noinspection StringToUpperCaseOrToLowerCaseWithoutLocale
         return serviceInterface()
-                   .getPackage()
                    .getName()
                + ".service.class";
     }

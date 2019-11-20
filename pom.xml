@@ -54,6 +54,7 @@
         <module>com.ridgid.oss.spi</module>
         <module>com.ridgid.oss.message</module>
         <module>com.ridgid.oss.message.redis</module>
+        <module>com.ridgid.oss.message.test</module>
         <!--
                 <module>com.ridgid.oss.message.test</module>
         -->
