@@ -82,7 +82,7 @@ public interface SPIService<SI, SE extends SPIServiceException>
     }
 
     /**
-     * @return value (Class Name) configured for the {@code defaultProviderPropertyName()} via {@see System.Properties}
+     * @return value (Class Name) configured for the {@code defaultProviderPropertyName()} via {@code System.Properties}
      */
     default Optional<String> defaultProviderPropertyValue() {
         return Optional.ofNullable(System.getProperty(defaultProviderPropertyName()));
@@ -97,7 +97,7 @@ public interface SPIService<SI, SE extends SPIServiceException>
      * Get a {@code Supplier} for a {@code SE} Exception
      *
      * @param msg  error message
-     * @param args arguments to the error message following the {@see String.format} conventions
+     * @param args arguments to the error message following the {@code String.format} conventions
      * @return supplier of the exception
      */
     @SuppressWarnings({"DuplicateStringLiteralInspection", "OverloadedVarargsMethod"})
@@ -121,7 +121,7 @@ public interface SPIService<SI, SE extends SPIServiceException>
      *
      * @param cause underlying cause of the exception
      * @param msg   error message
-     * @param args  arguments to the error message following the {@see String.format} conventions
+     * @param args  arguments to the error message following the {@code String.format} conventions
      * @return supplier of the exception
      */
     @SuppressWarnings({"DuplicateStringLiteralInspection", "OverloadedVarargsMethod"})
