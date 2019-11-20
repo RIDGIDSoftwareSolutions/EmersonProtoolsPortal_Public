@@ -6,12 +6,12 @@
     <parent>
         <artifactId>com.ridgid.oss</artifactId>
         <groupId>com.ridgid.oss</groupId>
-        <version>2.143</version>
+        <version>2.144-SNAPSHOT</version>
     </parent>
 
     <artifactId>com.ridgid.oss.common.exception</artifactId>
     <packaging>jar</packaging>
-    <version>2.143</version>
+    <version>2.144-SNAPSHOT</version>
 
     <!-- Required to publish to Maven Central -->
     <name>RIDGID (Emerson Professional Tools) Java Common - Functional Inferface Helpers</name>
@@ -38,7 +38,7 @@
         <url>
             https://github.com/RIDGIDSoftwareSolutions/EmersonProtoolsPortal_Public/tree/master/com.ridgid.oss.common.exception
         </url>
-      <tag>com.ridgid.oss-2.143</tag>
+      <tag>HEAD</tag>
   </scm>
 
     <dependencies>
