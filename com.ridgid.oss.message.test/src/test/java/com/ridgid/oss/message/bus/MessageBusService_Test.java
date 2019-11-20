@@ -43,7 +43,7 @@ class MessageBusService_Test
         MessageBusService.instance().clearDefaultProvider();
         System.clearProperty(COM_RIDGID_OSS_MESSAGE_BUS_SERVICE_CLASS);
         assertNull(System.getProperty(COM_RIDGID_OSS_MESSAGE_BUS_SERVICE_CLASS));
-        assertSame(InMemoryMessageBus.class,
+        assertSame(MessageBusMock.class,
                    MessageBusService.instance().defaultProvider().getClass(),
                    "Did not get the In-Memory implementation by default");
     }
@@ -51,12 +51,12 @@ class MessageBusService_Test
     @Test
     void it_gives_the_specific_implementation_if_configured() {
         MessageBusService.instance().clearDefaultProvider();
-        System.setProperty(COM_RIDGID_OSS_MESSAGE_BUS_SERVICE_CLASS, MessageBusMock.class.getName());
+        System.setProperty(COM_RIDGID_OSS_MESSAGE_BUS_SERVICE_CLASS, InMemoryMessageBus.class.getName());
         //noinspection ConstantExpression,HardCodedStringLiteral,StringConcatenation
-        assertEquals(MessageBusMock.class.getName(),
+        assertEquals(InMemoryMessageBus.class.getName(),
                      System.getProperty(COM_RIDGID_OSS_MESSAGE_BUS_SERVICE_CLASS),
                      COM_RIDGID_OSS_MESSAGE_BUS_SERVICE_CLASS + " Property Not Set to Test Mock Service");
-        assertSame(MessageBusMock.class,
+        assertSame(InMemoryMessageBus.class,
                    MessageBusService.instance().defaultProvider().getClass(),
                    "Did not get the configured implementation");
         System.clearProperty(COM_RIDGID_OSS_MESSAGE_BUS_SERVICE_CLASS);

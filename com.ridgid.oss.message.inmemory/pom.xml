@@ -47,7 +47,7 @@
             <groupId>com.ridgid.oss</groupId>
             <artifactId>com.ridgid.oss.message</artifactId>
             <version>2.142-SNAPSHOT</version>
-            <scope>compile</scope>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 
