@@ -4,6 +4,7 @@ import com.ridgid.oss.message.bus.MessageBusService.MessageBusServiceException;
 import com.ridgid.oss.message.bus.spi.MessageBus;
 import com.ridgid.oss.spi.SPIService;
 import com.ridgid.oss.spi.SPIServiceBase;
+import com.ridgid.oss.spi.SPIServiceException;
 
 /**
  * Loads the configured or available MessageBus Service Provider and returns and instance of the Bus.

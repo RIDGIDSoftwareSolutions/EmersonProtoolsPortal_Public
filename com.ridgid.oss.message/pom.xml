@@ -40,7 +40,6 @@
         <url>
             https://github.com/RIDGIDSoftwareSolutions/EmersonProtoolsPortal_Public/tree/master/com.ridgid.oss.message
         </url>
-        <tag>com.ridgid.oss-2.72</tag>
     </scm>
 
     <dependencies>

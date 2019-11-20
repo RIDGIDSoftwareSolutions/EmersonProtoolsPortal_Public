@@ -1,6 +1,6 @@
 package com.ridgid.oss.queue.spi;
 
-import com.ridgid.oss.spi.SPIService.SPIServiceException;
+import com.ridgid.oss.spi.SPIServiceException;
 
 import java.io.Serializable;
 import java.util.Optional;

@@ -1,7 +1,5 @@
 package com.ridgid.oss.spi;
 
-import com.ridgid.oss.spi.SPIService.SPIServiceException;
-
 import java.util.ServiceLoader;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
