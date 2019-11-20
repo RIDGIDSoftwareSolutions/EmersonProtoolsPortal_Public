@@ -46,7 +46,6 @@
             <groupId>com.ridgid.oss</groupId>
             <artifactId>com.ridgid.oss.common</artifactId>
             <version>2.142-SNAPSHOT</version>
-            <scope>compile</scope>
         </dependency>
     </dependencies>
 
