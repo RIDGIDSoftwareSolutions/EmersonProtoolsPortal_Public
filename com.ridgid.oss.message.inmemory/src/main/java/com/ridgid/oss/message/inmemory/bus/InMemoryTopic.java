@@ -16,15 +16,13 @@ import java.io.Serializable;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 
-@SuppressWarnings({"FieldNotUsedInToString", "ClassNamePrefixedWithPackageName"})
+@SuppressWarnings("FieldNotUsedInToString")
 class InMemoryTopic<Topic extends Enum<Topic> & TopicEnum<Topic>>
 {
     private final Topic                                       topic;
     private final MultiChannelFIFOQueue<? super Serializable> queues;
     private final AtomicLong                                  producers = new AtomicLong(0);
     private final AtomicLong                                  consumers = new AtomicLong(0);
-
-    private final AtomicLong nextTimestamp = new AtomicLong(Long.MIN_VALUE);
 
     InMemoryTopic(Topic topic) {
         this.topic = topic;
@@ -58,8 +56,6 @@ class InMemoryTopic<Topic extends Enum<Topic> & TopicEnum<Topic>>
         } catch ( MultiChannelFIFOQueueException e ) {
             throw new TopicSenderException(topic, e);
         }
-        if ( nextTimestamp.get() == Long.MIN_VALUE )
-            throw new TopicSenderException(topic, "Wrap-Around on Message Time-Stamps - Re-Start Advisable");
     }
 
     @SuppressWarnings("MethodParameterOfConcreteClass")
