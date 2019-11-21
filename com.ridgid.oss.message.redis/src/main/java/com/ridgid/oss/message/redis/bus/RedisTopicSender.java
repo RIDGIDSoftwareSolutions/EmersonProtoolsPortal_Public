@@ -53,9 +53,9 @@ public class RedisTopicSender<Topic extends Enum<Topic> & TopicEnum<Topic>> impl
             client.getTopic(topic.getTopicName())
                     .publishAsync(message)
                     .onComplete((receiverCount, throwable) -> {
-                        if ( throwable != null ) throw new RuntimeException(throwable);
-
                         pendingTransactionCount--;
+
+                        if ( throwable != null ) throw new RuntimeException(throwable);
                     });
         } catch ( Exception e ) {
             throw new TopicSenderException(topic, e);
