@@ -6,13 +6,15 @@ import org.redisson.api.RTopic;
 import org.redisson.api.RedissonClient;
 
 import java.io.Serializable;
+import java.time.Duration;
 
 
 @SuppressWarnings({"DuplicateStringLiteralInspection", "JavaDoc", "ClassHasNoToStringMethod", "WeakerAccess"})
 public class RedisTopicSender<Topic extends Enum<Topic> & TopicEnum<Topic>> implements TopicSender<Topic>
 {
     private final Topic  topic;
-    private final RTopic redisTopic;
+    private final RedissonClient client;
+    private int pendingTransactionCount = 0;
 
     /*
     TODO: Features that aren't implemented yet, but not critical for functionality:
@@ -27,7 +29,7 @@ public class RedisTopicSender<Topic extends Enum<Topic> & TopicEnum<Topic>> impl
     {
         guardAgainstMultipleMessageTypes(topic);
         this.topic = topic;
-        redisTopic = redissonClient.getTopic(topic.getTopicName());
+        this.client = redissonClient;
     }
 
     private void guardAgainstMultipleMessageTypes(Topic topic) {
@@ -47,10 +49,14 @@ public class RedisTopicSender<Topic extends Enum<Topic> & TopicEnum<Topic>> impl
         throws TopicSenderException
     {
         try {
-            redisTopic.publishAsync(message)
-                      .onComplete((receiverCount, throwable) -> {
-                          if ( throwable != null ) throw new RuntimeException(throwable);
-                      });
+            pendingTransactionCount++;
+            client.getTopic(topic.getTopicName())
+                    .publishAsync(message)
+                    .onComplete((receiverCount, throwable) -> {
+                        if ( throwable != null ) throw new RuntimeException(throwable);
+
+                        pendingTransactionCount--;
+                    });
         } catch ( Exception e ) {
             throw new TopicSenderException(topic, e);
         }
@@ -59,5 +65,14 @@ public class RedisTopicSender<Topic extends Enum<Topic> & TopicEnum<Topic>> impl
     @SuppressWarnings("RedundantThrows")
     @Override
     public void close() throws Exception {
+        long currentTime = System.currentTimeMillis();
+        long shutdownDeadline = currentTime + Duration.ofSeconds(5).toMillis();
+
+        while (pendingTransactionCount != 0 && currentTime < shutdownDeadline) {
+            Thread.sleep(100L);
+            currentTime = System.currentTimeMillis();
+        }
+
+        client.shutdown();
     }
 }
