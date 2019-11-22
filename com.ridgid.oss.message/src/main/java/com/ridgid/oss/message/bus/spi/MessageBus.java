@@ -12,6 +12,7 @@ import java.util.Map;
  * MessageBus interface. The client should have NO KNOWLEDGE of the implementation details of the
  * implementation.
  */
+@SuppressWarnings("ClassNameSameAsAncestorName")
 public interface MessageBus
 {
     /**

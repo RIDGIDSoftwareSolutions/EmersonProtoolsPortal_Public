@@ -9,10 +9,7 @@ import com.ridgid.oss.spi.SPIServiceException;
 /**
  * Loads the configured or available MessageBus Service Provider and returns and instance of the Bus.
  */
-@SuppressWarnings({
-                      "Singleton",
-                      "WeakerAccess"
-                  })
+@SuppressWarnings("Singleton")
 public final class MessageBusService
     extends SPIServiceBase<MessageBus, MessageBusServiceException>
 {

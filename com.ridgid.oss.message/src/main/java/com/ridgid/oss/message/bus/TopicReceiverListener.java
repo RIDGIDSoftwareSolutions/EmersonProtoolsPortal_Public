@@ -8,7 +8,7 @@ import java.io.Serializable;
  * @param <Topic>       type of the topic enumeration
  * @param <MessageType> type of the message the listener is expected to receive.
  */
-@SuppressWarnings("InterfaceMayBeAnnotatedFunctional")
+@SuppressWarnings({"InterfaceMayBeAnnotatedFunctional", "ClassNameSameAsAncestorName"})
 public interface TopicReceiverListener<Topic extends Enum<? super Topic> & TopicEnum<? super Topic>, MessageType extends Serializable>
     extends AutoCloseable
 {
