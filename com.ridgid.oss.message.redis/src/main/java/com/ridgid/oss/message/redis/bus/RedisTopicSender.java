@@ -27,14 +27,8 @@ public class RedisTopicSender<Topic extends Enum<Topic> & TopicEnum<Topic>> impl
     public RedisTopicSender(Topic topic,
                             RedissonClient redissonClient)
     {
-        guardAgainstMultipleMessageTypes(topic);
         this.topic = topic;
         this.client = redissonClient;
-    }
-
-    private void guardAgainstMultipleMessageTypes(Topic topic) {
-        if ( topic.getMessageTypes().count() != 1 )
-            throw new IllegalArgumentException("Only supports one message type at this time");
     }
 
     @Override
