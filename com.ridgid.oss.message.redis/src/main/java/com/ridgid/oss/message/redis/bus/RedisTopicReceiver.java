@@ -43,7 +43,6 @@ public class RedisTopicReceiver<Topic extends Enum<Topic> & TopicEnum<Topic>> im
     {
         this.topic = topic;
         this.client = redissonClient;
-        guardAgainstMultipleMessageTypes(topic);
     }
 
     @Override
@@ -52,18 +51,15 @@ public class RedisTopicReceiver<Topic extends Enum<Topic> & TopicEnum<Topic>> im
                                                              BiConsumer<? super Topic, ? super MessageType> handler)
     {
         MessageListener listener = (channel, msg) -> {
-            //noinspection unchecked
-            handler.accept(getTopic(), (MessageType) msg);
+            if (getTopic().getMessageTypes().anyMatch(x -> x.equals(messageType))) {
+                //noinspection unchecked
+                handler.accept(getTopic(), (MessageType) msg);
+            }
         };
         RTopic redisTopic = client.getTopic(this.topic.getTopicName());
         //noinspection unchecked
         redisTopic.addListenerAsync(messageType, listener);
         return () -> redisTopic.removeListener(listener);
-    }
-
-    private void guardAgainstMultipleMessageTypes(Topic topic) {
-        if ( topic.getMessageTypes().count() > 1 )
-            throw new IllegalArgumentException("Only supports one message type at this time");
     }
 
     @Override
