@@ -17,7 +17,19 @@ import java.util.function.Function;
 import static com.ridgid.oss.common.jdbc.NamedParameterJdbcQuery.get;
 import static com.ridgid.oss.common.jdbc.NamedParameterJdbcQuery.getLong;
 
-@SuppressWarnings({"unused", "SpellCheckingInspection", "WeakerAccess"})
+@SuppressWarnings({
+                      "unused",
+                      "WeakerAccess",
+                      "FieldCanBeLocal",
+                      "JavaDoc",
+                      "InstanceVariableOfConcreteClass",
+                      "ClassHasNoToStringMethod",
+                      "ClassWithTooManyFields",
+                      "ConstructorWithTooManyParameters",
+                      "FeatureEnvy",
+                      "BoundedWildcard",
+                      "AssignmentToNull"
+                  })
 public class StandardJDBCAuthenticationStorage<RIDT, IDT, ATT, ECT, ACT>
     extends StandardBaseAuthenticationStorage<RIDT, IDT, ATT>
 {
@@ -74,29 +86,29 @@ public class StandardJDBCAuthenticationStorage<RIDT, IDT, ATT, ECT, ACT>
                                              Function<RIDT, Long> extensionPolicy)
     {
         super(expirationPolicy, extensionPolicy);
-        this.dataSource                          = dataSource;
-        this.expiresColumnConverter              = expiresColumnConverter;
-        this.expiresParameterName                = expiresParameterName;
-        this.storage                             = new UpsertableStorage();
-        this.upsertStatement                     = JdbcHelpers.parseQuery(namedParameterUpsertStatement);
-        this.insertStatement                     = null;
-        this.updateStatement                     = null;
-        this.selectQuery                         = JdbcHelpers.parseQuery(namedParameterSelectStatement);
-        this.deleteStatement                     = JdbcHelpers.parseQuery(namedParameterDeleteStatement);
-        this.expiresColumnName                   = expiresColumnName;
-        this.realmIdClass                        = realmIdClass;
-        this.realmIdColumnName                   = realmIdColumnName;
-        this.realmIdParameterName                = realmIdParameterName;
-        this.idClass                             = idClass;
-        this.idColumnName                        = idColumnName;
-        this.idParameterName                     = idParameterName;
-        this.authenticationTokenClass            = authenticationTokenClass;
-        this.authenticationTokenColumnName       = authenticationTokenColumnName;
-        this.authenticationTokenParameterName    = authenticationTokenParameterName;
-        this.authenticationTokenColumnConverter  = authenticationTokenColumnConverter;
-        this.clientNetworkAddressColumnName      = clientNetworkAddressColumnName;
-        this.clientNetworkAddressParameterName   = clientNetworkAddressParameterName;
-        this.clientNetworkAddressColumnConverter = new InetAddressConverter();
+        this.dataSource                         = dataSource;
+        this.expiresColumnConverter             = expiresColumnConverter;
+        this.expiresParameterName               = expiresParameterName;
+        storage                                 = new UpsertableStorage();
+        upsertStatement                         = JdbcHelpers.parseQuery(namedParameterUpsertStatement);
+        insertStatement                         = null;
+        updateStatement                         = null;
+        selectQuery                             = JdbcHelpers.parseQuery(namedParameterSelectStatement);
+        deleteStatement                         = JdbcHelpers.parseQuery(namedParameterDeleteStatement);
+        this.expiresColumnName                  = expiresColumnName;
+        this.realmIdClass                       = realmIdClass;
+        this.realmIdColumnName                  = realmIdColumnName;
+        this.realmIdParameterName               = realmIdParameterName;
+        this.idClass                            = idClass;
+        this.idColumnName                       = idColumnName;
+        this.idParameterName                    = idParameterName;
+        this.authenticationTokenClass           = authenticationTokenClass;
+        this.authenticationTokenColumnName      = authenticationTokenColumnName;
+        this.authenticationTokenParameterName   = authenticationTokenParameterName;
+        this.authenticationTokenColumnConverter = authenticationTokenColumnConverter;
+        this.clientNetworkAddressColumnName     = clientNetworkAddressColumnName;
+        this.clientNetworkAddressParameterName  = clientNetworkAddressParameterName;
+        clientNetworkAddressColumnConverter     = new InetAddressConverter();
     }
 
     public StandardJDBCAuthenticationStorage(DataSource dataSource,
@@ -123,29 +135,29 @@ public class StandardJDBCAuthenticationStorage<RIDT, IDT, ATT, ECT, ACT>
                                              Function<RIDT, Long> extensionPolicy)
     {
         super(expirationPolicy, extensionPolicy);
-        this.dataSource                          = dataSource;
-        this.expiresColumnConverter              = expiresColumnConverter;
-        this.storage                             = new InsertableUpdateableStorage();
-        this.upsertStatement                     = null;
-        this.insertStatement                     = JdbcHelpers.parseQuery(namedParameterInsertStatement);
-        this.updateStatement                     = JdbcHelpers.parseQuery(namedParameterUpdateStatement);
-        this.selectQuery                         = JdbcHelpers.parseQuery(namedParameterSelectStatement);
-        this.deleteStatement                     = JdbcHelpers.parseQuery(namedParameterDeleteStatement);
-        this.expiresColumnName                   = expiresColumnName;
-        this.expiresParameterName                = expiresParameterName;
-        this.realmIdClass                        = realmIdClass;
-        this.realmIdColumnName                   = realmIdColumnName;
-        this.realmIdParameterName                = realmIdParameterName;
-        this.idClass                             = idClass;
-        this.idColumnName                        = idColumnName;
-        this.idParameterName                     = idParameterName;
-        this.authenticationTokenClass            = authenticationTokenClass;
-        this.authenticationTokenColumnName       = authenticationTokenColumnName;
-        this.authenticationTokenParameterName    = authenticationTokenParameterName;
-        this.authenticationTokenColumnConverter  = authenticationTokenColumnConverter;
-        this.clientNetworkAddressColumnName      = clientNetworkAddressColumnName;
-        this.clientNetworkAddressParameterName   = clientNetworkAddressParameterName;
-        this.clientNetworkAddressColumnConverter = new InetAddressConverter();
+        this.dataSource                         = dataSource;
+        this.expiresColumnConverter             = expiresColumnConverter;
+        storage                                 = new InsertableUpdateableStorage();
+        upsertStatement                         = null;
+        insertStatement                         = JdbcHelpers.parseQuery(namedParameterInsertStatement);
+        updateStatement                         = JdbcHelpers.parseQuery(namedParameterUpdateStatement);
+        selectQuery                             = JdbcHelpers.parseQuery(namedParameterSelectStatement);
+        deleteStatement                         = JdbcHelpers.parseQuery(namedParameterDeleteStatement);
+        this.expiresColumnName                  = expiresColumnName;
+        this.expiresParameterName               = expiresParameterName;
+        this.realmIdClass                       = realmIdClass;
+        this.realmIdColumnName                  = realmIdColumnName;
+        this.realmIdParameterName               = realmIdParameterName;
+        this.idClass                            = idClass;
+        this.idColumnName                       = idColumnName;
+        this.idParameterName                    = idParameterName;
+        this.authenticationTokenClass           = authenticationTokenClass;
+        this.authenticationTokenColumnName      = authenticationTokenColumnName;
+        this.authenticationTokenParameterName   = authenticationTokenParameterName;
+        this.authenticationTokenColumnConverter = authenticationTokenColumnConverter;
+        this.clientNetworkAddressColumnName     = clientNetworkAddressColumnName;
+        this.clientNetworkAddressParameterName  = clientNetworkAddressParameterName;
+        clientNetworkAddressColumnConverter     = new InetAddressConverter();
     }
 
     @Override
@@ -167,6 +179,7 @@ public class StandardJDBCAuthenticationStorage<RIDT, IDT, ATT, ECT, ACT>
         storage.remove(dataSource, realmId, id, authenticationToken);
     }
 
+    @SuppressWarnings({"ClassNamePrefixedWithPackageName", "NonStaticInnerClassInSecureContext"})
     private abstract class Storage
     {
         public abstract void store(DataSource dataSource,
@@ -177,62 +190,62 @@ public class StandardJDBCAuthenticationStorage<RIDT, IDT, ATT, ECT, ACT>
                                                                IDT id,
                                                                ATT authenticationToken) throws SQLException
         {
-            try ( Connection conn = dataSource.getConnection() ) {
-                try ( ResultSet rs =
-                          (
-                              selectQuery
-                                  .prepare(conn)
-                                  .setParameter(realmIdParameterName, realmId)
-                                  .setParameter(idParameterName, id)
-                                  .setParameter(authenticationTokenParameterName, authenticationToken)
-                                  .executeQuery()
-                          )
-                ) {
-                    if ( rs.first() ) {
-                        return Optional.ofNullable
-                            (
-                                construct
-                                    (
-                                        getExtensionPolicy()
-                                            .apply(realmIdClass.cast(rs.getObject(realmIdColumnName))),
-                                        getLong(rs,
-                                                expiresColumnConverter,
-                                                expiresColumnName),
-                                        realmIdClass
-                                            .cast(rs.getObject(realmIdColumnName)),
-                                        idClass
-                                            .cast(rs.getObject(idColumnName)),
-                                        get(rs,
-                                            authenticationTokenColumnConverter,
-                                            authenticationTokenColumnName),
-                                        get(rs,
-                                            clientNetworkAddressColumnConverter,
-                                            clientNetworkAddressColumnName)
-                                    )
-                            );
-                    } else
-                        return Optional.empty();
-                }
+            try ( ResultSet rs = selectQuery.prepare(dataSource.getConnection())
+                                            .setParameter(realmIdParameterName,
+                                                          realmId)
+                                            .setParameter(idParameterName,
+                                                          id)
+                                            .setParameter(authenticationTokenParameterName,
+                                                          authenticationToken)
+                                            .executeQuery()
+            ) {
+                return
+                    rs.first()
+                    ? Optional.ofNullable
+                        (
+                            construct
+                                (
+                                    getExtensionPolicy()
+                                        .apply(realmIdClass.cast(rs.getObject(realmIdColumnName))),
+                                    getLong(rs,
+                                            expiresColumnConverter,
+                                            expiresColumnName),
+                                    realmIdClass
+                                        .cast(rs.getObject(realmIdColumnName)),
+                                    idClass
+                                        .cast(rs.getObject(idColumnName)),
+                                    get(rs,
+                                        authenticationTokenColumnConverter,
+                                        authenticationTokenColumnName),
+                                    get(rs,
+                                        clientNetworkAddressColumnConverter,
+                                        clientNetworkAddressColumnName)
+                                )
+                        )
+                    : Optional.empty();
             }
         }
 
         public void remove(DataSource dataSource,
                            RIDT realmId,
                            IDT id,
-                           ATT authenticationToken) throws SQLException
+                           ATT authenticationToken)
+            throws SQLException
         {
             try ( Connection conn = dataSource.getConnection() ) {
-                int numRowsDeleted =
-                    deleteStatement
-                        .prepare(conn)
-                        .setParameter(realmIdParameterName, realmId)
-                        .setParameter(idParameterName, id)
-                        .setParameter(authenticationTokenParameterName, authenticationToken)
-                        .executeUpdate();
+                int numRowsDeleted = deleteStatement.prepare(conn)
+                                                    .setParameter(realmIdParameterName,
+                                                                  realmId)
+                                                    .setParameter(idParameterName,
+                                                                  id)
+                                                    .setParameter(authenticationTokenParameterName,
+                                                                  authenticationToken)
+                                                    .executeUpdate();
             }
         }
     }
 
+    @SuppressWarnings("NonStaticInnerClassInSecureContext")
     private class UpsertableStorage extends Storage
     {
         @Override
@@ -266,36 +279,39 @@ public class StandardJDBCAuthenticationStorage<RIDT, IDT, ATT, ECT, ACT>
         }
     }
 
+    @SuppressWarnings({"NonStaticInnerClassInSecureContext", "OverlyNestedMethod", "HardcodedFileSeparator"})
     private class InsertableUpdateableStorage extends Storage
     {
+        public static final String UNABLE_TO_INSERT_UPDATE = "Unable to Insert/Update: ";
+
+        @SuppressWarnings("HardcodedLineSeparator")
         @Override
         public void store(DataSource dataSource,
-                          RealmAuthentication<RIDT, IDT, ATT> auth) throws SQLException
+                          RealmAuthentication<RIDT, IDT, ATT> auth)
+            throws SQLException
         {
             SQLException insertEx = null;
             try ( Connection conn = dataSource.getConnection() ) {
                 assert insertStatement != null;
-                int numRowsInserted =
-                    insertStatement
-                        .prepare(conn)
-                        .setParameter(expiresParameterName,
-                                      expiresColumnConverter.convertToDatabaseColumn
-                                          (
-                                              auth.getExpiresSystemTimeMillis()
-                                          ))
-                        .setParameter(realmIdParameterName, auth.getRealmId())
-                        .setParameter(idParameterName, auth.getId())
-                        .setParameter(authenticationTokenParameterName,
-                                      authenticationTokenColumnConverter.convertToDatabaseColumn
-                                          (
-                                              auth.getAuthenticationToken()
-                                          ))
-                        .setParameter(clientNetworkAddressParameterName,
-                                      clientNetworkAddressColumnConverter.convertToDatabaseColumn
-                                          (
-                                              auth.getClientNetworkAddress()
-                                          ))
-                        .executeUpdate();
+                int numRowsInserted = insertStatement.prepare(conn)
+                                                     .setParameter(expiresParameterName,
+                                                                   expiresColumnConverter.convertToDatabaseColumn
+                                                                       (
+                                                                           auth.getExpiresSystemTimeMillis()
+                                                                       ))
+                                                     .setParameter(realmIdParameterName, auth.getRealmId())
+                                                     .setParameter(idParameterName, auth.getId())
+                                                     .setParameter(authenticationTokenParameterName,
+                                                                   authenticationTokenColumnConverter.convertToDatabaseColumn
+                                                                       (
+                                                                           auth.getAuthenticationToken()
+                                                                       ))
+                                                     .setParameter(clientNetworkAddressParameterName,
+                                                                   clientNetworkAddressColumnConverter.convertToDatabaseColumn
+                                                                       (
+                                                                           auth.getClientNetworkAddress()
+                                                                       ))
+                                                     .executeUpdate();
                 if ( numRowsInserted >= 1 )
                     return;
             } catch ( SQLException ex ) {
@@ -303,34 +319,33 @@ public class StandardJDBCAuthenticationStorage<RIDT, IDT, ATT, ECT, ACT>
             }
             try ( Connection conn = dataSource.getConnection() ) {
                 assert updateStatement != null;
-                int numRowsUpdated =
-                    updateStatement
-                        .prepare(conn)
-                        .setParameter(expiresParameterName,
-                                      expiresColumnConverter.convertToDatabaseColumn
-                                          (
-                                              auth.getExpiresSystemTimeMillis()
-                                          ))
-                        .setParameter(realmIdParameterName, auth.getRealmId())
-                        .setParameter(idParameterName, auth.getId())
-                        .setParameter(authenticationTokenParameterName,
-                                      authenticationTokenColumnConverter.convertToDatabaseColumn
-                                          (
-                                              auth.getAuthenticationToken()
-                                          ))
-                        .setParameter(clientNetworkAddressParameterName,
-                                      clientNetworkAddressColumnConverter.convertToDatabaseColumn
-                                          (
-                                              auth.getClientNetworkAddress()
-                                          ))
-                        .executeUpdate();
+                int numRowsUpdated = updateStatement.prepare(conn)
+                                                    .setParameter(expiresParameterName,
+                                                                  expiresColumnConverter.convertToDatabaseColumn
+                                                                      (
+                                                                          auth.getExpiresSystemTimeMillis()
+                                                                      ))
+                                                    .setParameter(realmIdParameterName, auth.getRealmId())
+                                                    .setParameter(idParameterName, auth.getId())
+                                                    .setParameter(authenticationTokenParameterName,
+                                                                  authenticationTokenColumnConverter.convertToDatabaseColumn
+                                                                      (
+                                                                          auth.getAuthenticationToken()
+                                                                      ))
+                                                    .setParameter(clientNetworkAddressParameterName,
+                                                                  clientNetworkAddressColumnConverter.convertToDatabaseColumn
+                                                                      (
+                                                                          auth.getClientNetworkAddress()
+                                                                      ))
+                                                    .executeUpdate();
                 if ( numRowsUpdated < 1 )
                     if ( insertEx != null )
-                        throw new SQLException(
-                            "Unable to Insert/Update: " + auth + "\nInsert Exception was: " + insertEx.getMessage(),
-                            insertEx);
+                        throw new SQLException(UNABLE_TO_INSERT_UPDATE
+                                               + auth
+                                               + "\nInsert Exception was: " + insertEx.getMessage(),
+                                               insertEx);
                     else
-                        throw new SQLException("Unable to Insert/Update: " + auth);
+                        throw new SQLException(UNABLE_TO_INSERT_UPDATE + auth);
             }
         }
     }
