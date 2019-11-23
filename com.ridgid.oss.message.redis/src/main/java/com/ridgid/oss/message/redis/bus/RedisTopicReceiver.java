@@ -51,7 +51,7 @@ public class RedisTopicReceiver<Topic extends Enum<Topic> & TopicEnum<Topic>> im
                                                              BiConsumer<? super Topic, ? super MessageType> handler)
     {
         MessageListener listener = (channel, msg) -> {
-            if (getTopic().getMessageTypes().anyMatch(x -> x.equals(messageType))) {
+            if (messageType.isAssignableFrom(msg.getClass())) {
                 //noinspection unchecked
                 handler.accept(getTopic(), (MessageType) msg);
             }
