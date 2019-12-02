@@ -14,6 +14,9 @@ public interface SecurePasswordService
     SecurePasswordEncryptionResult EncryptPassword(String password)
         throws SecurePasswordServiceException;
 
+    SecurePasswordEncryptionResult EncryptPasswordForLegacyUser(String password)
+            throws SecurePasswordServiceException;
+
     /**
      * Encrypts the given password with the salt provided (must be a base-64 encoded string of bytes for the implementation) using preferred iterations and key length.
      * Prefer using the SecurePasswordEncryptionResult EncryptPassword(String password) instead
