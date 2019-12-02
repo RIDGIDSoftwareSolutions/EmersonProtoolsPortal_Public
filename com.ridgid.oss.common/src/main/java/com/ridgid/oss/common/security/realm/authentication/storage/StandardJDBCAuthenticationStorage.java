@@ -200,7 +200,7 @@ public class StandardJDBCAuthenticationStorage<RIDT, IDT, ATT, ECT, ACT>
                                             .executeQuery()
             ) {
                 return
-                    rs.first()
+                    rs.next()
                     ? Optional.ofNullable
                         (
                             construct
