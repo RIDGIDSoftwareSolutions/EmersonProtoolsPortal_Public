@@ -102,7 +102,8 @@ public class SecurePasswordServiceImpl
     {
         return encryptionResult.encryptedPassword.equalsIgnoreCase(legacyEncrypt(password))
                || encryptionResult.encryptedPassword.equalsIgnoreCase(legacyEncrypt(password.toLowerCase()))
-               || encryptionResult.encryptedPassword.equalsIgnoreCase(legacyEncrypt(password.toUpperCase()));
+               || encryptionResult.encryptedPassword.equalsIgnoreCase(legacyEncrypt(password.toUpperCase()))
+               || encryptionResult.encryptedPassword.equalsIgnoreCase(password);
     }
 
     /*
