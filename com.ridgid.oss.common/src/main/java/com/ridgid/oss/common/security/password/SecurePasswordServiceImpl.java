@@ -42,7 +42,7 @@ public class SecurePasswordServiceImpl
     }
 
     @Override
-    public SecurePasswordEncryptionResult EncryptPasswordForLegacyUser(String password) throws SecurePasswordServiceException {
+    public SecurePasswordEncryptionResult EncryptPasswordWithoutCheckingEntropy(String password) throws SecurePasswordServiceException {
         byte[] saltBytes = generateSalt();
         String salt      = Base64.getEncoder().encodeToString(saltBytes);
         return generateSecurePasswordEncryptionResult(password,

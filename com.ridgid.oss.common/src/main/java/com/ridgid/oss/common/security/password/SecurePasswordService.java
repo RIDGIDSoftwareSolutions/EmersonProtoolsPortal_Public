@@ -14,7 +14,7 @@ public interface SecurePasswordService
     SecurePasswordEncryptionResult EncryptPassword(String password)
         throws SecurePasswordServiceException;
 
-    SecurePasswordEncryptionResult EncryptPasswordForLegacyUser(String password)
+    SecurePasswordEncryptionResult EncryptPasswordWithoutCheckingEntropy(String password)
             throws SecurePasswordServiceException;
 
     /**
