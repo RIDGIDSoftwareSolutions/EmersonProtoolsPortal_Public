@@ -38,7 +38,10 @@ public class RedisTopicSender<Topic extends Enum<Topic> & TopicEnum<Topic>> impl
         try {
             new Thread(() -> {
                 Config config = new Config();
-                config.useSingleServer().setConnectionPoolSize(1);
+                config.useSingleServer()
+                        .setConnectionPoolSize(1)
+                        .setTimeout(1000000)
+                        .setAddress("redis://127.0.0.1:6379");
                 RedissonClient client = Redisson.create(config);
                 client.getTopic(topic.getTopicName())
                         .publish(message);
