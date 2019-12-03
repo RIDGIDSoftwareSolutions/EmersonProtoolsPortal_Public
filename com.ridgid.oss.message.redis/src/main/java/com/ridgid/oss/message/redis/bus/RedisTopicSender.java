@@ -2,19 +2,16 @@ package com.ridgid.oss.message.redis.bus;
 
 import com.ridgid.oss.message.bus.TopicEnum;
 import com.ridgid.oss.message.bus.spi.TopicSender;
-import org.redisson.api.RTopic;
+import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
+import org.redisson.config.Config;
 
 import java.io.Serializable;
-import java.time.Duration;
 
 
 @SuppressWarnings({"DuplicateStringLiteralInspection", "JavaDoc", "ClassHasNoToStringMethod", "WeakerAccess"})
-public class RedisTopicSender<Topic extends Enum<Topic> & TopicEnum<Topic>> implements TopicSender<Topic>
-{
-    private final Topic  topic;
-    private final RedissonClient client;
-    private int pendingTransactionCount = 0;
+public class RedisTopicSender<Topic extends Enum<Topic> & TopicEnum<Topic>> implements TopicSender<Topic> {
+    private final Topic topic;
 
     /*
     TODO: Features that aren't implemented yet, but not critical for functionality:
@@ -24,11 +21,8 @@ public class RedisTopicSender<Topic extends Enum<Topic> & TopicEnum<Topic>> impl
       - DeliveryRequirement
       - ReliabilityRequirement: Currently will always behave as NONDURABLE_GUARANTEED
      */
-    public RedisTopicSender(Topic topic,
-                            RedissonClient redissonClient)
-    {
+    public RedisTopicSender(Topic topic) {
         this.topic = topic;
-        this.client = redissonClient;
     }
 
     @Override
@@ -40,18 +34,17 @@ public class RedisTopicSender<Topic extends Enum<Topic> & TopicEnum<Topic>> impl
     @Override
     public <MessageType extends Serializable>
     void send(MessageType message)
-        throws TopicSenderException
-    {
+            throws TopicSenderException {
         try {
-            pendingTransactionCount++;
-            client.getTopic(topic.getTopicName())
-                    .publishAsync(message)
-                    .onComplete((receiverCount, throwable) -> {
-                        pendingTransactionCount--;
-
-                        if ( throwable != null ) throw new RuntimeException(throwable);
-                    });
-        } catch ( Exception e ) {
+            new Thread(() -> {
+                Config config = new Config();
+                config.useSingleServer().setConnectionPoolSize(1);
+                RedissonClient client = Redisson.create(config);
+                client.getTopic(topic.getTopicName())
+                        .publish(message);
+                client.shutdown();
+            }).start();
+        } catch (Exception e) {
             throw new TopicSenderException(topic, e);
         }
     }
@@ -59,14 +52,5 @@ public class RedisTopicSender<Topic extends Enum<Topic> & TopicEnum<Topic>> impl
     @SuppressWarnings("RedundantThrows")
     @Override
     public void close() throws Exception {
-        long currentTime = System.currentTimeMillis();
-        long shutdownDeadline = currentTime + Duration.ofSeconds(5).toMillis();
-
-        while (pendingTransactionCount != 0 && currentTime < shutdownDeadline) {
-            Thread.sleep(100L);
-            currentTime = System.currentTimeMillis();
-        }
-
-        client.shutdown();
     }
 }
