@@ -40,6 +40,7 @@ public class RedisTopicSender<Topic extends Enum<Topic> & TopicEnum<Topic>> impl
                 Config config = new Config();
                 config.useSingleServer()
                         .setConnectionPoolSize(1)
+                        .setConnectionMinimumIdleSize(1)
                         .setTimeout(1000000)
                         .setAddress("redis://127.0.0.1:6379");
                 RedissonClient client = Redisson.create(config);

@@ -17,6 +17,7 @@ public class RedisMessageBus implements MessageBus {
     public <Topic extends Enum<Topic> & TopicEnum<Topic>> TopicReceiver<Topic> subscribe(Topic topic) throws MessageBusException {
         Config config = new Config();
         config.useSingleServer()
+                .setConnectionMinimumIdleSize(1)
                 .setConnectionPoolSize(2)
                 .setTimeout(1000000)
                 .setAddress("redis://127.0.0.1:6379");
