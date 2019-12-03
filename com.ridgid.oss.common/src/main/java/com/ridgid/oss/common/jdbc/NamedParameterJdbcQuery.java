@@ -3,11 +3,8 @@ package com.ridgid.oss.common.jdbc;
 import com.ridgid.oss.common.jdbc.transform.AttributeConverter;
 
 import java.net.InetAddress;
-import java.sql.Connection;
-import java.sql.ParameterMetaData;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -37,6 +34,13 @@ public class NamedParameterJdbcQuery
                                     String columnName)
         throws SQLException
     {
+        Object columnValue = rs.getObject(columnName);
+
+        // TODO: Remove this hack
+        if (columnValue instanceof Timestamp) {
+            return converter.convertToEntityAttribute((CT) ((Timestamp) columnValue).toLocalDateTime());
+        }
+
         return converter.convertToEntityAttribute((CT) rs.getObject(columnName));
     }
 
