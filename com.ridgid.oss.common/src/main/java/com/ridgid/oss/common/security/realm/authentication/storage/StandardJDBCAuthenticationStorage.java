@@ -190,7 +190,8 @@ public class StandardJDBCAuthenticationStorage<RIDT, IDT, ATT, ECT, ACT>
                                                                IDT id,
                                                                ATT authenticationToken) throws SQLException
         {
-            try ( ResultSet rs = selectQuery.prepare(dataSource.getConnection())
+            try (Connection connection = dataSource.getConnection();
+                 ResultSet rs = selectQuery.prepare(connection)
                                             .setParameter(realmIdParameterName,
                                                           realmId)
                                             .setParameter(idParameterName,
