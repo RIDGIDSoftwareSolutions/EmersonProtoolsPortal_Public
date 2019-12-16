@@ -56,6 +56,7 @@
         <module>com.ridgid.oss.message.redis</module>
         <module>com.ridgid.oss.message.test</module>
         <module>com.ridgid.oss.message.inmemory</module>
+        <module>com.ridgid.oss.concurrent</module>
         <!--
                 <module>com.ridgid.oss.message.test</module>
         -->
