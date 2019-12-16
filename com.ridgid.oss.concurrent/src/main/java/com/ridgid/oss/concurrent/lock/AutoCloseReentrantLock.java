@@ -9,7 +9,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class AutoCloseReentrantLock
     implements Lock
 {
-    private static final ConcurrentHashMap<ReentrantLock>
+    private static final ConcurrentHashMap<ReentrantLock, Boolean> locks = new ConcurrentHashMap<>();
 
     /**
      * Acquires the lock.
@@ -27,7 +27,6 @@ public class AutoCloseReentrantLock
      * {@code Lock} implementation.
      */
     @Override
-
     public void lock() {
 
     }
