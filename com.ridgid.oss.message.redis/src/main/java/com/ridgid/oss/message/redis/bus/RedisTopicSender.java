@@ -7,6 +7,7 @@ import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
 
 import java.io.Serializable;
+import java.text.MessageFormat;
 
 
 @SuppressWarnings({"DuplicateStringLiteralInspection", "JavaDoc", "ClassHasNoToStringMethod", "WeakerAccess"})
@@ -42,7 +43,8 @@ public class RedisTopicSender<Topic extends Enum<Topic> & TopicEnum<Topic>> impl
                         .setConnectionPoolSize(1)
                         .setConnectionMinimumIdleSize(1)
                         .setTimeout(1000000)
-                        .setAddress("redis://127.0.0.1:6379");
+                        .setAddress(buildAddress())
+                        .setPassword(System.getProperty("redis.password", null));
                 RedissonClient client = Redisson.create(config);
                 client.getTopic(topic.getTopicName())
                         .publish(message);
@@ -51,6 +53,14 @@ public class RedisTopicSender<Topic extends Enum<Topic> & TopicEnum<Topic>> impl
         } catch (Exception e) {
             throw new TopicSenderException(topic, e);
         }
+    }
+
+    private String buildAddress() {
+        String protocol = Boolean.parseBoolean(System.getProperty("redis.ssl", "false")) ? "rediss" : "redis";
+        String host = System.getProperty("redis.host", "127.0.0.1");
+        String port = System.getProperty("redis.port", "6379");
+
+        return MessageFormat.format("{0}://{1}:{2}", protocol, host, port);
     }
 
     @SuppressWarnings("RedundantThrows")
