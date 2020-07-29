@@ -30,7 +30,7 @@ public class RedisMessageBus implements MessageBus {
 
     private String buildAddress() {
         String protocol = Boolean.parseBoolean(System.getProperty("redis.ssl", "false")) ? "rediss" : "redis";
-        String host = System.getProperty("redis.host", "127.0.0.1");
+        String host = System.getProperty("redis.url", "127.0.0.1");
         String port = System.getProperty("redis.port", "6379");
 
         return MessageFormat.format("{0}://{1}:{2}", protocol, host, port);
