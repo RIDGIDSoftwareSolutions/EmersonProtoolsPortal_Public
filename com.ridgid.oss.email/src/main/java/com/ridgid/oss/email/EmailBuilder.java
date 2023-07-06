@@ -48,6 +48,8 @@ public class EmailBuilder {
 
     static {
         markdownFileTemplateEngine = createCommonEngine();
+        markdownFileTemplateEngine.setProperty(RuntimeConstants.RESOURCE_LOADER, "classpath");
+        markdownFileTemplateEngine.setProperty("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());
         markdownFileTemplateEngine.setProperty("resource.loader.file.class", ClasspathResourceLoader.class.getName());
         markdownFileTemplateEngine.init();
 
