@@ -14,6 +14,7 @@ import org.apache.commons.mail.HtmlEmail;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
+import org.apache.velocity.runtime.RuntimeConstants;
 import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 import org.apache.velocity.runtime.resource.loader.StringResourceLoader;
 import org.apache.velocity.runtime.resource.util.StringResourceRepository;
@@ -47,10 +48,14 @@ public class EmailBuilder {
 
     static {
         markdownFileTemplateEngine = createCommonEngine();
+        markdownFileTemplateEngine.setProperty(RuntimeConstants.RESOURCE_LOADER, "classpath");
+        markdownFileTemplateEngine.setProperty("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());
         markdownFileTemplateEngine.setProperty("resource.loader.file.class", ClasspathResourceLoader.class.getName());
         markdownFileTemplateEngine.init();
 
         htmlTemplateEngine = new VelocityEngine();
+        htmlTemplateEngine.setProperty(RuntimeConstants.RESOURCE_LOADER, "classpath");
+        htmlTemplateEngine.setProperty("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());
         htmlTemplateEngine.setProperty("resource.loader.file.class", ClasspathResourceLoader.class.getName());
         htmlTemplateEngine.init();
 
